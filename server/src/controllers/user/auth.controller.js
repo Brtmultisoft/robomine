@@ -639,7 +639,7 @@ module.exports = {
             let refer_id = null;
 
             // If a valid referral ID is provided, find the referring user
-            if (trace_id && /^[A-Z0-9]{8}$/.test(trace_id)) {
+            if (trace_id) {
                 let referUser = await userDbHandler.getOneByQuery({ trace_id: trace_id }, { _id: 1 });
                 if (referUser) {
                     refer_id = referUser._id;

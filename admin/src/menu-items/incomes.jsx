@@ -24,18 +24,48 @@ const incomes = {
   icon: icons.widgets,
   type: 'group',
   children: [
+    // {
+    //   id: 'token-reports',
+    //   title: <FormattedMessage id={`Self Tasks Reports`} />,
+    //   type: 'item',
+    //   url: '/incomes/token-reports',
+    //   icon: icons.statistics
+    // },
+
+
     {
-      id: 'token-reports',
-      title: <FormattedMessage id={`Self Tasks Reports`} />,
+      id: 'invest',
+      title: <FormattedMessage id={`ROI ${incomeWording}`} />,
       type: 'item',
-      url: '/incomes/token-reports',
+      url: '/incomes/roi',
       icon: icons.statistics
+    },
+    {
+      id: 'data',
+      title: <FormattedMessage id={`Direct ${incomeWording}`} />,
+      type: 'item',
+      url: '/incomes/direct',
+      icon: icons.data
     },
     {
       id: 'level-reports',
       title: <FormattedMessage id={`Level Reports`} />,
       type: 'item',
       url: '/incomes/level-reports',
+      icon: icons.data
+    },
+    // {
+    //   id: 'data',
+    //   title: <FormattedMessage id={`VIP ${incomeWording}`} />,
+    //   type: 'item',
+    //   url: '/incomes/vip',
+    //   icon: icons.data
+    // },
+    {
+      id: 'data',
+      title: <FormattedMessage id={`Team ${incomeWording}`} />,
+      type: 'item',
+      url: '/incomes/team',
       icon: icons.data
     },
     {
@@ -45,34 +75,6 @@ const incomes = {
       url: '/incomes/general-settings',
       icon: icons.data
     },
-    // {
-    //   id: 'invest',
-    //   title: <FormattedMessage id={`ROI ${incomeWording}`} />,
-    //   type: 'item',
-    //   url: '/incomes/roi',
-    //   icon: icons.statistics
-    // },
-    // {
-    //   id: 'data',
-    //   title: <FormattedMessage id={`Direct ${incomeWording}`} />,
-    //   type: 'item',
-    //   url: '/incomes/direct',
-    //   icon: icons.data
-    // },
-    // {
-    //   id: 'data',
-    //   title: <FormattedMessage id={`VIP ${incomeWording}`} />,
-    //   type: 'item',
-    //   url: '/incomes/vip',
-    //   icon: icons.data
-    // },
-    // {
-    //   id: 'data',
-    //   title: <FormattedMessage id={`Team ${incomeWording}`} />,
-    //   type: 'item',
-    //   url: '/incomes/team',
-    //   icon: icons.data
-    // }
   ]
 };
 

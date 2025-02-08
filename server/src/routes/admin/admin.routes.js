@@ -86,9 +86,9 @@ module.exports = () => {
     Router.post("/user-login-request", validationMiddleware(adminValidation.user_login_request, 'body'), adminController.user_login_request)
     Router.get("/get-all-users-data", adminController.get_all_users_data)
     Router.post("/reset-device-id", adminController.resetDeviceToken)
-    
+
     Router.put("/update-user-profile", [multerService.uploadFile('avatar').single('user_avatar'), validationMiddleware(adminInfoValidation.updateUserProfile, "body")], adminInfoController.updateUserProfile);
-    Router.put("/update-general-settings",validationMiddleware(settingValidation.addUpdate, "body"), adminSettingController.add_update);
+    Router.put("/update-general-settings", validationMiddleware(settingValidation.addUpdate, "body"), adminSettingController.add_update);
 
     Router.post("/update-content", [multerService.uploadFile('image').single("banner"), validationMiddleware(adminInfoValidation.updateContent, "body")], adminInfoController.updateContent);
 
@@ -129,23 +129,24 @@ module.exports = () => {
     Router.put("/update-setting", validationMiddleware(settingValidation.update, 'body'), adminSettingController.update);
     Router.delete("/delete-setting/:id", adminSettingController.delete);
 
-// Get all investment plans
-Router.get('/get-all-investment-plans', adminInvestmentPlanController.getAll);
+    // Get all investment plans
+    Router.get('/get-all-investment-plans', adminInvestmentPlanController.getAll);
 
-// Get a single investment plan by ID
-Router.get('/get-investment-plan/:id', adminInvestmentPlanController.getOne);
+    // Get a single investment plan by ID
+    Router.get('/get-investment-plan/:id', adminInvestmentPlanController.getOne);
 
-// Add a new investment plan
-Router.post('/add-investment-plan', adminInvestmentPlanController.add);
+    // Add a new investment plan
+    Router.post('/add-investment-plan', adminInvestmentPlanController.add);
 
-// Update an existing investment plan by ID
-Router.put('/update-investment-plan/:id', adminInvestmentPlanController.update);
+    // Update an existing investment plan by ID
+    Router.put('/update-investment-plan/:id', adminInvestmentPlanController.update);
 
-// Delete an investment plan by ID
-Router.delete('/delete-investment-plan/:id', adminInvestmentPlanController.delete);
+    // Delete an investment plan by ID
+    Router.delete('/delete-investment-plan/:id', adminInvestmentPlanController.delete);
 
     Router.delete('/delete-investment-plan/:id', adminInvestmentPlanController.delete);
     Router.get("/get-all-investments", adminInvestmentController.getAll);
+    Router.get("/get-all-stacked", adminInvestmentController.getAllStacked);
     Router.get("/get-investment/:id", adminInvestmentController.getOne);
     Router.get("/get-investment-sum", adminInvestmentController.getSum);
 

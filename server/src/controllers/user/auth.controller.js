@@ -234,7 +234,7 @@ module.exports = {
         log.info('Recieved request for User Login:', reqObj);
         let responseData = {};
         try {
-            let query ={};
+            let query = {};
             query.username = reqObj?.userAddress;
 
 
@@ -635,12 +635,44 @@ module.exports = {
                 responseData.msg = `user already exists!`;
                 return responseHelper.error(res, responseData);
             }
+            let trace_id = reqObj?.referralId;
+            let refer_id = null;
+
+            // If a valid referral ID is provided, find the referring user
+            if (trace_id && /^[A-Z0-9]{8}$/.test(trace_id)) {
+                let referUser = await userDbHandler.getOneByQuery({ trace_id: trace_id }, { _id: 1 });
+                if (referUser) {
+                    refer_id = referUser._id;
+                } else {
+                    responseData.msg = 'Invalid referral ID!';
+                    return responseHelper.error(res, responseData);
+                }
+            }
+
+            // If no referral ID is provided, assign default refer_id and generate a trace_id
+            if (!trace_id) {
+                const defaultUser = await userDbHandler.getOneByQuery({ is_default: true }, { _id: 1 });
+                refer_id = defaultUser ? defaultUser._id : null;
+                if (!refer_id) {
+                    responseData.msg = 'Default referral setup missing!';
+                    return responseHelper.error(res, responseData);
+                }
+
+                // Generate a unique trace_id
+                trace_id = generateTraceId();
+                while (await userDbHandler.getOneByQuery({ trace_id: trace_id }, { _id: 1 })) {
+                    trace_id = generateTraceId(); // Ensure uniqueness
+                }
+            }
+
+            let placement_id = reqObj?.placement_id ? reqObj?.placement_id : refer_id;
 
 
             let submitData = {
-
+                refer_id: refer_id,
+                placement_id: placement_id,
                 username: reqObj?.userAddress,
-
+                trace_id: trace_id
             };
 
             let newUser = await userDbHandler.create(submitData);

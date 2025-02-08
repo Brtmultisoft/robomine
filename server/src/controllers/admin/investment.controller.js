@@ -12,6 +12,23 @@ module.exports = {
         log.info('Recieved request for getAll:', reqObj);
         let responseData = {};
         try {
+            reqObj.type = 0;
+            let getList = await investmentDbHandler.getAll(reqObj);
+            responseData.msg = 'Data fetched successfully!';
+            responseData.data = getList;
+            return responseHelper.success(res, responseData);
+        } catch (error) {
+            log.error('failed to fetch data with error::', error);
+            responseData.msg = 'Failed to fetch data';
+            return responseHelper.error(res, responseData);
+        }
+    },
+    getAllStacked: async (req, res) => {
+        let reqObj = req.query;
+        log.info('Recieved request for getAll:', reqObj);
+        let responseData = {};
+        try {
+            reqObj.type = 1;
             let getList = await investmentDbHandler.getAll(reqObj);
             responseData.msg = 'Data fetched successfully!';
             responseData.data = getList;

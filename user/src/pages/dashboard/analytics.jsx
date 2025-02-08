@@ -4,6 +4,7 @@ import Stack from '@mui/material/Stack';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
+import Swal from 'sweetalert2';
 
 // project-imports
 import NewOrders from 'sections/widget/chart/NewOrders';
@@ -21,20 +22,39 @@ import EcommerceDataCard from 'components/cards/statistics/EcommerceDataCard';
 import { useEffect, useState } from 'react';
 import useAuth from 'hooks/useAuth';
 import { Book } from 'iconsax-react';
+import { Button } from '@mui/material';
 
 // ==============================|| DASHBOARD - ANALYTICS ||============================== //
 
 export default function DashboardAnalytics() {
   const theme = useTheme();
-  const [user, setUser] = useState({})
-  const { user: userData } = useAuth()
-  useEffect(() => {
-    setUser(userData)
+  const [user, setUser] = useState({});
+  const { user: userData } = useAuth();
 
-  }, [])
+  useEffect(() => {
+    setUser(userData);
+  }, [userData]);
+
+  const generateReferralLink = () => {
+    const userAddress = user?.trace_id || 'defaultAddress'; // Ensure userAddress is defined
+    return `${userAddress}`;
+  };
+
+  const handleCopyReferralLink = () => {
+    const referralLink = generateReferralLink();
+    navigator.clipboard.writeText(referralLink).then(() => {
+      Swal.fire({
+        icon: 'success',
+        title: 'Copied!',
+        text: 'Referral link has been copied to clipboard.',
+        showConfirmButton: false,
+        timer: 1500
+      });
+    });
+  };
+
   return (
     <Grid container rowSpacing={4.5} columnSpacing={3}>
-
       {/* row 1 */}
       <Grid item xs={12} md={4} lg={3}>
         <NewOrders count={user?.extra?.dailyIncome || 0} />
@@ -50,8 +70,7 @@ export default function DashboardAnalytics() {
               count={user?.email?.split('@')[0] ?? "Anonymous"}
               color="success"
               iconPrimary={<Book color={theme.palette.success.darker} />}
-            >
-            </EcommerceDataCard>
+            />
           </Grid>
           <Grid item xs={12}>
             <EcommerceDataCard
@@ -59,8 +78,7 @@ export default function DashboardAnalytics() {
               count={user?.status ? "ACTIVE" : "INACTIVE"}
               color="success"
               iconPrimary={<Book color={theme.palette.success.darker} />}
-            >
-            </EcommerceDataCard  >
+            />
           </Grid>
         </Grid>
       </Grid>
@@ -73,29 +91,35 @@ export default function DashboardAnalytics() {
           <Grid item xs={12}>
             <EcommerceRadial count={user.wallet} color={theme.palette.primary.main} />
           </Grid>
+
           {/* <Grid item xs={12} md={6} lg={12}>
             <LanguagesSupport />
           </Grid> */}
-
         </Grid>
       </Grid>
       <Grid item xs={12} md={4} lg={3}>
         <EcommerceIncome count={user.wallet_topup} />
+        <Button
+            variant="contained"
+            onClick={handleCopyReferralLink}
+            style={{ backgroundColor: theme.palette.primary.main, color: '#fff' }}
+          >
+            Copy Referral Link
+          </Button>
       </Grid>
+     
+
 
 
       {/* row 2 */}
- 
 
       {/* row 3 */}
-
-     <Grid item xs={6}>
+      <Grid item xs={6}>
         <ProjectAnalytics />
       </Grid>
       {/* <Grid item xs={12} md={6}>
         <ProductOverview />
       </Grid> */}
-
     </Grid>
   );
 }

@@ -1,9 +1,10 @@
+import { Chip } from '@mui/material';
 import CommonDatatable from 'helpers/CommonDatatable'
 import { useMemo } from 'react';
 
 export default function ROI() {
 
-  const apiPoint = 'get-all-incomes'
+  const apiPoint = 'get-all-stacked'
 
   const columns = useMemo(
     () => [
@@ -15,13 +16,19 @@ export default function ROI() {
         header: 'Type',
         accessorKey: 'type',
         cell: (props) => {
-          return 'Admin';
+          return <Chip color={props.getValue() === 1 ? "success" : "error"} label={props.getValue() === 1 ? "STACKED" : "INACTIVE"} size="small" />
+        },
       },
-      },
-    
       {
-        header: 'Amount',
+        header: 'Stacked ICO Token',
         accessorKey: 'amount'
+      },
+      {
+        header: 'Status',
+        accessorKey: 'status',
+        cell: (props) => {
+          return <Chip color={props.getValue() === 1 ? "success" : "error"} label={props.getValue() === 1 ? "ACTIVE" : "INACTIVE"} size="small" />
+        },
       },
       {
         header: 'Date',
@@ -37,5 +44,5 @@ export default function ROI() {
     []
   );
 
-  return <CommonDatatable columns={columns} apiPoint={apiPoint} type={3} />
+  return <CommonDatatable columns={columns} apiPoint={apiPoint} />
 }

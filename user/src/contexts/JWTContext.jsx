@@ -111,10 +111,11 @@ export const JWTProvider = ({ children }) => {
     // });
   };
 
-  const register = async (userAddress) => {
+  const register = async (userAddress, referralId) => {
     // todo: this flow need to be recode as it not verified
     const response = await axios.post('/user/signup', {
-      userAddress
+      userAddress,
+      referralId
     });
     dispatch({
       type: REGISTER,

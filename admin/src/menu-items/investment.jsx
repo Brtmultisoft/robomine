@@ -24,18 +24,25 @@ const investments = {
   icon: icons.widgets,
   type: 'group',
   children: [
+    // {
+    //   id: 'invest-plan',
+    //   title: <FormattedMessage id={`Invest plan`} />,
+    //   type: 'item',
+    //   url: '/investments/invest',
+    //   icon: icons.statistics
+    // },
     {
-      id: 'invest-plan',
-      title: <FormattedMessage id={`Invest plan`} />,
+      id: 'invest-report',
+      title: <FormattedMessage id={`Buy ICO Report`} />,
       type: 'item',
-      url: '/investments/invest',
+      url: '/investments/invest-report',
       icon: icons.statistics
     },
     {
-      id: 'invest-report',
-      title: <FormattedMessage id={`Investors Report`} />,
+      id: 'stacked-report',
+      title: <FormattedMessage id={`Stake ICO Report`} />,
       type: 'item',
-      url: '/investments/invest-report',
+      url: '/investments/staked-report',
       icon: icons.statistics
     },
    

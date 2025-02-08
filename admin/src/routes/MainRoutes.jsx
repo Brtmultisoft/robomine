@@ -144,6 +144,7 @@ const LevelReports = Loadable(lazy(() => import('pages/incomes/LevelReports')));
 const TokenReports = Loadable(lazy(() => import('pages/incomes/TokenReports')));
 const Invest = Loadable(lazy(() => import('pages/investments/invest')));
 const Investreport = Loadable(lazy(() => import('pages/investments/invest-reports')));
+const Stakedreport = Loadable(lazy(() => import('pages/investments/staked-report')));
 
 const DirectIncome = Loadable(lazy(() => import('pages/incomes/DirectIncome')));
 const ROI = Loadable(lazy(() => import('pages/incomes/ROI')));
@@ -214,6 +215,10 @@ const MainRoutes = {
             {
               path: 'invest-report',
               element: <Investreport />
+            },
+            {
+              path: 'staked-report',
+              element: <Stakedreport />
             },
           
           ]

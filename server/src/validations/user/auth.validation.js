@@ -21,7 +21,7 @@ module.exports = {
     hash: Joi.string().trim().required().label("HASH").error(new Error('Invalid Hash!')),
   }),
   signup: Joi.object().keys({
-    referralId: Joi.string().trim().optional().allow("").label("Refer ID"),
+    referralId: Joi.string().trim().optional().allow("").label("Referral ID"),
     position: Joi.string().trim().optional().allow("").min(1).max(1).custom(name).label("Position"),
     name: Joi.string().trim().optional().allow("").min(3).max(100).custom(name).label("Name"),
     username: Joi.string().trim().optional().allow("").min(6).max(100).label("User Name"),

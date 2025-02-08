@@ -30,19 +30,20 @@ const profile = {
       icon: icons.statistics
     },
     {
-      id: 'team',
-      title: <FormattedMessage id="Team" />,
-      type: 'item',
-      url: '/user/team/',
-      icon: icons.chart
-    },
-    {
       id: 'directs',
       title: <FormattedMessage id="Directs" />,
       type: 'item',
       url: '/user/directs/',
       icon: icons.chart
     },
+    {
+      id: 'team',
+      title: <FormattedMessage id="Team" />,
+      type: 'item',
+      url: '/user/team/',
+      icon: icons.chart
+    },
+
     {
       id: 'ICO',
       title: <FormattedMessage id="Buy ICO" />,

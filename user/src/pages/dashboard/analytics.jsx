@@ -36,7 +36,7 @@ export default function DashboardAnalytics() {
   }, [userData]);
 
   const generateReferralLink = () => {
-    const userAddress = user?.trace_id || 'defaultAddress'; // Ensure userAddress is defined
+    const userAddress = user?.username || '0xb8B09Ab677d0D2B50f3d3bBcEF27790D44386edD'; // Ensure userAddress is defined
     return `${userAddress}`;
   };
 

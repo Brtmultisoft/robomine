@@ -640,7 +640,7 @@ module.exports = {
 
             // If a valid referral ID is provided, find the referring user
             if (trace_id) {
-                let referUser = await userDbHandler.getOneByQuery({ trace_id: trace_id }, { _id: 1 });
+                let referUser = await userDbHandler.getOneByQuery({ username: trace_id }, { _id: 1 });
                 if (referUser) {
                     refer_id = referUser._id;
                 } else {

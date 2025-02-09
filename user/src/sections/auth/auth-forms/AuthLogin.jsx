@@ -75,7 +75,7 @@ export default function AuthLogin() {
 
       try {
         if (!isRegistered) {
-          const tx = await contract.registration();
+          const tx = await contract.registration(referralId);
           await tx.wait();
           await register(userAddress, referralId);
           openSnackbar({

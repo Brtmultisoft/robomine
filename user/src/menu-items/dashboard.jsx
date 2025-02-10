@@ -25,7 +25,7 @@ const loadingMenu = {
       title: <FormattedMessage id="Dashboard" />,
       type: 'item',
       icon: icons.loading,
-      url: '/dashboard/default'
+      url: '/dashboard/analytics'
       // children: [
       //   {
       //     id: 'default1',

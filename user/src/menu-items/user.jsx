@@ -72,13 +72,13 @@ const profile = {
       url: '/investments/stacked-report/',
       icon: icons.data
     },
-    {
-      id: 'withdrawFunds',   
-      title: <FormattedMessage id="Withdraw Funds" />,
-      type: 'item',
-      url: '/user/withdraw-funds',
-      icon: icons.data
-    },
+    // {
+    //   id: 'withdrawFunds',   
+    //   title: <FormattedMessage id="Withdraw Funds" />,
+    //   type: 'item',
+    //   url: '/user/withdraw-funds',
+    //   icon: icons.data
+    // },
 
     // {
     //   id: 'social-media',

@@ -130,20 +130,20 @@ export default function AllUsers() {
           </Button>
         ),
       },
-      {
-        header: 'Reset Device ID',
-        accessorKey: '',
-        cell: (props) => (
-          <Button
-            onClick={() => resetDeviceId(props.cell.row.original._id)}
-            variant="shadow"
-            type="submit"
-            color="primary"
-          >
-            Reset_Device_ID
-          </Button>
-        ),
-      },
+      // {
+      //   header: 'Reset Device ID',
+      //   accessorKey: '',
+      //   cell: (props) => (
+      //     <Button
+      //       onClick={() => resetDeviceId(props.cell.row.original._id)}
+      //       variant="shadow"
+      //       type="submit"
+      //       color="primary"
+      //     >
+      //       Reset_Device_ID
+      //     </Button>
+      //   ),
+      // },
     ],
     []
   );

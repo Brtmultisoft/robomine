@@ -63,18 +63,18 @@ const incomes = {
     // },
     {
       id: 'data',
-      title: <FormattedMessage id={`Team ${incomeWording}`} />,
+      title: <FormattedMessage id={`Admins ${incomeWording}`} />,
       type: 'item',
       url: '/incomes/team',
       icon: icons.data
     },
-    {
-      id: 'general-settings',
-      title: <FormattedMessage id={`General Settings`} />,
-      type: 'item',
-      url: '/incomes/general-settings',
-      icon: icons.data
-    },
+    // {
+    //   id: 'general-settings',
+    //   title: <FormattedMessage id={`General Settings`} />,
+    //   type: 'item',
+    //   url: '/incomes/general-settings',
+    //   icon: icons.data
+    // },
   ]
 };
 

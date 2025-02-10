@@ -43,13 +43,13 @@ const profile = {
     //   url: '/user/transferFunds',
     //   icon: icons.data
     // },
-    {
-      id: 'data',
-      title: <FormattedMessage id="Deduct Funds" />,
-      type: 'item',
-      url: '/user/deductFunds',
-      icon: icons.data
-    }
+    // {
+    //   id: 'data',
+    //   title: <FormattedMessage id="Deduct Funds" />,
+    //   type: 'item',
+    //   url: '/user/deductFunds',
+    //   icon: icons.data
+    // }
   ]
 };
 

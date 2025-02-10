@@ -69,7 +69,7 @@ export default function DashboardAnalytics() {
       <Grid item xs={12} md={6}>
         <ProductOverview />
       </Grid>
-      <Grid item xs={12} lg={3}>
+      {/* <Grid item xs={12} lg={3}>
         <Grid container spacing={3}>
           <Grid item xs={12} md={6} lg={12}>
             <PaymentHistory />
@@ -81,7 +81,7 @@ export default function DashboardAnalytics() {
             </Stack>
           </Grid>
         </Grid>
-      </Grid>
+      </Grid> */}
     </Grid>
   );
 }

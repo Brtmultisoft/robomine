@@ -72,6 +72,13 @@ const profile = {
       url: '/investments/stacked-report/',
       icon: icons.data
     },
+    {
+      id: 'ICO Transfer',
+      title: <FormattedMessage id="ICO Transfer" />,
+      type: 'item',
+      url: '/user/ico-transfer/',
+      icon: icons.data
+    },
     // {
     //   id: 'withdrawFunds',   
     //   title: <FormattedMessage id="Withdraw Funds" />,

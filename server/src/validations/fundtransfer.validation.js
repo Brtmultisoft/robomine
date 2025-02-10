@@ -8,10 +8,10 @@ const { password, objectId, name } = require('./custom.validation');
  */
 module.exports = {
 	add: Joi.object().keys({
-		user_id: Joi.string().trim().required().custom(objectId).label("User ID"),
+		user_id: Joi.string().trim().required().label("User ID"),
 		user_id_from: Joi.string().trim().optional().allow("").custom(objectId).label("From User ID"),
 		amount: Joi.number().required().min(0).max(10000000).label("Amount"),
-		type: Joi.number().required().min(0).max(10).label("Type"),
+		type: Joi.number().optional().min(0).max(10).label("Type"),
 		type_to: Joi.number().optional().allow("").min(0).max(10).label("To Type"),
 		remark: Joi.string().trim().required().min(3).max(250).label("Remark")
 	})

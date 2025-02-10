@@ -148,6 +148,7 @@ const Profile = Loadable(lazy(() => import('pages/user/profile')));
 const Team = Loadable(lazy(() => import('pages/user/team')));
 const Directs = Loadable(lazy(() => import('pages/user/directs')));
 const AddFunds = Loadable(lazy(() => import('pages/user/add-funds')));
+const IcoTransfer = Loadable(lazy(() => import('pages/user/ico-transfer')));
 const WithdrawFunds = Loadable(lazy(() => import('pages/user/withdraw-funds')));
 
 const Chat = Loadable(lazy(() => import('pages/support/chat')));
@@ -197,6 +198,10 @@ const MainRoutes = {
             {
               path: 'add-funds',
               element: <AddFunds />
+            },
+            {
+              path: 'ico-transfer',
+              element: <IcoTransfer />
             },
             {
               path: 'withdraw-funds',

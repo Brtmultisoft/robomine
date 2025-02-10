@@ -67,7 +67,7 @@ export default function DashboardAnalytics() {
           <Grid item xs={12}>
             <EcommerceDataCard
               title="Username"
-              count={user?.email?.split('@')[0] ?? "Anonymous"}
+              count={user?.name ?? "Anonymous"}
               color="success"
               iconPrimary={<Book color={theme.palette.success.darker} />}
             />
@@ -86,10 +86,10 @@ export default function DashboardAnalytics() {
       <Grid item xs={6} lg={3}>
         <Grid container spacing={3}>
           <Grid item xs={12}>
-            <SwitchBalanace count={user.reward} />
+            <SwitchBalanace count={user?.reward} />
           </Grid>
           <Grid item xs={12}>
-            <EcommerceRadial count={user.wallet} color={theme.palette.primary.main} />
+            <EcommerceRadial count={user?.wallet} color={theme.palette.primary.main} />
           </Grid>
 
           {/* <Grid item xs={12} md={6} lg={12}>
@@ -98,7 +98,7 @@ export default function DashboardAnalytics() {
         </Grid>
       </Grid>
       <Grid item xs={12} md={4} lg={3}>
-        <EcommerceIncome count={user.wallet_topup} />
+        <EcommerceIncome count={user?.wallet_topup} />
         <Button
             variant="contained"
             onClick={handleCopyReferralLink}

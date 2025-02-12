@@ -50,6 +50,24 @@ module.exports = {
             return responseHelper.error(res, responseData);
         }
     },
+    getAllStackedToken: async (req, res) => {
+        let reqObj = req.query;
+        let user = req.user;
+        let user_id = user.sub;
+        log.info('Recieved request for getAll:', reqObj);
+        let responseData = {};
+        try {
+            reqObj.type = 2;
+            let getList = await investmentDbHandler.getAll(reqObj, user_id);
+            responseData.msg = 'Data fetched successfully!';
+            responseData.data = getList;
+            return responseHelper.success(res, responseData);
+        } catch (error) {
+            log.error('failed to fetch data with error::', error);
+            responseData.msg = 'Failed to fetch data';
+            return responseHelper.error(res, responseData);
+        }
+    },
 
     getOne: async (req, res) => {
         let responseData = {};
@@ -79,8 +97,8 @@ module.exports = {
         let reqObj = req.body;
         try {
             let investment_plan_id = reqObj.investment_plan_id;
-            let amount = reqObj.amount ;
-        
+            let amount = reqObj.amount;
+
             await userDbHandler.updateOneByQuery(user_id,
                 {
                     $inc: { wallet_topup: +amount }
@@ -100,18 +118,18 @@ module.exports = {
 
             })
 
-           
+
             let data = {
                 user_id: user_id,
                 investment_plan_id: investment_plan_id,
                 amount: amount,
-          
+
                 status: 1
             }
 
             let iData = await investmentDbHandler.create(data);
 
-     
+
 
             responseData.msg = "Investment successful!";
             return responseHelper.success(res, responseData);
@@ -153,14 +171,14 @@ module.exports = {
 
             // Ensure stacked_amount is a number
             let wallet = parseFloat(userRecord.wallet) || 0;
-//  Note wallet_topup is Total Bought ICO
-//  Note wallet is Stacked ICO
+            //  Note wallet_topup is Total Bought ICO
+            //  Note wallet is Stacked ICO
             // Deduct amount from wallet
             await userDbHandler.updateOneByQuery(user_id, {
                 $inc: { wallet_topup: -amount }
             }).then(async response => {
                 if (!response.acknowledged || response.modifiedCount === 0) throw "Amount not deducted!";
-                
+
                 // Update stacked amount
                 await userDbHandler.updateOneByQuery(user_id, {
                     $inc: { wallet: +amount }
@@ -170,9 +188,55 @@ module.exports = {
             });
             let data = {
                 user_id: user_id,
-                type:1,
+                type: 1,
                 amount: amount,
-          
+
+                status: 2
+            }
+
+            let iData = await investmentDbHandler.create(data);
+            responseData.msg = "Stacked successful!";
+            return responseHelper.success(res, responseData);
+        } catch (error) {
+            log.error('Failed to update data with error:', error);
+            responseData.msg = "Failed to add data";
+            return responseHelper.error(res, responseData);
+        }
+    },
+    add3: async (req, res) => {
+        let responseData = {};
+        let user = req.user;
+        let user_id = { _id: ObjectId(user.sub) };
+        let reqObj = req.body;
+
+        try {
+            let amount = reqObj.amount;
+
+            let investment_plan_id = reqObj.investment_plan_id;
+
+            await userDbHandler.updateOneByQuery(user_id,
+                {
+                    $inc: { wallet_token: +amount }
+                }
+            ).then(async response => {
+
+                if (!response.acknowledged || response.modifiedCount === 0) throw `Amount not deducted !!!`
+
+                await userDbHandler.updateOneByQuery({ _id: user_id },
+                    {
+                        $inc: { topup: amount }
+                    }
+                ).then(async response => {
+                    if (!response.acknowledged || response.modifiedCount === 0) throw `User Topup Value is not updated !!!`
+                }).catch(e => { throw `Error while updating topup amount: ${e}` })
+
+            })
+
+            let data = {
+                user_id: user_id,
+                type: 2,
+                amount: amount,
+
                 status: 2
             }
 

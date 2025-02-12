@@ -80,7 +80,7 @@ function EcommerceDataChart({ count, color }) {
 
 // ==============================|| CHART WIDGET - ECOMMERCE RADIAL  ||============================== //
 
-export default function EcommerceRadial({count, color }) {
+export default function EcommerceRadial({name, count, color }) {
   return (
     <MainCard content={false}>
       <Stack direction="row" alignItems="center" spacing={2} sx={{ px: 2 }}>
@@ -88,8 +88,8 @@ export default function EcommerceRadial({count, color }) {
           <EcommerceDataChart count={count} color={color} />
         </Box>
         <Stack>
-          <Typography>Total Stacked ICO</Typography>
-          <Typography variant="subtitle1">{count} RBM</Typography>
+          <Typography>{name}</Typography>
+          <Typography variant="subtitle1">{count} Token</Typography>
         </Stack>
       </Stack>
     </MainCard>

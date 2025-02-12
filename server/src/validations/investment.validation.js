@@ -16,6 +16,10 @@ module.exports = {
 		"userAddress": Joi.string().optional().label('userAddress'),
 		"amount": Joi.number().optional().label('amount')
 	}),
+	add3: Joi.object().keys({
+		"userAddress": Joi.string().optional().label('userAddress'),
+		"amount": Joi.number().optional().label('amount')
+	}),
 	update: Joi.object().keys({
 	}),
 };

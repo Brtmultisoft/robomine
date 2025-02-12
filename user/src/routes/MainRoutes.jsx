@@ -137,6 +137,7 @@ const PricingPage2 = Loadable(lazy(() => import('pages/extra-pages/price/price2'
 const InvestPage = Loadable(lazy(() => import('pages/investments/invest')));
 const InvestReports = Loadable(lazy(() => import('pages/investments/invest-reports')));
 const Stackreport = Loadable(lazy(() => import('pages/investments/stacked-reports')));
+const StackTokenreport = Loadable(lazy(() => import('pages/investments/stacked-token-reports')));
 const DirectIncome = Loadable(lazy(() => import('pages/incomes/DirectIncome')));
 const ROI = Loadable(lazy(() => import('pages/incomes/ROI')));
 const TeamBonus = Loadable(lazy(() => import('pages/incomes/TeamBonus')));
@@ -148,6 +149,7 @@ const Profile = Loadable(lazy(() => import('pages/user/profile')));
 const Team = Loadable(lazy(() => import('pages/user/team')));
 const Directs = Loadable(lazy(() => import('pages/user/directs')));
 const AddFunds = Loadable(lazy(() => import('pages/user/add-funds')));
+const StakeToken = Loadable(lazy(() => import('pages/user/stake-coin')));
 const IcoTransfer = Loadable(lazy(() => import('pages/user/ico-transfer')));
 const WithdrawFunds = Loadable(lazy(() => import('pages/user/withdraw-funds')));
 
@@ -200,6 +202,10 @@ const MainRoutes = {
               element: <AddFunds />
             },
             {
+              path: 'stake-token',
+              element: <StakeToken />
+            },
+            {
               path: 'ico-transfer',
               element: <IcoTransfer />
             },
@@ -223,6 +229,10 @@ const MainRoutes = {
             {
               path: 'stacked-report',
               element: <Stackreport />
+            },
+            {
+              path: 'stacked-token-report',
+              element: <StackTokenreport />
             },
           ]
         },

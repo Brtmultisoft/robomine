@@ -212,8 +212,8 @@ export default function ProjectAnalytics() {
           </Tabs>
         </Box>
         <Box sx={{ p: 3 }}>
-          <Grid container spacing={2}>
-            <Grid item xs={12} md={8}>
+          <Grid  spacing={2}>
+            {/* <Grid item xs={12} md={8}> */}
               <Stack spacing={2}>
                 <Stack direction="row" alignItems="center" justifyContent="flex-end" spacing={1}>
                   <Box sx={{ minWidth: 120 }}>
@@ -237,8 +237,8 @@ export default function ProjectAnalytics() {
                 </Stack>
                 <EcommerceDataChart data={data} />
               </Stack>
-            </Grid>
-            <Grid item xs={12} md={4}>
+            {/* </Grid> */}
+            {/* <Grid item xs={12} md={4}>
               <List disablePadding sx={{ '& .MuiListItem-root': { px: 3, py: 1.5 } }}>
                 <ListItem
                   divider
@@ -324,7 +324,7 @@ export default function ProjectAnalytics() {
                   />
                 </ListItem>
               </List>
-            </Grid>
+            </Grid> */}
           </Grid>
         </Box>
       </Box>

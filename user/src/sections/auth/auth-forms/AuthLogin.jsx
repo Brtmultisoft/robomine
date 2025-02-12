@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { Buffer } from 'buffer';
 import { ethers } from 'ethers';
 import Grid from '@mui/material/Grid';
 import Button from '@mui/material/Button';
@@ -9,53 +8,27 @@ import AnimateButton from 'components/@extended/AnimateButton';
 import { openSnackbar } from 'api/snackbar';
 import useAuth from 'hooks/useAuth';
 import useScriptRef from 'hooks/useScriptRef';
-import IconButton from 'components/@extended/IconButton';
-import { fetcher } from 'utils/axios';
-window.Buffer = Buffer;
+import { ConnectButton } from '@rainbow-me/rainbowkit';
+import { useAccount } from 'wagmi';
 
 const contractABI = process.env.REACT_APP_CONTRACT_ABI;
 const contractAddress = process.env.REACT_APP_CONTRACT_ADDRESS;
 
 export default function AuthLogin() {
   const [isRegistered, setIsRegistered] = useState(false);
-  const [userAddress, setUserAddress] = useState('');
   const [referralId, setReferralId] = useState('');
-  const { isLoggedIn, login, register } = useAuth();
+  const { address: userAddress, isConnected } = useAccount();
+  const { login, register } = useAuth();
   const scriptedRef = useScriptRef();
-
-  const connectMetaMask = async () => {
-    if (window.ethereum) {
-      try {
-        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-        setUserAddress(accounts[0]);
-        openSnackbar({
-          open: true,
-          message: `Connected: ${accounts[0]}`,
-          variant: 'alert',
-          alert: { color: 'success' }
-        });
-      } catch (error) {
-        console.error('Connection failed:', error);
-        openSnackbar({
-          open: true,
-          message: 'Failed to connect MetaMask',
-          variant: 'alert',
-          alert: { color: 'error' }
-        });
-      }
-    } else {
-      alert('MetaMask is not installed. Please install it to use this feature.');
-    }
-  };
 
   useEffect(() => {
     const checkRegistration = async () => {
-      if (window.ethereum && userAddress) {
-        const provider = new ethers.providers.Web3Provider(window.ethereum);
-        const signer = provider.getSigner();
-        const contract = new ethers.Contract(contractAddress, contractABI, signer);
-
+      if (isConnected && userAddress) {
         try {
+          const provider = new ethers.providers.Web3Provider(window.ethereum);
+          await provider.send('eth_requestAccounts', []); // Ensure the wallet is connected
+          const signer = provider.getSigner();
+          const contract = new ethers.Contract(contractAddress, contractABI, signer);
           const userDetails = await contract.getUserDetail(userAddress);
           setIsRegistered(userDetails._isRegistered);
         } catch (error) {
@@ -65,15 +38,16 @@ export default function AuthLogin() {
     };
 
     checkRegistration();
-  }, [userAddress]);
+  }, [isConnected, userAddress]);
 
   const handleRegistrationOrLogin = async () => {
-    if (window.ethereum) {
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      const signer = provider.getSigner();
-      const contract = new ethers.Contract(contractAddress, contractABI, signer);
-
+    if (isConnected) {
       try {
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        await provider.send('eth_requestAccounts', []); // Ensure wallet connection
+        const signer = provider.getSigner();
+        const contract = new ethers.Contract(contractAddress, contractABI, signer);
+
         if (!isRegistered) {
           const tx = await contract.registration(referralId);
           await tx.wait();
@@ -106,7 +80,7 @@ export default function AuthLogin() {
         console.error('Operation failed:', error);
       }
     } else {
-      alert('Please install MetaMask!');
+      alert('Please connect your wallet!');
     }
   };
 
@@ -114,13 +88,9 @@ export default function AuthLogin() {
     <MainCard title="Register or Login">
       <Grid container spacing={3}>
         <Grid item xs={12}>
-          <AnimateButton>
-            <Button variant="contained" onClick={connectMetaMask}>
-              {userAddress ? `Connected: ${userAddress.slice(0, 6)}...${userAddress.slice(-4)}` : 'Connect MetaMask'}
-            </Button>
-          </AnimateButton>
+          <ConnectButton />
         </Grid>
-        {!isRegistered &&userAddress && (
+        {!isRegistered && isConnected && (
           <Grid item xs={12}>
             <TextField
               label="Referral ID"
@@ -136,7 +106,7 @@ export default function AuthLogin() {
             <Button
               variant="contained"
               onClick={handleRegistrationOrLogin}
-              disabled={!userAddress}
+              disabled={!isConnected}
             >
               {isRegistered ? 'Login' : 'Register & Login'}
             </Button>
@@ -146,3 +116,4 @@ export default function AuthLogin() {
     </MainCard>
   );
 }
+

@@ -92,22 +92,33 @@ export default function DashboardAnalytics() {
             <EcommerceRadial count={user?.wallet} color={theme.palette.primary.main} />
           </Grid>
 
+
           {/* <Grid item xs={12} md={6} lg={12}>
             <LanguagesSupport />
           </Grid> */}
         </Grid>
       </Grid>
-      <Grid item xs={12} md={4} lg={3}>
-        <EcommerceIncome count={user?.wallet_topup} />
-        <Button
-            variant="contained"
-            onClick={handleCopyReferralLink}
-            style={{ backgroundColor: theme.palette.primary.main, color: '#fff' }}
-          >
-            Copy Referral Link
-          </Button>
+      <Grid item xs={12} md={4} lg={3} spacing={3}>
+        <Grid container spacing={3}>
+          <Grid item xs={12} >
+            <EcommerceIncome count={user?.wallet_topup} />
+          </Grid>
+          <Grid item xs={12} >
+            <EcommerceRadial name="Total Staked Token" count={user?.wallet_token} color={theme.palette.primary.main} />
+            <Button
+              variant="contained"
+              onClick={handleCopyReferralLink}
+              style={{ backgroundColor: theme.palette.primary.main, color: '#fff' }}
+            >
+              Copy Referral Link
+            </Button>
+          </Grid>
+        
+
+
+        </Grid>
       </Grid>
-     
+
 
 
 

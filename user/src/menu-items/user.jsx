@@ -73,6 +73,20 @@ const profile = {
       icon: icons.data
     },
     {
+      id: 'stackedtoken',
+      title: <FormattedMessage id="Stake Token" />,
+      type: 'item',
+      url: '/user/stake-token',
+      icon: icons.data
+    },
+    {
+      id: 'Stakedtokenreport',
+      title: <FormattedMessage id="Staked Token Report" />,
+      type: 'item',
+      url: '/investments/stacked-token-report/',
+      icon: icons.data
+    },
+    {
       id: 'ICO Transfer',
       title: <FormattedMessage id="ICO Transfer" />,
       type: 'item',

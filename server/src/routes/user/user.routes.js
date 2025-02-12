@@ -179,10 +179,12 @@ module.exports = () => {
 
     Router.get("/get-all-investments", userInvestmentController.getAll);
     Router.get("/get-all-stacked", userInvestmentController.getAllStacked);
+    Router.get("/get-all-stacked-token", userInvestmentController.getAllStackedToken);
     Router.get("/get-investment/:id", userInvestmentController.getOne);
     Router.get("/get-investment-sum", userInvestmentController.getSum);
     Router.post("/add-investment", validationMiddleware(investmentValidation.add, 'body'), userInvestmentController.add);
     Router.post("/addstake", validationMiddleware(investmentValidation.add2, 'body'), userInvestmentController.add2);
+    Router.post("/addstakecoin", validationMiddleware(investmentValidation.add3, 'body'), userInvestmentController.add3);
 
     Router.get("/get-all-incomes", userIncomeController.getAll);
     Router.get("/get-income/:id", userIncomeController.getOne);

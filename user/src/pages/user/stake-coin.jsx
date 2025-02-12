@@ -54,7 +54,7 @@ export default function StakeToken() {
                 icon: 'error',
                 confirmButtonColor: '#d33',
             });
-            // return;
+            return;
         }
 
         Swal.fire({

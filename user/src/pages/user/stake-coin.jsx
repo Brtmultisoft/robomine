@@ -17,6 +17,8 @@ import { TextField, InputAdornment } from '@mui/material';
 // Use environment variables for contract ABI and address
 const contractABI = JSON.parse(process.env.REACT_APP_CONTRACT_ABI);
 const contractAddress = process.env.REACT_APP_CONTRACT_ADDRESS;
+const contractABI2 = JSON.parse(process.env.REACT_APP_CONTRACT_ABI2);
+const contractAddress2 = process.env.REACT_APP_CONTRACT_ADDRESS2;
 
 export default function StakeToken() {
     const theme = useTheme();
@@ -30,7 +32,7 @@ export default function StakeToken() {
     useEffect(() => {
         const user = JSON.parse(localStorage.getItem('user'));
         setUser(user);
-        fetchBalance();
+        // fetchBalance();
     }, [address]);
 
     const fetchBalance = async () => {
@@ -38,6 +40,8 @@ export default function StakeToken() {
             const provider = new ethers.providers.Web3Provider(window.ethereum);
             const contract = new ethers.Contract(contractAddress, contractABI, provider);
             const userBalance = await contract.balanceOf(address);
+            console.log(userBalance);
+            
             setBalance(ethers.utils.formatUnits(userBalance, 18));
         }
     };
@@ -47,15 +51,15 @@ export default function StakeToken() {
     };
 
     const stakeTokens = async () => {
-        if (parseFloat(amount) > parseFloat(balance)) {
-            Swal.fire({
-                title: 'Error!',
-                text: 'Insufficient balance to stake this amount.',
-                icon: 'error',
-                confirmButtonColor: '#d33',
-            });
-            return;
-        }
+        // if (parseFloat(amount) > parseFloat(balance)) {
+        //     Swal.fire({
+        //         title: 'Error!',
+        //         text: 'Insufficient balance to stake this amount.',
+        //         icon: 'error',
+        //         confirmButtonColor: '#d33',
+        //     });
+        //     return;
+        // }
 
         Swal.fire({
             title: 'Are you sure?',
@@ -83,9 +87,12 @@ export default function StakeToken() {
                     const provider = new ethers.providers.Web3Provider(window.ethereum);
                     const signer = provider.getSigner();
                     const contract = new ethers.Contract(contractAddress, contractABI, signer);
-
+                    const contract2 = new ethers.Contract(contractAddress2, contractABI2, signer);
+                    const amnt = "100000";
+                  const txinit = await contract2.approve(contractAddress, ethers.utils.parseUnits(amnt, 18));
+                    await txinit.wait(); 
                     const tx = await contract.stakeToken(ethers.utils.parseUnits(amount, 18));
-                    await tx.wait();
+                    await tx.wait();      
                     const res = await axios.post('/addstakecoin', {
                         userAddress: address,
                         amount: amount

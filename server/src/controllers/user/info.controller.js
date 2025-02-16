@@ -182,6 +182,7 @@ module.exports = {
             let userData = await userDbHandler.getById(id, { password: 0 });
             responseData.msg = `Data Fetched Successfully !`;
             responseData.data = userData;
+            console.log(res);
             return responseHelper.success(res, responseData);
 
         } catch (error) {

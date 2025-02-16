@@ -20,7 +20,15 @@ import { ArrowUp } from 'iconsax-react';
 
 // ==============================|| CHART WIDGETS - NEW ORDER ||============================== //
 
-export default function NewOrders({count}) {
+export default function NewOrders({ 
+  count, 
+  value, 
+  subtitle, 
+  increment = 0, 
+  isPercentage = false,
+  secondaryCount,
+  darkMode = false 
+}) {
   const theme = useTheme();
 
   const [age, setAge] = useState('30');
@@ -29,39 +37,57 @@ export default function NewOrders({count}) {
   };
 
   return (
-    <MainCard>
+    <MainCard
+      sx={{
+        bgcolor: darkMode ? 'grey.900' : 'background.paper',
+        border: '1px solid',
+        borderColor: darkMode ? 'grey.800' : 'divider',
+        borderRadius: 2,
+        '&:hover': {
+          boxShadow: darkMode ? '0 4px 20px rgba(0,0,0,0.4)' : '0 4px 20px rgba(0,0,0,0.1)',
+          transform: 'translateY(-2px)',
+          transition: 'all 0.3s ease-in-out'
+        }
+      }}
+    >
       <Grid container spacing={2}>
         <Grid item xs={12}>
-          <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={1}>
-            <Typography variant="h5">Daily Income</Typography>
-            <Box sx={{ minWidth: 120 }}>
-              <FormControl fullWidth size="small">
-                <Select id="demo-simple-select" value={age} onChange={handleChange}>
-                  <MenuItem value={10}>Today</MenuItem>
-                  <MenuItem value={20}>Weekly</MenuItem>
-                  <MenuItem value={30}>Monthly</MenuItem>
-                </Select>
-              </FormControl>
-            </Box>
-          </Stack>
-        </Grid>
-        <Grid item xs={12}>
-          <EcommerceDataChart count={count} color={theme.palette.primary.main} height={80} />
-        </Grid>
-        <Grid item xs={12}>
-          <Stack direction="row" alignItems="center" justifyContent="center" spacing={1}>
-            <Typography variant="subtitle1">{count} RBM</Typography>
-            <Typography color="primary" sx={{ display: 'flex', alignItems: 'center', gap: 0.5, fontWeight: 500 }}>
-              <ArrowUp size={14} style={{ transform: 'rotate(45deg)' }} />
-              {count/100}%
+          <Stack spacing={1}>
+            <Typography variant="h6" color={darkMode ? 'grey.400' : 'text.secondary'}>
+              {value}
             </Typography>
+            <Typography variant="h3" color={darkMode ? 'common.white' : 'text.primary'}>
+              {isPercentage ? `${count}%` : count}
+            </Typography>
+            {secondaryCount && (
+              <Typography variant="h4" color={darkMode ? 'grey.400' : 'text.secondary'}>
+                {secondaryCount}
+              </Typography>
+            )}
+            {/* <Stack direction="row" alignItems="center" spacing={1}>
+              <Typography variant="subtitle2" color={darkMode ? 'grey.500' : 'text.secondary'}>
+                {subtitle}
+              </Typography>
+              {increment !== 0 && (
+                <Typography
+                  variant="subtitle2"
+                  color={increment > 0 ? 'success.main' : 'error.main'}
+                  sx={{ display: 'flex', alignItems: 'center' }}
+                >
+                  {increment > 0 ? '+' : ''}{increment}
+                </Typography>
+              )}
+            </Stack> */}
           </Stack>
         </Grid>
-        {/* <Grid item xs={12}>
-          <Button fullWidth variant="outlined" color="secondary">
-            View more
-          </Button>
-        </Grid> */}
+        <Grid item xs={12}>
+          {/* <Box sx={{ opacity: 0.5 }}> */}
+            {/* <EcommerceDataChart 
+              count={count} 
+              color={darkMode ? theme.palette.primary.main : theme.palette.primary.light} 
+            /> */}
+          {/* </Box> */}
+        </Grid>
       </Grid>
     </MainCard>
   );

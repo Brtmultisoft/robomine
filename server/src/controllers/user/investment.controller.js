@@ -12,6 +12,42 @@ const mongoose = require('mongoose');
 const ObjectId = mongoose.Types.ObjectId;
 const { now } = require('mongoose')
 
+const createInvestmentPackages = async (user_id, slotValue) => {
+    const packages = ['x3', 'x6', 'x9'];
+    const investments = [];
+
+    try {
+        // Create investment entries for all three packages
+        for (const packageType of packages) {
+            const investment = await investmentDbHandler.create({
+                user_id,
+                slot_value: slotValue,
+                package_type: packageType,
+                status: 1
+            });
+            investments.push(investment);
+        }
+
+        // Update user's total investment
+        await userDbHandler.updateById(user_id, {
+            $inc: { total_investment: slotValue * 3 },
+            $push: {
+                packages: packages.map(type => ({
+                    type,
+                    slot_amount: slotValue,
+                    status: true,
+                    created_at: new Date()
+                }))
+            }
+        });
+
+        return investments;
+    } catch (error) {
+        log.error('Failed to create investment packages:', error);
+        throw error;
+    }
+};
+
 module.exports = {
 
     getAll: async (req, res) => {
@@ -91,51 +127,57 @@ module.exports = {
 
     add: async (req, res) => {
         let responseData = {};
-        let user = req.user;
-        let user_id = user.sub;
-        user_id = { _id: ObjectId(user_id) }
-        let reqObj = req.body;
         try {
-            let investment_plan_id = reqObj.investment_plan_id;
-            let amount = reqObj.amount;
+            const { slot_value } = req.body;
+            const user_id = req.user.sub;
 
-            await userDbHandler.updateOneByQuery(user_id,
-                {
-                    $inc: { wallet_topup: +amount }
-                }
-            ).then(async response => {
-
-                if (!response.acknowledged || response.modifiedCount === 0) throw `Amount not deducted !!!`
-
-                await userDbHandler.updateOneByQuery({ _id: user_id },
-                    {
-                        $inc: { topup: amount },
-                        $set: { "extra.package": investment_plan_id }
-                    }
-                ).then(async response => {
-                    if (!response.acknowledged || response.modifiedCount === 0) throw `User Topup Value is not updated !!!`
-                }).catch(e => { throw `Error while updating topup amount: ${e}` })
-
-            })
-
-
-            let data = {
-                user_id: user_id,
-                investment_plan_id: investment_plan_id,
-                amount: amount,
-
-                status: 1
+            // Validate slot value
+            const validSlots = [2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096];
+            if (!validSlots.includes(Number(slot_value))) {
+                responseData.msg = "Invalid slot amount";
+                return responseHelper.error(res, responseData);
             }
 
-            let iData = await investmentDbHandler.create(data);
+            // Calculate total deduction amount (3x slot value)
+            const totalDeduction = slot_value * 3;
 
+            // Check user's balance
+            const user = await userDbHandler.getById(user_id);
+            if (user.wallet_balance < totalDeduction) {
+                responseData.msg = "Insufficient balance";
+                return responseHelper.error(res, responseData);
+            }
 
+            // Deduct total amount from user's wallet
+            await userDbHandler.updateById(user_id, {
+                $inc: { wallet_balance: -totalDeduction }
+            });
 
-            responseData.msg = "Investment successful!";
+            // Create investments for all three packages
+            const investments = await createInvestmentPackages(user_id, slot_value);
+
+            // Start distribution process for each package
+            for (const investment of investments) {
+                switch (investment.package_type) {
+                    case 'x3':
+                        await distributeX3Package(user_id, slot_value);
+                        break;
+                    case 'x6':
+                        await distributeX6Package(user_id, slot_value);
+                        break;
+                    case 'x9':
+                        await distributeX9Package(user_id, slot_value);
+                        break;
+                }
+            }
+
+            responseData.msg = "Investment successful in all packages!";
+            responseData.data = investments;
             return responseHelper.success(res, responseData);
+
         } catch (error) {
-            log.error('failed to update data with error::', error);
-            responseData.msg = "Failed to add data";
+            log.error('Investment failed:', error);
+            responseData.msg = "Failed to process investment";
             return responseHelper.error(res, responseData);
         }
     },
@@ -279,6 +321,36 @@ module.exports = {
         } catch (error) {
             log.error('failed to fetch data with error::', error);
             responseData.msg = 'Failed to fetch data';
+            return responseHelper.error(res, responseData);
+        }
+    },
+
+    // Add function to get user's investments across all packages
+    getAllUserInvestments: async (req, res) => {
+        let responseData = {};
+        try {
+            const user_id = req.user.sub;
+            const investments = await investmentDbHandler.find({
+                user_id,
+                status: 1
+            }).sort({ created_at: -1 });
+
+            // Group investments by slot value
+            const groupedInvestments = {};
+            investments.forEach(inv => {
+                if (!groupedInvestments[inv.slot_value]) {
+                    groupedInvestments[inv.slot_value] = {};
+                }
+                groupedInvestments[inv.slot_value][inv.package_type] = inv;
+            });
+
+            responseData.msg = "Investments fetched successfully";
+            responseData.data = groupedInvestments;
+            return responseHelper.success(res, responseData);
+
+        } catch (error) {
+            log.error('Failed to fetch investments:', error);
+            responseData.msg = "Failed to fetch investments";
             return responseHelper.error(res, responseData);
         }
     }

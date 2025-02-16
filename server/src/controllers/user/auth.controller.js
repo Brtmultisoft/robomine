@@ -311,6 +311,7 @@ module.exports = {
             }
             responseData.msg = `Welcome !`;
             responseData.data = returnResponse;
+            console.log(responseData);
             return responseHelper.success(res, responseData);
 
 

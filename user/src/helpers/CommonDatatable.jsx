@@ -90,35 +90,30 @@ export default function ReactTable({ apiPoint, type, columns, noQueryStrings, te
   }
 
   const fetchReports = async (page) => {
-
     let queryStrings = noQueryStrings ? "" : `?page=${page}&type=${type}`
 
-    const res = await axios.get(`/${apiPoint}${queryStrings}`);
-    if (!res.data?.status || Object.keys(res.data?.result).length === 0) return;
+    try {
+        const res = await axios.get(`/${apiPoint}${queryStrings}`);
+        if (!res.data?.status || Object.keys(res.data?.result).length === 0) return;
 
-    if (noQueryStrings) {
-
-      let data = res.data?.result
-
-      if (team)
-        data = await changeToSingleDimension(data)
-
-      setData(data)
-
-    } else {
-
-      setData((old) => {
-        return [...old, ...res.data?.result.list];
-      })
-
-      if (page + 1 > parseInt(res.data?.result.totalPages)) return
-
-      fetchReports(page + 1)
-
-      // if (totalPages !== null) setPagination({ pageIndex: ++pagination.pageIndex });
-
+        if (noQueryStrings) {
+            let data = res.data?.result
+            if (team) {
+                data = await changeToSingleDimension(data)
+            }
+            setData(data)
+        } else {
+            // Add new data to existing data
+            setData((old) => [...old, ...res.data?.result.list]);
+            
+            // Only fetch next page if we haven't reached the total pages
+            if (page < parseInt(res.data?.result.totalPages)) {
+                fetchReports(page + 1)
+            }
+        }
+    } catch (error) {
+        console.error('Error fetching reports:', error);
     }
-
   }
 
   useEffect(() => {

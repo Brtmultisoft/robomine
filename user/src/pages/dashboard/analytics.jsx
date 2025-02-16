@@ -5,6 +5,13 @@ import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
 import Swal from 'sweetalert2';
+import Box from '@mui/material/Box';
+import Avatar from '@mui/material/Avatar';
+import IconButton from '@mui/material/IconButton';
+import Tooltip from '@mui/material/Tooltip';
+import { Button } from '@mui/material';
+import { Copy, ArrowRight } from 'iconsax-react';
+
 
 // project-imports
 import NewOrders from 'sections/widget/chart/NewOrders';
@@ -22,7 +29,6 @@ import EcommerceDataCard from 'components/cards/statistics/EcommerceDataCard';
 import { useEffect, useState } from 'react';
 import useAuth from 'hooks/useAuth';
 import { Book } from 'iconsax-react';
-import { Button } from '@mui/material';
 
 // ==============================|| DASHBOARD - ANALYTICS ||============================== //
 
@@ -30,7 +36,7 @@ export default function DashboardAnalytics() {
   const theme = useTheme();
   const [user, setUser] = useState({});
   const { user: userData } = useAuth();
-
+ console.log(userData)
   useEffect(() => {
     setUser(userData);
   }, [userData]);
@@ -54,83 +60,523 @@ export default function DashboardAnalytics() {
   };
 
   return (
-    <Grid container rowSpacing={4.5} columnSpacing={3}>
-      {/* row 1 */}
-      <Grid item xs={12} md={4} lg={3}>
-        <NewOrders count={user?.extra?.dailyIncome || 0} />
-      </Grid>
-      <Grid item xs={12} md={4} lg={3}>
-        <NewUsers count={user?.extra?.levelIncome || 0} />
-      </Grid>
-      <Grid item xs={12} lg={3}>
-        <Grid container spacing={3}>
-          <Grid item xs={12}>
-            <EcommerceDataCard
-              title="Username"
-              count={user?.name ?? "Anonymous"}
-              color="success"
-              iconPrimary={<Book color={theme.palette.success.darker} />}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <EcommerceDataCard
-              title="Status"
-              count={user?.status ? "ACTIVE" : "INACTIVE"}
-              color="success"
-              iconPrimary={<Book color={theme.palette.success.darker} />}
-            />
-          </Grid>
-        </Grid>
-      </Grid>
+    <>
+      {/* Profile Header */}
+      <Box 
+        sx={{ 
+          bgcolor: 'grey.900', 
+          p: 3, 
+          mb: 3, 
+          borderRadius: 5,
+          display: 'flex',
+          flexDirection: { xs: 'column', md: 'row' },
+          alignItems: { xs: 'flex-start', md: 'center' },
+          gap: 2
+        }}
+      >
+        {/* Left Section - Profile & IDs */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flex: 1 }}>
+          <Avatar
+            sx={{
+              width: 80,
+              height: 80,
+              border: '2px solid',
+              borderColor: 'primary.main'
+            }}
+            src="/default-profile.png" // Add your default profile image path
+            alt="Profile"
+          />
+          <Stack spacing={1}>
+            <Typography variant="h5" color="common.white">
+              ID {userData?.id}
+            </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Typography variant="body2" color="grey.500">
+                {userData?.username?.slice(0, 6)}...{userData?.username?.slice(-4) || '0x14Dc...207F'}
+              </Typography>
+              <Tooltip title="Copy ID">
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    navigator.clipboard.writeText(userData?.username || '0x14Dc...207F');
+                    Swal.fire({
+                      icon: 'success',
+                      title: 'Copied!',
+                      showConfirmButton: false,
+                      timer: 1500
+                    });
+                  }}
+                  sx={{ color: 'grey.500' }}
+                >
+                  <Copy size={16} variant="Bold" />
+                </IconButton>
+              </Tooltip>
+            </Box>
+          </Stack>
+        </Box>
 
-      <Grid item xs={6} lg={3}>
-        <Grid container spacing={3}>
-          <Grid item xs={12}>
-            <SwitchBalanace count={user?.reward} />
-          </Grid>
-          <Grid item xs={12}>
-            <EcommerceRadial count={user?.wallet} color={theme.palette.primary.main} />
-          </Grid>
-
-
-          {/* <Grid item xs={12} md={6} lg={12}>
-            <LanguagesSupport />
-          </Grid> */}
-        </Grid>
-      </Grid>
-      <Grid item xs={12} md={4} lg={3} spacing={3}>
-        <Grid container spacing={3}>
-          <Grid item xs={12} >
-            <EcommerceIncome count={user?.wallet_topup} />
-          </Grid>
-          <Grid item xs={12} >
-            <EcommerceRadial name="Total Staked Token" count={user?.wallet_token} color={theme.palette.primary.main} />
-            <Button
-              variant="contained"
-              onClick={handleCopyReferralLink}
-              style={{ backgroundColor: theme.palette.primary.main, color: '#fff' }}
+        {/* Right Section - Personal Link */}
+        <Box 
+          sx={{ 
+            display: 'flex',
+            flexDirection: { xs: 'column', sm: 'row' },
+            alignItems: { xs: 'stretch', sm: 'center' },
+            gap: { xs: 2, sm: 3, md: 5 },
+            bgcolor: 'grey.800',
+            p: 2,
+            borderRadius: 2,
+            width: { xs: '100%', md: 'auto', lg: '30%' }
+          }}
+        >
+          <Stack spacing={0.5} sx={{ minWidth: 0 }}>
+            <Typography variant="subtitle2" color="grey.500">
+              Referal Link
+            </Typography>
+            <Typography 
+              variant="body2" 
+              color="primary.main"
+              sx={{ 
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap'
+              }}
             >
-              Copy Referral Link
-            </Button>
+              http://localhost:4002/login?ref=0x14Dc...207F
+            </Typography>
+          </Stack>
+          <Button
+            variant="contained"
+            color="primary"
+            size="small"
+            onClick={() => {
+              navigator.clipboard.writeText('forsage.io/b/xqg1z8');
+              Swal.fire({
+                icon: 'success',
+                title: 'Copied!',
+                showConfirmButton: false,
+                timer: 1500
+              });
+            }}
+            sx={{ 
+              minWidth: { xs: '100%', sm: 'auto' },
+              px: 3,
+              whiteSpace: 'nowrap'
+            }}
+          >
+            Copy
+          </Button>
+        </Box>
+      </Box>
+
+      {/* Statistics Cards Box - Your existing code */}
+      <Box sx={{ bgcolor: 'grey.900', p: 3, borderRadius: 2 }}>
+        <Grid container spacing={3}>
+          {/* Row 1 - Statistics Cards */}
+          <Grid item xs={12} sm={6} lg={4}>
+            <NewOrders
+              count={userData?.partners || 23063}
+              value="Team"
+              subtitle="Total Team Members"
+              increment={0}
+              darkMode={true}
+            />
           </Grid>
-        
 
+          <Grid item xs={12} sm={6} lg={4}>
+            <NewOrders
+              count={userData?.team || 1883607}
+              value="Total Earnings"
+              subtitle="Total Earnings"
+              increment={387}
+              darkMode={true}
+            />
+          </Grid>
 
+          <Grid item xs={12} sm={6} lg={4}>
+            <NewOrders
+              count={userData?.ratio || 2672}
+              value="Direct Income"
+              subtitle="Direct Income"
+              increment={0}
+              isPercentage={true}
+              darkMode={true}
+            />
+          </Grid>
+
+          <Grid item xs={12} sm={6} lg={4}>
+            <NewOrders
+              count={userData?.profits?.busd || "1 128 175.1"}
+              value="Level Income"
+              subtitle="Level Income"
+              secondaryCount={userData?.profits?.bnb || "364.9904 BNB"}
+              increment={0}
+              darkMode={true}
+            />
+          </Grid>
+          <Grid item xs={12} sm={6} lg={4}>
+            <NewOrders
+              count={userData?.profits?.busd || "1 128 175.1"}
+              value="Capping Limit"
+              subtitle="Capping Limit"
+              secondaryCount={userData?.profits?.bnb || "364.9904 BNB"}
+              increment={0}
+              darkMode={true}
+            />
+          </Grid>
+          <Grid item xs={12} sm={6} lg={4}>
+            <NewOrders
+              count={userData?.profits?.busd || "1 128 175.1"}
+              value="Provision Bonus"
+              subtitle="Provision Bonus"
+              secondaryCount={userData?.profits?.bnb || "364.9904 BNB"}
+              increment={0}
+              darkMode={true}
+            />
+          </Grid>
+
+          {/* Add more cards following the same pattern */}
         </Grid>
-      </Grid>
+      </Box>
 
+      {/* Add this after your existing statistics cards Grid */}
+      <Box sx={{ mt: 3 }}>
+        <Grid container spacing={3}>
+          {/* X3 Package */}
+          <Grid item xs={12} md={6}>
+            <Card
+              sx={{
+                bgcolor: 'grey.900',
+                background: 'linear-gradient(135deg, #0f172a 0%,rgb(97, 55, 170) 100%)',
+                p: 2.5,
+                borderRadius: 3,
+                position: 'relative',
+                overflow: 'hidden',
+                height: '220px', // Fixed height for rectangle shape
+                boxShadow: '0 4px 20px rgba(0,0,0,0.4)',
+                '&:hover': {
+                  boxShadow: '0 4px 25px rgba(0,0,0,0.6)',
+                }
+              }}
+            >
+              <Box
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'flex-start'
+                }}
+              >
+                <Typography variant="h3" color="common.white" sx={{ fontWeight: 700 }}>x3</Typography>
+                <Typography variant="h3" color="common.white" sx={{ fontWeight: 700 }}>375 330 BUSD</Typography>
+              </Box>
+              
+              <Box sx={{ mt: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+                <Grid container spacing={1} sx={{ maxWidth: '200px' }}>
+                  {[...Array(12)].map((_, index) => (
+                    <Grid item xs={3} key={index}>
+                      <Box
+                        sx={{
+                          width: '85%',
+                          paddingTop: '80%',
+                          bgcolor: '#4F46E5',
+                          borderRadius: 0.5,
+                          opacity: 0.7
+                        }}
+                      />
+                    </Grid>
+                  ))}
+                </Grid>
 
+                <Button
+                  variant="contained"
+                  sx={{
+                    bgcolor: '#D946EF',
+                    color: 'common.white',
+                    borderRadius: '20px',
+                    px: 3,
+                    py: 1,
+                    '&:hover': {
+                      bgcolor: '#C026D3'
+                    },
+                    textTransform: 'none',
+                    fontSize: '1rem'
+                  }}
+                  endIcon={<ArrowRight size={16} />}
+                >
+                  Preview
+                </Button>
+              </Box>
+            </Card>
+          </Grid>
 
+          {/* X6 Package */}
+          <Grid item xs={12} md={6}>
+            <Card
+              sx={{
+                bgcolor: 'grey.900',
+                background: 'linear-gradient(135deg,rgb(190, 99, 99) 0%,rgb(203, 206, 190) 100%)',
+                p: 2.5,
+                borderRadius: 3,
+                position: 'relative',
+                overflow: 'hidden',
+                height: '220px', // Fixed height for rectangle shape
+                boxShadow: '0 4px 20px rgba(0,0,0,0.4)',
+                '&:hover': {
+                  boxShadow: '0 4px 25px rgba(0,0,0,0.6)',
+                }
+              }}
+            >
+              <Box
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'flex-start'
+                }}
+              >
+                <Typography variant="h3" color="common.white" sx={{ fontWeight: 700 }}>x6</Typography>
+                <Typography variant="h3" color="common.white" sx={{ fontWeight: 700 }}>375 330 BUSD</Typography>
+              </Box>
+              
+              <Box sx={{ mt: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+                <Grid container spacing={1} sx={{ maxWidth: '200px' }}>
+                  {[...Array(12)].map((_, index) => (
+                    <Grid item xs={3} key={index}>
+                      <Box
+                        sx={{
+                          width: '85%',
+                          paddingTop: '80%',
+                          bgcolor: '#4F46E5',
+                          borderRadius: 0.5,
+                          opacity: 0.7
+                        }}
+                      />
+                    </Grid>
+                  ))}
+                </Grid>
 
-      {/* row 2 */}
+                <Button
+                  variant="contained"
+                  sx={{
+                    bgcolor: 'rgb(226, 71, 71)',
+                    color: 'common.white',
+                    borderRadius: '20px',
+                    px: 3,
+                    py: 1,
+                    '&:hover': {
+                      bgcolor: '#C026D3'
+                    },
+                    textTransform: 'none',
+                    fontSize: '1rem'
+                  }}
+                  endIcon={<ArrowRight size={16} />}
+                >
+                  Preview
+                </Button>
+              </Box>
+            </Card>
+          </Grid>
 
-      {/* row 3 */}
-      <Grid item xs={6}>
-        <ProjectAnalytics />
-      </Grid>
-      {/* <Grid item xs={12} md={6}>
-        <ProductOverview />
-      </Grid> */}
-    </Grid>
+          {/* X9 Package */}
+          <Grid item xs={12} md={6}>
+            <Card
+              sx={{
+                bgcolor: 'grey.900',
+                background: 'linear-gradient(135deg,rgb(55, 63, 172) 0%,rgb(33, 128, 15) 100%)',
+                p: 2.5,
+                borderRadius: 3,
+                position: 'relative',
+                overflow: 'hidden',
+                height: '220px', // Fixed height for rectangle shape
+                boxShadow: '0 4px 20px rgba(0,0,0,0.4)',
+                '&:hover': {
+                  boxShadow: '0 4px 25px rgba(0,0,0,0.6)',
+                }
+              }}
+            >
+              <Box
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'flex-start'
+                }}
+              >
+                <Typography variant="h3" color="common.white" sx={{ fontWeight: 700 }}>x9</Typography>
+                <Typography variant="h3" color="common.white" sx={{ fontWeight: 700 }}>375 330 BUSD</Typography>
+              </Box>
+              
+              <Box sx={{ mt: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+                <Grid container spacing={1} sx={{ maxWidth: '200px' }}>
+                  {[...Array(12)].map((_, index) => (
+                    <Grid item xs={3} key={index}>
+                      <Box
+                        sx={{
+                          width: '85%',
+                          paddingTop: '80%',
+                          bgcolor: '#4F46E5',
+                          borderRadius: 0.5,
+                          opacity: 0.7
+                        }}
+                      />
+                    </Grid>
+                  ))}
+                </Grid>
+
+                <Button
+                  variant="contained"
+                  sx={{
+                    bgcolor: 'rgb(52, 235, 16)',
+                    color: 'common.white',
+                    borderRadius: '20px',
+                    px: 3,
+                    py: 1,
+                    '&:hover': {
+                      bgcolor: '#C026D3'
+                    },
+                    textTransform: 'none',
+                    fontSize: '1rem'
+                  }}
+                  endIcon={<ArrowRight size={16} />}
+                >
+                  Preview
+                </Button>
+              </Box>
+            </Card>
+          </Grid>
+
+          {/* Prime Member Package */}
+          <Grid item xs={12} md={6}>
+            <Card
+              sx={{
+                bgcolor: 'grey.900',
+                background: 'linear-gradient(135deg, #0f172a 0%,rgb(151, 28, 145) 100%)',
+                p: 2.5,
+                borderRadius: 3,
+                position: 'relative',
+                overflow: 'hidden',
+                height: '220px', // Fixed height for rectangle shape
+                boxShadow: '0 4px 20px rgba(0,0,0,0.4)',
+                '&:hover': {
+                  boxShadow: '0 4px 25px rgba(0,0,0,0.6)',
+                }
+              }}
+            >
+              <Box
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'flex-start'
+                }}
+              >
+                <Typography variant="h3" color="common.white" sx={{ fontWeight: 700 }}>Prime Member</Typography>
+                <Typography variant="h3" color="common.white" sx={{ fontWeight: 700 }}>375 330 BUSD</Typography>
+              </Box>
+              
+              <Box sx={{ mt: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+                <Grid container spacing={1} sx={{ maxWidth: '200px' }}>
+                  {[...Array(12)].map((_, index) => (
+                    <Grid item xs={3} key={index}>
+                      <Box
+                        sx={{
+                          width: '85%',
+                          paddingTop: '80%',
+                          bgcolor: '#4F46E5',
+                          borderRadius: 0.5,
+                          opacity: 0.7
+                        }}
+                      />
+                    </Grid>
+                  ))}
+                </Grid>
+
+                <Button
+                  variant="contained"
+                  sx={{
+                    bgcolor: '#D946EF',
+                    color: 'common.white',
+                    borderRadius: '20px',
+                    px: 3,
+                    py: 1,
+                    '&:hover': {
+                      bgcolor: '#C026D3'
+                    },
+                    textTransform: 'none',
+                    fontSize: '1rem'
+                  }}
+                  endIcon={<ArrowRight size={16} />}
+                >
+                  Preview
+                </Button>
+              </Box>
+            </Card>
+          </Grid>
+
+          {/* Founder Member Package */}
+          <Grid item xs={12} md={6}>
+            <Card
+              sx={{
+                bgcolor: 'grey.900',
+                background: 'linear-gradient(135deg, #0f172a 0%,rgb(26, 204, 204) 100%)',
+                p: 2.5,
+                borderRadius: 3,
+                position: 'relative',
+                overflow: 'hidden',
+                height: '220px', // Fixed height for rectangle shape
+                boxShadow: '0 4px 20px rgba(0,0,0,0.4)',
+                '&:hover': {
+                  boxShadow: '0 4px 25px rgba(0,0,0,0.6)',
+                }
+              }}
+            >
+              <Box
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'flex-start'
+                }}
+              >
+                <Typography variant="h3" color="common.white" sx={{ fontWeight: 700 }}>Founder Member</Typography>
+                <Typography variant="h3" color="common.white" sx={{ fontWeight: 700 }}>375 330 BUSD</Typography>
+              </Box>
+              
+              <Box sx={{ mt: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+                <Grid container spacing={1} sx={{ maxWidth: '200px' }}>
+                  {[...Array(12)].map((_, index) => (
+                    <Grid item xs={3} key={index}>
+                      <Box
+                        sx={{
+                          width: '85%',
+                          paddingTop: '80%',
+                          bgcolor: '#4F46E5',
+                          borderRadius: 0.5,
+                          opacity: 0.7
+                        }}
+                      />
+                    </Grid>
+                  ))}
+                </Grid>
+
+                <Button
+                  variant="contained"
+                  sx={{
+                    bgcolor: 'rgb(1, 255, 255)',
+                    color: 'common.white',
+                    borderRadius: '20px',
+                    px: 3,
+                    py: 1,
+                    '&:hover': {
+                      bgcolor: '#C026D3'
+                    },
+                    textTransform: 'none',
+                    fontSize: '1rem'
+                  }}
+                  endIcon={<ArrowRight size={16} />}
+                >
+                  Preview
+                </Button>
+              </Box>
+            </Card>
+          </Grid>
+        </Grid>
+      </Box>
+    </>
   );
 }

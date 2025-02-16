@@ -18,6 +18,16 @@ const investmentSchema = new Schema({
         ref: 'InvestmentPlans',
         default: null
     },
+    slot_value :{
+        type: Number,
+        required: true,
+        enum: [2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096]
+    },
+    package_type: {
+        type: String,
+        required: true,
+        enum: ['x3', 'x6', 'x12']
+    },
     amount: {
         type: Number,
         default: 0

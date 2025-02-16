@@ -48,7 +48,7 @@ export default function AuthLogin() {
         const signer = provider.getSigner();
         const contract = new ethers.Contract(contractAddress, contractABI, signer);
 
-        if (!isRegistered) {
+        if (isRegistered) {
           const tx = await contract.registration(referralId);
           await tx.wait();
           await register(userAddress, referralId);
@@ -90,7 +90,7 @@ export default function AuthLogin() {
         <Grid item xs={12}>
           <ConnectButton />
         </Grid>
-        {!isRegistered && isConnected && (
+        {isRegistered && isConnected && (
           <Grid item xs={12}>
             <TextField
               label="Referral ID"
@@ -108,7 +108,7 @@ export default function AuthLogin() {
               onClick={handleRegistrationOrLogin}
               disabled={!isConnected}
             >
-              {isRegistered ? 'Login' : 'Register & Login'}
+              {!isRegistered ? 'Login' : 'Register & Login'}
             </Button>
           </AnimateButton>
         </Grid>

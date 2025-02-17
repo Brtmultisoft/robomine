@@ -150,25 +150,82 @@ export default function ReactTable({ apiPoint, type, columns, noQueryStrings, te
   );
 
   return (
-    <MainCard content={false}>
-      <Stack direction="row" spacing={3} alignItems="center" justifyContent="space-between" sx={{ padding: 2 }}>
+    <MainCard 
+      content={false}
+      sx={{
+        bgcolor: 'grey.900',
+        '& .MuiCardHeader-root': {
+          bgcolor: 'grey.900'
+        }
+      }}
+    >
+      <Stack 
+        direction="row" 
+        spacing={3} 
+        alignItems="center" 
+        justifyContent="space-between" 
+        sx={{ 
+          padding: 2,
+          bgcolor: 'grey.900',
+          borderBottom: '1px solid',
+          borderColor: 'grey.800'
+        }}
+      >
         <DebouncedInput
           value={globalFilter ?? ''}
           onFilterChange={(value) => setGlobalFilter(String(value))}
           placeholder={`Search ${data.length} records...`}
+          sx={{
+            '& .MuiOutlinedInput-root': {
+              bgcolor: 'grey.800',
+              color: 'common.white',
+              '& fieldset': {
+                borderColor: 'common.white',
+                borderWidth: '1.5px',
+              },
+              '&:hover fieldset': {
+                borderColor: 'primary.main'
+              },
+              '& input::placeholder': {
+                color: 'grey.500'
+              }
+            }
+          }}
         />
         <CSVExport {...{ data: table.getRowModel().rows.map((d) => d.original), headers, filename: 'report.csv' }} />
       </Stack>
 
       <ScrollX>
-        <TableContainer component={Paper}>
+        <TableContainer 
+          component={Paper}
+          sx={{
+            bgcolor: 'grey.900',
+            '& .MuiPaper-root': {
+              bgcolor: 'grey.900'
+            }
+          }}
+        >
           <Table>
             <TableHead>
               {table.getHeaderGroups().map((headerGroup) => (
-                <TableRow key={headerGroup.id}>
-                  <TableCell key={'#'}>#</TableCell>
+                <TableRow 
+                  key={headerGroup.id}
+                  sx={{
+                    bgcolor: 'grey.800',
+                    '& th': {
+                      color: 'common.white',
+                      borderBottom: '1px solid',
+                      borderColor: 'grey.700'
+                    }
+                  }}
+                >
+                  <TableCell key={'#'} sx={{ color: 'common.white' }}>#</TableCell>
                   {headerGroup.headers.map((header) => (
-                    <TableCell key={header.id} {...header.column.columnDef.meta}>
+                    <TableCell 
+                      key={header.id} 
+                      {...header.column.columnDef.meta}
+                      sx={{ color: 'common.white' }}
+                    >
                       {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
                     </TableCell>
                   ))}
@@ -177,11 +234,37 @@ export default function ReactTable({ apiPoint, type, columns, noQueryStrings, te
             </TableHead>
             <TableHead>
               {table.getHeaderGroups().map((headerGroup, index) => (
-                <TableRow key={headerGroup.id}>
+                <TableRow 
+                  key={headerGroup.id}
+                  sx={{
+                    bgcolor: 'grey.800',
+                    '& th': {
+                      borderBottom: '1px solid',
+                      borderColor: 'grey.700'
+                    }
+                  }}
+                >
                   <TableCell key={index}></TableCell>
                   {headerGroup.headers.map((header) => (
                     <TableCell key={header.id} {...header.column.columnDef.meta}>
-                      {header.column.getCanFilter() && <Filter column={header.column} table={table} />}
+                      {header.column.getCanFilter() && (
+                        <Filter 
+                          column={header.column} 
+                          table={table}
+                          sx={{
+                            '& .MuiOutlinedInput-root': {
+                              bgcolor: 'grey.800',
+                              color: 'common.white',
+                              '& fieldset': {
+                                borderColor: 'grey.700'
+                              },
+                              '&:hover fieldset': {
+                                borderColor: 'primary.main'
+                              }
+                            }
+                          }}
+                        />
+                      )}
                     </TableCell>
                   ))}
                 </TableRow>
@@ -190,10 +273,28 @@ export default function ReactTable({ apiPoint, type, columns, noQueryStrings, te
             <TableBody>
               {table.getRowModel().rows.length > 0 ? (
                 table.getRowModel().rows.map((row, index) => (
-                  <TableRow key={row.id}>
-                    <TableCell key={index}>{index + 1}</TableCell>
+                  <TableRow 
+                    key={row.id}
+                    sx={{
+                      bgcolor: 'grey.900',
+                      '&:hover': {
+                        bgcolor: 'grey.800',
+                        transition: 'all 0.2s ease'
+                      },
+                      '& td': {
+                        color: 'common.white',
+                        borderBottom: '1px solid',
+                        borderColor: 'grey.800'
+                      }
+                    }}
+                  >
+                    <TableCell key={index} sx={{ color: 'common.white' }}>{index + 1}</TableCell>
                     {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id} {...cell.column.columnDef.meta}>
+                      <TableCell 
+                        key={cell.id} 
+                        {...cell.column.columnDef.meta}
+                        sx={{ color: 'common.white' }}
+                      >
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
                       </TableCell>
                     ))}
@@ -201,7 +302,14 @@ export default function ReactTable({ apiPoint, type, columns, noQueryStrings, te
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={table.getAllColumns().length}>
+                  <TableCell 
+                    colSpan={table.getAllColumns().length}
+                    sx={{ 
+                      color: 'grey.500',
+                      textAlign: 'center',
+                      py: 3
+                    }}
+                  >
                     <EmptyTable msg="No Data" />
                   </TableCell>
                 </TableRow>
@@ -212,14 +320,28 @@ export default function ReactTable({ apiPoint, type, columns, noQueryStrings, te
 
         {!top && (
           <>
-            <Divider />
-            <Box sx={{ p: 2 }}>
+            <Divider sx={{ borderColor: 'grey.800' }} />
+            <Box sx={{ p: 2, bgcolor: 'grey.900' }}>
               <TablePagination
                 {...{
                   setPageSize: table.setPageSize,
                   setPageIndex: table.setPageIndex,
                   getState: table.getState,
                   getPageCount: table.getPageCount
+                }}
+                sx={{
+                  '& .MuiSelect-select': {
+                    color: 'common.white',
+                    bgcolor: 'grey.800'
+                  },
+                  '& .MuiTablePagination-displayedRows': {
+                    color: 'common.white'
+                  },
+                  '& .MuiTablePagination-actions': {
+                    '& button': {
+                      color: 'common.white'
+                    }
+                  }
                 }}
               />
             </Box>

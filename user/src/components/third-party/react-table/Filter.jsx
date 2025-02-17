@@ -28,6 +28,13 @@ function NumberInput({ columnFilterValue, getFacetedMinMaxValues, setFilterValue
         inputProps={{ min: min, max: max }}
         size="small"
         startAdornment={false}
+        sx={{
+          '& .MuiOutlinedInput-root': {
+            bgcolor: 'grey.800',
+            color: 'common.white',
+          }
+        }
+      }
       />
       <>
         <Minus size="32" color="#FF8A65" variant="Outline" />
@@ -67,7 +74,7 @@ function TextInput({ columnId, columnFilterValue, header, setFilterValue }) {
 
 // ==============================|| FILTER - INPUT ||============================== //
 
-export default function Filter({ column, table }) {
+export default function Filter({ column, table}) {
   const firstValue = table.getPreFilteredRowModel().flatRows[0]?.getValue(column.id);
 
   const columnFilterValue = column.getFilterValue();

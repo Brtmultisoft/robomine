@@ -41,65 +41,93 @@ const profile = {
       title: <FormattedMessage id="Team" />,
       type: 'item',
       url: '/user/team/',
-      icon: icons.chart
+      icon: icons.widgets
     },
 
     {
-      id: 'ICO',
-      title: <FormattedMessage id="Buy ICO" />,
+      id: 'Direct Income',
+      title: <FormattedMessage id="Direct Income" />,
       type: 'item',
-      url: '/investments/invest/',
-      icon: icons.statistics
-    },
-    {
-      id: 'data',
-      title: <FormattedMessage id="ICO Reports" />,
-      type: 'item',
-      url: '/investments/invest-reports/',
+      url: '/user/direct-income/',
       icon: icons.data
     },
     {
+      id: 'Level Income',
+      title: <FormattedMessage id="Level Income" />,
+      type: 'item',
+      url: '/user/level-income',
+      icon: icons.data
+    },
+    {
+      id: 'Provision Bonus',
+      title: <FormattedMessage id="Provision Bonus" />,
+      type: 'item',
+      url: '/user/provision-bonus',
+      icon: icons.data
+    },
+    {
+      id: 'Active Package',
+      title: <FormattedMessage id="Active Package" />,
+      type: 'item',
+      url: '/user/active-package',
+      icon: icons.data
+    },
+    // {
+    //   id: 'data',
+    //   title: <FormattedMessage id="Level Income" />,
+    //   type: 'item',
+    //   url: '/investments/invest-reports/',
+    //   icon: icons.data
+    // },
+    {
       id: 'Stakeico',
-      title: <FormattedMessage id="Stake ICO" />,
+      title: <FormattedMessage id="Deposit Funds" />,
       type: 'item',
       url: '/user/add-funds',
       icon: icons.data
     },
-    {
-      id: 'Stakedicoreport',
-      title: <FormattedMessage id="Staked ICO Report" />,
-      type: 'item',
-      url: '/investments/stacked-report/',
-      icon: icons.data
-    },
-    {
-      id: 'stackedtoken',
-      title: <FormattedMessage id="Stake Token" />,
-      type: 'item',
-      url: '/user/stake-token',
-      icon: icons.data
-    },
-    {
-      id: 'Stakedtokenreport',
-      title: <FormattedMessage id="Staked Token Report" />,
-      type: 'item',
-      url: '/investments/stacked-token-report/',
-      icon: icons.data
-    },
-    {
-      id: 'ICO Transfer',
-      title: <FormattedMessage id="ICO Transfer" />,
-      type: 'item',
-      url: '/user/ico-transfer/',
-      icon: icons.data
-    },
     // {
-    //   id: 'withdrawFunds',   
-    //   title: <FormattedMessage id="Withdraw Funds" />,
+    //   id: 'Stakedicoreport',
+    //   title: <FormattedMessage id="Active Package" />,
     //   type: 'item',
-    //   url: '/user/withdraw-funds',
+    //   url: '/investments/stacked-report/',
     //   icon: icons.data
     // },
+    // {
+    //    id: 'packages',
+    //    title: <FormattedMessage id="Packages" />,
+    //    type: 'item',
+    //    url: '/packages/x3',
+    //    icon: icons.data
+    // },
+    // {
+    //   id: 'stackedtoken',
+    //   title: <FormattedMessage id="Stake Token" />,
+    //   type: 'item',
+    //   url: '/user/stake-token',
+    //   icon: icons.data
+    // },
+    // {
+    //   id: 'Stakedtokenreport',
+    //   title: <FormattedMessage id="TXN History" />,
+    //   type: 'item',
+    //   url: '/investments/stacked-token-report/',
+    //   icon: icons.data
+    // },
+    // {
+    //   id: 'ICO Transfer',
+    //   title: <FormattedMessage id="Withdraw Funds" />,
+    //   type: 'item',
+    //   url: '/user/ico-transfer/',
+    //   icon: icons.data
+    // },
+    {
+      id: 'withdrawFunds',   
+      title: <FormattedMessage id="Withdraw Funds" />,
+      type: 'item',
+      url: '/user/withdraw-funds',
+      icon: icons.data
+    }
 
     // {
     //   id: 'social-media',

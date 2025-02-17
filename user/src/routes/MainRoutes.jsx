@@ -9,10 +9,17 @@ import SimpleLayout from 'layout/Simple';
 
 import { SimpleLayoutType } from 'config';
 import { loader as productsLoader, productLoader } from 'api/products';
+import { Level } from 'iconsax-react';
+// import Packages from 'pages/user/packages';
 
 // render - dashboard
 const DashboardDefault = Loadable(lazy(() => import('pages/dashboard/default')));
 const DashboardAnalytics = Loadable(lazy(() => import('pages/dashboard/analytics')));
+const Packages = Loadable(lazy(() => import('pages/user/packages')));
+const PrimePackage = Loadable(lazy(() => import('pages/user/prime')));
+const FounderPackage = Loadable(lazy(() => import('pages/user/founder')));
+
+
 
 // render - widget
 const WidgetStatistics = Loadable(lazy(() => import('pages/widget/statistics')));
@@ -142,8 +149,11 @@ const DirectIncome = Loadable(lazy(() => import('pages/incomes/DirectIncome')));
 const ROI = Loadable(lazy(() => import('pages/incomes/ROI')));
 const TeamBonus = Loadable(lazy(() => import('pages/incomes/TeamBonus')));
 const VipBonus = Loadable(lazy(() => import('pages/incomes/VipBonus')));
-const LevelReports = Loadable(lazy(() => import('pages/incomes/LevelReports')));
+// const LevelReports = Loadable(lazy(() => import('pages/incomes/LevelReports')));
 const TokenReports = Loadable(lazy(() => import('pages/incomes/TokenReports')));
+
+const LevelIncome = Loadable(lazy(() => import('pages/incomes/LevelReports')));
+
 
 const Profile = Loadable(lazy(() => import('pages/user/profile')));
 const Team = Loadable(lazy(() => import('pages/user/team')));
@@ -179,6 +189,31 @@ const MainRoutes = {
           ]
         },
         {
+          path: 'packages/:type',
+          element: <Packages />
+        },
+        {
+          path: 'membership/prime',
+          element: <PrimePackage />
+        },
+        {
+          path: 'membership/founder',
+          element: <FounderPackage />
+        },
+        // {
+        //   path: 'membership',
+        //   children: [
+        //     {
+        //       path: 'prime',
+        //       element: <PrimePackage />
+        //     },
+        //     {
+        //       path: 'Founder',
+        //       element: <FounderPackage />
+        //     }
+        //   ]
+        // },
+        {
           path: 'user',
           children: [
             {
@@ -202,12 +237,20 @@ const MainRoutes = {
               element: <AddFunds />
             },
             {
-              path: 'stake-token',
-              element: <StakeToken />
+              path: 'direct-income',
+              element: <DirectIncome />
             },
             {
-              path: 'ico-transfer',
-              element: <IcoTransfer />
+              path: 'level-income',
+              element: <LevelIncome />
+            },
+            {
+              path: 'provision-bonus',
+              element: <VipBonus />
+            },
+            {
+              path: 'active-package',
+              element: <InvestReports />
             },
             {
               path: 'withdraw-funds',
@@ -215,54 +258,55 @@ const MainRoutes = {
             }
           ]
         },
-        {
-          path: 'investments',
-          children: [
-            {
-              path: 'invest',
-              element: <InvestPage />
-            },
-            {
-              path: 'invest-reports',
-              element: <InvestReports />
-            },
-            {
-              path: 'stacked-report',
-              element: <Stackreport />
-            },
-            {
-              path: 'stacked-token-report',
-              element: <StackTokenreport />
-            },
-          ]
-        },
+        
+        // {
+        //   path: 'investments',
+        //   children: [
+        //     {
+        //       path: 'invest',
+        //       element: <InvestPage />
+        //     },
+        //     {
+        //       path: 'invest-reports',
+        //       element: <InvestReports />
+        //     },
+        //     {
+        //       path: 'stacked-report',
+        //       element: <Stackreport />
+        //     },
+        //     {
+        //       path: 'stacked-token-report',
+        //       element: <StackTokenreport />
+        //     },
+        //   ]
+        // },
         {
           path: 'incomes',
           children: [
-            {
-              path: 'token-reports',
-              element: <TokenReports />
-            },
-            {
-              path: 'level-reports',
-              element: <LevelReports />
-            },
-            {
-              path: 'roi',
-              element: <ROI />
-            },
-            {
-              path: 'direct',
-              element: <DirectIncome />
-            },
-            {
-              path: 'vip',
-              element: <VipBonus />
-            },
-            {
-              path: 'team',
-              element: <TeamBonus />
-            }
+            // {
+            //   path: 'deposit',
+            //   element: <AddFunds />
+            // },
+            // {
+            //   path: 'withdraw',
+            //   element: <WithdrawFunds />
+            // },
+            // {
+            //   path: 'roi',
+            //   element: <ROI />
+            // },
+            // {
+            //   path: 'direct',
+            //   element: <DirectIncome />
+            // },
+            // {
+            //   path: 'vip',
+            //   element: <VipBonus />
+            // },
+            // {
+            //   path: 'team',
+            //   element: <TeamBonus />
+            // }
           ]
         },
         {

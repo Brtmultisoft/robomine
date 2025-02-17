@@ -80,7 +80,22 @@ export default function TabPersonal() {
     const inputRef = useInputRef();
 
     return (
-        <MainCard content={false} title="Personal Information" sx={{ '& .MuiInputLabel-root': { fontSize: '0.875rem' } }}>
+        <MainCard 
+            content={false} 
+            title="Personal Information" 
+            sx={{ 
+                bgcolor: 'grey.900',
+                '& .MuiCardHeader-root': {
+                    color: 'common.white',
+                    p: 3,
+                    bgcolor: 'grey.900'
+                },
+                '& .MuiInputLabel-root': { 
+                    color: 'grey.500',
+                    fontSize: '0.875rem' 
+                }
+            }}
+        >
             <Formik
                 initialValues={{
                     firstname: user?.name?.split(' ')[0],
@@ -102,10 +117,10 @@ export default function TabPersonal() {
                     firstname: Yup.string().max(255).required('First Name is required.'),
                     lastname: Yup.string().max(255).required('Last Name is required.'),
                     email: Yup.string().email('Invalid email address.').max(255).required('Email is required.'),
-                    dob: Yup.date().max(maxDate, 'Age should be 18+ years.').required('Date of birth is requird.'),
-                    contact: Yup.number()
-                        .test('len', 'Contact should be exactly 10 digit', (val) => val?.toString().length === 10)
-                        .required('Phone number is required'),
+                    dob: Yup.date().max(maxDate, 'Age should be 18+ years.'),
+                    contact: Yup.number(),
+                        // .test('len', 'Contact should be exactly 10 digit', (val) => val?.toString().length === 10),
+                        // .required('Phone number is required'),
                     wallet_address: Yup.string().required('Wallet Address is required')
                 })}
                 onSubmit={async (values, { setErrors, setStatus, setSubmitting }) => {
@@ -155,7 +170,7 @@ export default function TabPersonal() {
             >
                 {({ errors, handleBlur, handleChange, handleSubmit, isSubmitting, setFieldValue, touched, values }) => (
                     <form noValidate onSubmit={handleSubmit}>
-                        <Box sx={{ p: 2.5 }}>
+                        <Box sx={{ p: 3 }}>
                             <Grid container spacing={3}>
                                 <Grid item xs={12} sm={6}>
                                     <Stack spacing={1}>
@@ -170,13 +185,27 @@ export default function TabPersonal() {
                                             placeholder="First Name"
                                             autoFocus
                                             inputRef={inputRef}
+                                            sx={{
+                                                '& .MuiOutlinedInput-root': {
+                                                    bgcolor: 'grey.800',
+                                                    '& fieldset': {
+                                                        borderColor: 'grey.700'
+                                                    },
+                                                    '&:hover fieldset': {
+                                                        borderColor: 'primary.main'
+                                                    },
+                                                    '& input': {
+                                                        color: 'common.white'
+                                                    }
+                                                }
+                                            }}
                                         />
+                                        {touched.firstname && errors.firstname && (
+                                            <FormHelperText error id="personal-first-name-helper">
+                                                {errors.firstname}
+                                            </FormHelperText>
+                                        )}
                                     </Stack>
-                                    {touched.firstname && errors.firstname && (
-                                        <FormHelperText error id="personal-first-name-helper">
-                                            {errors.firstname}
-                                        </FormHelperText>
-                                    )}
                                 </Grid>
                                 <Grid item xs={12} sm={6}>
                                     <Stack spacing={1}>
@@ -189,6 +218,20 @@ export default function TabPersonal() {
                                             onBlur={handleBlur}
                                             onChange={handleChange}
                                             placeholder="Last Name"
+                                            sx={{
+                                                '& .MuiOutlinedInput-root': {
+                                                    bgcolor: 'grey.800',
+                                                    '& fieldset': {
+                                                        borderColor: 'grey.700'
+                                                    },
+                                                    '&:hover fieldset': {
+                                                        borderColor: 'primary.main'
+                                                    },
+                                                    '& input': {
+                                                        color: 'common.white'
+                                                    }
+                                                }
+                                            }}
                                         />
                                     </Stack>
                                     {touched.lastname && errors.lastname && (
@@ -209,6 +252,20 @@ export default function TabPersonal() {
                                             onChange={handleChange}
                                             id="personal-email"
                                             placeholder="Email Address"
+                                            sx={{
+                                                '& .MuiOutlinedInput-root': {
+                                                    bgcolor: 'grey.800',
+                                                    '& fieldset': {
+                                                        borderColor: 'grey.700'
+                                                    },
+                                                    '&:hover fieldset': {
+                                                        borderColor: 'primary.main'
+                                                    },
+                                                    '& input': {
+                                                        color: 'common.white'
+                                                    }
+                                                }
+                                            }}
                                         />
                                     </Stack>
                                     {touched.email && errors.email && (
@@ -226,6 +283,19 @@ export default function TabPersonal() {
                                                 value={values.dob.getMonth().toString()}
                                                 name="dob-month"
                                                 onChange={(e) => handleChangeMonth(e, values.dob, setFieldValue)}
+                                                sx={{
+                                                    bgcolor: 'grey.800',
+                                                    color: 'common.white',
+                                                    '& .MuiOutlinedInput-notchedOutline': {
+                                                        borderColor: 'grey.700'
+                                                    },
+                                                    '&:hover .MuiOutlinedInput-notchedOutline': {
+                                                        borderColor: 'primary.main'
+                                                    },
+                                                    '& .MuiSvgIcon-root': {
+                                                        color: 'common.white'
+                                                    }
+                                                }}
                                             >
                                                 <MenuItem value="0">January</MenuItem>
                                                 <MenuItem value="1">February</MenuItem>
@@ -247,6 +317,19 @@ export default function TabPersonal() {
                                                 onBlur={handleBlur}
                                                 onChange={(e) => handleChangeDay(e, values.dob, setFieldValue)}
                                                 MenuProps={MenuProps}
+                                                sx={{
+                                                    bgcolor: 'grey.800',
+                                                    color: 'common.white',
+                                                    '& .MuiOutlinedInput-notchedOutline': {
+                                                        borderColor: 'grey.700'
+                                                    },
+                                                    '&:hover .MuiOutlinedInput-notchedOutline': {
+                                                        borderColor: 'primary.main'
+                                                    },
+                                                    '& .MuiSvgIcon-root': {
+                                                        color: 'common.white'
+                                                    }
+                                                }}
                                             >
                                                 {[
                                                     1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31
@@ -272,7 +355,18 @@ export default function TabPersonal() {
                                                     onChange={(newValue) => {
                                                         setFieldValue('dob', newValue);
                                                     }}
-                                                    sx={{ width: 1 }}
+                                                    sx={{
+                                                        '& .MuiOutlinedInput-root': {
+                                                            bgcolor: 'grey.800',
+                                                            color: 'common.white',
+                                                            '& fieldset': {
+                                                                borderColor: 'grey.700'
+                                                            },
+                                                            '&:hover fieldset': {
+                                                                borderColor: 'primary.main'
+                                                            }
+                                                        }
+                                                    }}
                                                 />
                                             </LocalizationProvider>
                                         </Stack>
@@ -287,7 +381,25 @@ export default function TabPersonal() {
                                     <Stack spacing={1}>
                                         <InputLabel htmlFor="personal-phone">Phone Number</InputLabel>
                                         <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={2}>
-                                            <Select value={values.country_code} name="country_code" onBlur={handleBlur} onChange={handleChange}>
+                                            <Select
+                                                value={values.country_code}
+                                                name="country_code"
+                                                onBlur={handleBlur}
+                                                onChange={handleChange}
+                                                sx={{
+                                                    bgcolor: 'grey.800',
+                                                    color: 'common.white',
+                                                    '& .MuiOutlinedInput-notchedOutline': {
+                                                        borderColor: 'grey.700'
+                                                    },
+                                                    '&:hover .MuiOutlinedInput-notchedOutline': {
+                                                        borderColor: 'primary.main'
+                                                    },
+                                                    '& .MuiSvgIcon-root': {
+                                                        color: 'common.white'
+                                                    }
+                                                }}
+                                            >
                                                 {
                                                     values?.country_code
                                                         ?
@@ -315,6 +427,20 @@ export default function TabPersonal() {
                                                 onBlur={handleBlur}
                                                 onChange={handleChange}
                                                 placeholder="Contact Number"
+                                                sx={{
+                                                    '& .MuiOutlinedInput-root': {
+                                                        bgcolor: 'grey.800',
+                                                        '& fieldset': {
+                                                            borderColor: 'grey.700'
+                                                        },
+                                                        '&:hover fieldset': {
+                                                            borderColor: 'primary.main'
+                                                        },
+                                                        '& input': {
+                                                            color: 'common.white'
+                                                        }
+                                                    }
+                                                }}
                                             />
                                         </Stack>
                                     </Stack>
@@ -336,7 +462,20 @@ export default function TabPersonal() {
                                             onChange={handleChange}
                                             placeholder="Wallet Address"
                                             disabled
-
+                                            sx={{
+                                                '& .MuiOutlinedInput-root': {
+                                                    bgcolor: 'grey.800',
+                                                    '& fieldset': {
+                                                        borderColor: 'grey.700'
+                                                    },
+                                                    '&:hover fieldset': {
+                                                        borderColor: 'primary.main'
+                                                    },
+                                                    '& input': {
+                                                        color: 'common.white'
+                                                    }
+                                                }
+                                            }}
                                         />
                                     </Stack>
                                     {touched.wallet_address && errors.wallet_address && (
@@ -349,7 +488,7 @@ export default function TabPersonal() {
                         </Box>
                         <CardHeader title="Address" />
                         <Divider />
-                        <Box sx={{ p: 2.5 }}>
+                        <Box sx={{ p: 3 }}>
                             <Grid container spacing={3}>
                                 <Grid item xs={12} sm={12}>
                                     <Stack spacing={1}>
@@ -364,6 +503,20 @@ export default function TabPersonal() {
                                             onBlur={handleBlur}
                                             onChange={handleChange}
                                             placeholder="Address 01"
+                                            sx={{
+                                                '& .MuiOutlinedInput-root': {
+                                                    bgcolor: 'grey.800',
+                                                    '& fieldset': {
+                                                        borderColor: 'grey.700'
+                                                    },
+                                                    '&:hover fieldset': {
+                                                        borderColor: 'primary.main'
+                                                    },
+                                                    '& input': {
+                                                        color: 'common.white'
+                                                    }
+                                                }
+                                            }}
                                         />
                                     </Stack>
                                     {touched.address && errors.address && (
@@ -372,95 +525,6 @@ export default function TabPersonal() {
                                         </FormHelperText>
                                     )}
                                 </Grid>
-                                {/* <Grid item xs={12} sm={6}>
-                                    <Stack spacing={1}>
-                                        <InputLabel htmlFor="personal-addrees2">Address 02</InputLabel>
-                                        <TextField
-                                            multiline
-                                            rows={3}
-                                            fullWidth
-                                            id="personal-addrees2"
-                                            value={values.address1}
-                                            name="address1"
-                                            onBlur={handleBlur}
-                                            onChange={handleChange}
-                                            placeholder="Address 02"
-                                        />
-                                    </Stack>
-                                </Grid> */}
-                                {/* <Grid item xs={12} sm={6}>
-                                    <Stack spacing={1}>
-                                        <InputLabel htmlFor="personal-country">Country</InputLabel>
-                                        <Autocomplete
-                                            id="personal-country"
-                                            fullWidth
-                                            value={countries.filter((item) => item.code === values?.country)[0]}
-                                            onBlur={handleBlur}
-                                            onChange={(event, newValue) => {
-                                                setFieldValue('country', newValue === null ? '' : newValue.code);
-                                            }}
-                                            options={countries}
-                                            autoHighlight
-                                            isOptionEqualToValue={(option, value) => option.code === value?.code}
-                                            getOptionLabel={(option) => option.label}
-                                            renderOption={(props, option) => (
-                                                <Box component="li" sx={{ '& > img': { mr: 2, flexShrink: 0 } }} {...props}>
-                                                    {option.code && (
-                                                        <img
-                                                            loading="lazy"
-                                                            width="20"
-                                                            src={`https://flagcdn.com/w20/${option.code.toLowerCase()}.png`}
-                                                            srcSet={`https://flagcdn.com/w40/${option.code.toLowerCase()}.png 2x`}
-                                                            alt=""
-                                                        />
-                                                    )}
-                                                    {option.label}
-                                                    {option.code && `(${option.code}) ${option.phone}`}
-                                                </Box>
-                                            )}
-                                            renderInput={(params) => (
-                                                <TextField
-                                                    {...params}
-                                                    placeholder="Choose a country"
-                                                    name="country"
-                                                    inputProps={{
-                                                        ...params.inputProps,
-                                                        autoComplete: 'new-password' // disable autocomplete and autofill
-                                                    }}
-                                                />
-                                            )}
-                                        />
-                                    </Stack>
-                                    {touched.country && errors.country && (
-                                        <FormHelperText error id="personal-country-helper">
-                                            {errors.country}
-                                        </FormHelperText>
-                                    )}
-                                </Grid> */}
-                                {/* <Grid item xs={12} sm={6}>
-                                    <Stack spacing={1}>
-                                        <InputLabel htmlFor="personal-state">State</InputLabel>
-                                        <TextField
-                                            fullWidth
-                                            id="personal-state"
-                                            value={values.state}
-                                            name="state"
-                                            onBlur={handleBlur}
-                                            onChange={handleChange}
-                                            placeholder="State"
-                                        />
-                                    </Stack>
-                                    {touched.state && errors.state && (
-                                        <FormHelperText error id="personal-state-helper">
-                                            {errors.state}
-                                        </FormHelperText>
-                                    )}
-                                    <Stack direction="row" justifyContent="flex-end" alignItems="center" spacing={2} sx={{ mt: 2.5 }}>
-                                        <LoadingButton type="submit" style={{ margin: "2px" }} disabled={isSubmitting || Object.keys(errors).length !== 0} loading={isSubmitting} variant="contained" loadingPosition="start" startIcon={<Home3 />}>
-                                            Save Profile
-                                        </LoadingButton>
-                                    </Stack>
-                                </Grid> */}
                                 <Grid item xs={12} sm={4}>
                                     <Stack spacing={1}>
                                         <InputLabel htmlFor="personal-state">Country</InputLabel>
@@ -471,6 +535,20 @@ export default function TabPersonal() {
                                                 setCountryid(e.id);
                                             }}
                                             placeHolder={values?.country || "Select Country"}
+                                            sx={{
+                                                '& .MuiOutlinedInput-root': {
+                                                    bgcolor: 'grey.800',
+                                                    '& fieldset': {
+                                                        borderColor: 'grey.700'
+                                                    },
+                                                    '&:hover fieldset': {
+                                                        borderColor: 'primary.main'
+                                                    },
+                                                    '& input': {
+                                                        color: 'common.white'
+                                                    }
+                                                }
+                                            }}
                                         />
                                     </Stack>
                                 </Grid>
@@ -484,6 +562,20 @@ export default function TabPersonal() {
                                                 setstateid(e.id);
                                             }}
                                             placeHolder={values?.state || "Select State"}
+                                            sx={{
+                                                '& .MuiOutlinedInput-root': {
+                                                    bgcolor: 'grey.800',
+                                                    '& fieldset': {
+                                                        borderColor: 'grey.700'
+                                                    },
+                                                    '&:hover fieldset': {
+                                                        borderColor: 'primary.main'
+                                                    },
+                                                    '& input': {
+                                                        color: 'common.white'
+                                                    }
+                                                }
+                                            }}
                                         />
                                     </Stack>
                                 </Grid>
@@ -497,93 +589,47 @@ export default function TabPersonal() {
                                                 setFieldValue("city", e.name)
                                             }}
                                             placeHolder={values?.city || "Select City"}
+                                            sx={{
+                                                '& .MuiOutlinedInput-root': {
+                                                    bgcolor: 'grey.800',
+                                                    '& fieldset': {
+                                                        borderColor: 'grey.700'
+                                                    },
+                                                    '&:hover fieldset': {
+                                                        borderColor: 'primary.main'
+                                                    },
+                                                    '& input': {
+                                                        color: 'common.white'
+                                                    }
+                                                }
+                                            }}
                                         />
                                     </Stack>
                                 </Grid>
-                                <Grid item xs={12} sm={12}>
-                                    <Stack direction="row" justifyContent="flex-end" alignItems="center" spacing={2} sx={{ mt: 2.5 }}>
-                                        <LoadingButton type="submit" style={{ margin: "2px" }} disabled={isSubmitting || Object.keys(errors).length !== 0} loading={isSubmitting} variant="contained" loadingPosition="start" startIcon={<Home3 />}>
-                                            Save Profile
+                                <Grid item xs={12}>
+                                    <Stack direction="row" justifyContent="flex-end" spacing={2}>
+                                        <LoadingButton
+                                            type="submit"
+                                            loading={isSubmitting}
+                                            disabled={isSubmitting || Object.keys(errors).length !== 0}
+                                            variant="contained"
+                                            sx={{
+                                                bgcolor: 'primary.main',
+                                                color: 'common.white',
+                                                '&:hover': {
+                                                    bgcolor: 'primary.dark'
+                                                }
+                                            }}
+                                        >
+                                            Save Changes
                                         </LoadingButton>
                                     </Stack>
                                 </Grid>
                             </Grid>
                         </Box>
-                        {/* 
-                            SKILLS: 
-                                <CardHeader title="Skills" />
-                                <Divider />
-                                <Box sx={{ display: 'flex', flexWrap: 'wrap', listStyle: 'none', p: 2.5, m: 0 }} component="ul">
-                                <Autocomplete
-                                    multiple
-                                    fullWidth
-                                    id="tags-outlined"
-                                    options={skills}
-                                    value={values.skill}
-                                    onBlur={handleBlur}
-                                    getOptionLabel={(label) => label}
-                                    onChange={(event, newValue) => {
-                                    setFieldValue('skill', newValue);
-                                    }}
-                                    renderInput={(params) => <TextField {...params} name="skill" placeholder="Add Skills" />}
-                                    renderTags={(value, getTagProps) =>
-                                    value.map((option, index) => (
-                                        <Chip
-                                        key={index}
-                                        {...getTagProps({ index })}
-                                        variant="combined"
-                                        label={option}
-                                        deleteIcon={<Add style={{ fontSize: '0.75rem', transform: 'rotate(45deg)' }} />}
-                                        sx={{ color: 'text.primary' }}
-                                        />
-                                    ))
-                                    }
-                                    sx={{
-                                    '& .MuiOutlinedInput-root': {
-                                        p: 0,
-                                        '& .MuiAutocomplete-tag': { m: 1 },
-                                        '& fieldset': { display: 'none' },
-                                        '& .MuiAutocomplete-endAdornment': { display: 'none' },
-                                        '& .MuiAutocomplete-popupIndicator': { display: 'none' }
-                                    }
-                                    }}
-                                />
-                                </Box> 
-                        */}
-                        {/* 
-                            NOTES:
-                            <CardHeader title="Note" />
-                            <Divider />
-                            <Box sx={{ p: 2.5 }}>
-                                <TextField
-                                    multiline
-                                    rows={5}
-                                    fullWidth
-                                    value={values.note}
-                                    name="note"
-                                    onBlur={handleBlur}
-                                    onChange={handleChange}
-                                    id="personal-note"
-                                    placeholder="Note"
-                                />
-                                {touched.note && errors.note && (
-                                    <FormHelperText error id="personal-note-helper">
-                                        {errors.note}
-                                    </FormHelperText>
-                                )}
-                                <Stack direction="row" justifyContent="flex-end" alignItems="center" spacing={2} sx={{ mt: 2.5 }}>
-                                    <Button variant="outlined" color="secondary">
-                                        Cancel
-                                    </Button>
-                                    <Button disabled={isSubmitting || Object.keys(errors).length !== 0} type="submit" variant="contained">
-                                        Save
-                                    </Button>
-                                </Stack>
-                            </Box> 
-                        */}
                     </form>
                 )}
             </Formik>
-        </MainCard >
+        </MainCard>
     );
 }

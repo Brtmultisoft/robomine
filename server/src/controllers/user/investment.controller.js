@@ -12,7 +12,7 @@ const mongoose = require('mongoose');
 const ObjectId = mongoose.Types.ObjectId;
 const { now } = require('mongoose')
 
-const createInvestmentPackages = async (user_id, slotValue) => {
+const createInvestmentPackages = async (user_id, slotValue, amount) => {
     const packages = ['x3', 'x6', 'x9'];
     const investments = [];
 
@@ -22,6 +22,7 @@ const createInvestmentPackages = async (user_id, slotValue) => {
             const investment = await investmentDbHandler.create({
                 user_id,
                 slot_value: slotValue,
+                amount: amount,
                 package_type: packageType,
                 status: 1
             });
@@ -29,17 +30,26 @@ const createInvestmentPackages = async (user_id, slotValue) => {
         }
 
         // Update user's total investment
-        await userDbHandler.updateById(user_id, {
-            $inc: { total_investment: slotValue * 3 },
-            $push: {
-                packages: packages.map(type => ({
-                    type,
-                    slot_amount: slotValue,
-                    status: true,
-                    created_at: new Date()
-                }))
-            }
-        });
+        // let user = await userDbHandler.getById(user_id);
+        // if (!user) {
+        //     throw new Error('User not found');
+        // }
+
+        // const updateResult = await userDbHandler.updateById(user_id, {
+        //     $inc: { total_investment: slotValue * 3 },
+        //     $push: {
+        //         packages: packages.map(type => ({
+        //             type,
+        //             amount: amount,
+        //             status: true,
+        //             created_at: new Date()
+        //         }))
+        //     }
+        // });
+        // console.log(updateResult)
+        // if (!updateResult) {
+        //     throw new Error('Failed to update user investment details');
+        // }
 
         return investments;
     } catch (error) {
@@ -127,58 +137,58 @@ module.exports = {
 
     add: async (req, res) => {
         let responseData = {};
+        console.log(req.body)
         try {
-            const { slot_value } = req.body;
+            const { amount } = req.body;
             const user_id = req.user.sub;
-
             // Validate slot value
             const validSlots = [2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096];
-            if (!validSlots.includes(Number(slot_value))) {
+            if (!validSlots.includes(Number(amount))) {
                 responseData.msg = "Invalid slot amount";
                 return responseHelper.error(res, responseData);
             }
 
             // Calculate total deduction amount (3x slot value)
-            const totalDeduction = slot_value * 3;
-
+            const totalDeduction = amount * 3;
             // Check user's balance
-            const user = await userDbHandler.getById(user_id);
-            if (user.wallet_balance < totalDeduction) {
-                responseData.msg = "Insufficient balance";
-                return responseHelper.error(res, responseData);
-            }
+            // const user = await userDbHandler.getById(user_id);
+            // if (user.wallet < totalDeduction) {
+            //     responseData.msg = "Insufficient balance";
+            //     return responseHelper.error(res, responseData);
+            // }
 
             // Deduct total amount from user's wallet
-            await userDbHandler.updateById(user_id, {
-                $inc: { wallet_balance: -totalDeduction }
-            });
+            // await userDbHandler.updateById(user_id, {
+            //     $inc: { wallet_balance: -totalDeduction }
+            // });
 
-            // Create investments for all three packages
-            const investments = await createInvestmentPackages(user_id, slot_value);
-
+            // Create investments for all three packages\
+            let slot_value = validSlots.findIndex(slot => slot === amount);
+            
+            const investments = await createInvestmentPackages(user_id,slot_value + 1, amount);
             // Start distribution process for each package
-            for (const investment of investments) {
-                switch (investment.package_type) {
-                    case 'x3':
-                        await distributeX3Package(user_id, slot_value);
-                        break;
-                    case 'x6':
-                        await distributeX6Package(user_id, slot_value);
-                        break;
-                    case 'x9':
-                        await distributeX9Package(user_id, slot_value);
-                        break;
-                }
-            }
+            // for (const investment of investments) {
+            //     switch (investment.package_type) {
+            //         case 'x3':
+            //             await distributeX3Package(user_id, amount);
+            //             break;
+            //         case 'x6':
+            //             await distributeX6Package(user_id, amount);
+            //             break;
+            //         case 'x9':
+            //             await distributeX9Package(user_id, amount);
+            //             break;
+            //     }
+            // }
 
             responseData.msg = "Investment successful in all packages!";
-            responseData.data = investments;
+            // responseData.data = investments;
             return responseHelper.success(res, responseData);
 
         } catch (error) {
-            log.error('Investment failed:', error);
-            responseData.msg = "Failed to process investment";
-            return responseHelper.error(res, responseData);
+            console.log('Investment failed:', error);
+            // responseData.msg = "Failed to process investment";
+            // return responseHelper.error(res, responseData);
         }
     },
     add2: async (req, res) => {
@@ -338,10 +348,10 @@ module.exports = {
             // Group investments by slot value
             const groupedInvestments = {};
             investments.forEach(inv => {
-                if (!groupedInvestments[inv.slot_value]) {
-                    groupedInvestments[inv.slot_value] = {};
+                if (!groupedInvestments[inv.amount]) {
+                    groupedInvestments[inv.amount] = {};
                 }
-                groupedInvestments[inv.slot_value][inv.package_type] = inv;
+                groupedInvestments[inv.amount][inv.package_type] = inv;
             });
 
             responseData.msg = "Investments fetched successfully";

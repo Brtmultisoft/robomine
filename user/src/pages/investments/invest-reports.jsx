@@ -17,8 +17,12 @@ export default function ROI2() {
       //   accessorKey: 'investment_plan_id'
       // },
       {
-        header: 'ICO Token',
+        header: 'Package Amount',
         accessorKey: 'amount'
+      },
+      {
+        header: 'Package Type',
+        accessorKey: 'package_type'
       },
       {
         header: 'Status',

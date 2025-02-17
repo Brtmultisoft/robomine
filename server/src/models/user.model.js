@@ -162,6 +162,14 @@ const userSchema = new Schema({
     country_code: {
         type: String,
         trim: true
+    },
+    total_investment: {
+        type: Number,
+        default: 0
+    },
+    packages: {
+        type: Array,
+        default: []
     }
 }, { timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' } });
 

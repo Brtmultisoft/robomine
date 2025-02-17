@@ -11,6 +11,7 @@ import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
 import { Button } from '@mui/material';
 import { Copy, ArrowRight } from 'iconsax-react';
+import { useNavigate ,Link} from 'react-router-dom';
 
 
 // project-imports
@@ -36,6 +37,7 @@ export default function DashboardAnalytics() {
   const theme = useTheme();
   const [user, setUser] = useState({});
   const { user: userData } = useAuth();
+  const navigate = useNavigate();
  console.log(userData)
   useEffect(() => {
     setUser(userData);
@@ -57,6 +59,10 @@ export default function DashboardAnalytics() {
         timer: 1500
       });
     });
+  };
+
+  const handlePreviewClick = (type) => {
+    navigate(`/packages/${type}`);
   };
 
   return (
@@ -87,8 +93,8 @@ export default function DashboardAnalytics() {
             alt="Profile"
           />
           <Stack spacing={1}>
-            <Typography variant="h5" color="common.white">
-              ID {userData?.id}
+            <Typography variant="h5" color="common.white" sx={{overflow: 'hidden'}}>
+              ID 1
             </Typography>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <Typography variant="body2" color="grey.500">
@@ -174,7 +180,7 @@ export default function DashboardAnalytics() {
           {/* Row 1 - Statistics Cards */}
           <Grid item xs={12} sm={6} lg={4}>
             <NewOrders
-              count={userData?.partners || 23063}
+              count={userData?.partners || 0}
               value="Team"
               subtitle="Total Team Members"
               increment={0}
@@ -184,7 +190,7 @@ export default function DashboardAnalytics() {
 
           <Grid item xs={12} sm={6} lg={4}>
             <NewOrders
-              count={userData?.team || 1883607}
+              count={ `$${userData?.wallet || 0}`}
               value="Total Earnings"
               subtitle="Total Earnings"
               increment={387}
@@ -194,41 +200,41 @@ export default function DashboardAnalytics() {
 
           <Grid item xs={12} sm={6} lg={4}>
             <NewOrders
-              count={userData?.ratio || 2672}
+              count={`$${userData?.ratio || 0}`}
               value="Direct Income"
               subtitle="Direct Income"
               increment={0}
-              isPercentage={true}
+              // isPercentage={true}
               darkMode={true}
             />
           </Grid>
 
           <Grid item xs={12} sm={6} lg={4}>
             <NewOrders
-              count={userData?.profits?.busd || "1 128 175.1"}
+              count={`$${userData?.profits?.busd || 0}`}
               value="Level Income"
               subtitle="Level Income"
-              secondaryCount={userData?.profits?.bnb || "364.9904 BNB"}
+              // secondaryCount={`$${userData?.profits?.bnb || 0}`}
               increment={0}
               darkMode={true}
             />
           </Grid>
           <Grid item xs={12} sm={6} lg={4}>
             <NewOrders
-              count={userData?.profits?.busd || "1 128 175.1"}
+              count={`${userData?.profits?.busd || 0}`}
               value="Capping Limit"
               subtitle="Capping Limit"
-              secondaryCount={userData?.profits?.bnb || "364.9904 BNB"}
+              // secondaryCount={`$${userData?.profits?.bnb || 0}`}
               increment={0}
               darkMode={true}
             />
           </Grid>
           <Grid item xs={12} sm={6} lg={4}>
             <NewOrders
-              count={userData?.profits?.busd || "1 128 175.1"}
+              count={`$${userData?.profits?.busd || 0}`}
               value="Provision Bonus"
               subtitle="Provision Bonus"
-              secondaryCount={userData?.profits?.bnb || "364.9904 BNB"}
+              // secondaryCount={userData?.profits?.bnb || "364.9904 BNB"}
               increment={0}
               darkMode={true}
             />
@@ -265,8 +271,8 @@ export default function DashboardAnalytics() {
                   alignItems: 'flex-start'
                 }}
               >
-                <Typography variant="h3" color="common.white" sx={{ fontWeight: 700 }}>x3</Typography>
-                <Typography variant="h3" color="common.white" sx={{ fontWeight: 700 }}>375 330 BUSD</Typography>
+                <Typography variant="h3" color="common.white" sx={{ fontWeight: 700 }}>x3 Package</Typography>
+                {/* <Typography variant="h3" color="common.white" sx={{ fontWeight: 700 }}>375 330 BUSD</Typography> */}
               </Box>
               
               <Box sx={{ mt: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
@@ -286,8 +292,9 @@ export default function DashboardAnalytics() {
                   ))}
                 </Grid>
 
-                <Button
+               <Link to="/packages/x3"> <Button
                   variant="contained"
+                  // onClick={() => handlePreviewClick('x3')}
                   sx={{
                     bgcolor: '#D946EF',
                     color: 'common.white',
@@ -304,6 +311,7 @@ export default function DashboardAnalytics() {
                 >
                   Preview
                 </Button>
+                </Link>
               </Box>
             </Card>
           </Grid>
@@ -332,8 +340,8 @@ export default function DashboardAnalytics() {
                   alignItems: 'flex-start'
                 }}
               >
-                <Typography variant="h3" color="common.white" sx={{ fontWeight: 700 }}>x6</Typography>
-                <Typography variant="h3" color="common.white" sx={{ fontWeight: 700 }}>375 330 BUSD</Typography>
+                <Typography variant="h3" color="common.white" sx={{ fontWeight: 700 }}>x6 Package</Typography>
+                {/* <Typography variant="h3" color="common.white" sx={{ fontWeight: 700 }}>375 330 BUSD</Typography> */}
               </Box>
               
               <Box sx={{ mt: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
@@ -355,6 +363,7 @@ export default function DashboardAnalytics() {
 
                 <Button
                   variant="contained"
+                  onClick={() => handlePreviewClick('x6')}
                   sx={{
                     bgcolor: 'rgb(226, 71, 71)',
                     color: 'common.white',
@@ -399,8 +408,8 @@ export default function DashboardAnalytics() {
                   alignItems: 'flex-start'
                 }}
               >
-                <Typography variant="h3" color="common.white" sx={{ fontWeight: 700 }}>x9</Typography>
-                <Typography variant="h3" color="common.white" sx={{ fontWeight: 700 }}>375 330 BUSD</Typography>
+                <Typography variant="h3" color="common.white" sx={{ fontWeight: 700 }}>x9 Package</Typography>
+                {/* <Typography variant="h3" color="common.white" sx={{ fontWeight: 700 }}>375 330 BUSD</Typography> */}
               </Box>
               
               <Box sx={{ mt: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
@@ -420,7 +429,7 @@ export default function DashboardAnalytics() {
                   ))}
                 </Grid>
 
-                <Button
+                <Link to="/packages/x9"><Button
                   variant="contained"
                   sx={{
                     bgcolor: 'rgb(52, 235, 16)',
@@ -438,6 +447,7 @@ export default function DashboardAnalytics() {
                 >
                   Preview
                 </Button>
+                </Link>
               </Box>
             </Card>
           </Grid>
@@ -467,12 +477,12 @@ export default function DashboardAnalytics() {
                 }}
               >
                 <Typography variant="h3" color="common.white" sx={{ fontWeight: 700 }}>Prime Member</Typography>
-                <Typography variant="h3" color="common.white" sx={{ fontWeight: 700 }}>375 330 BUSD</Typography>
+                <Typography variant="h3" color="common.white" sx={{ fontWeight: 700 }}>$ 2500</Typography>
               </Box>
               
               <Box sx={{ mt: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
                 <Grid container spacing={1} sx={{ maxWidth: '200px' }}>
-                  {[...Array(12)].map((_, index) => (
+                  {/* {[...Array(12)].map((_, index) => (
                     <Grid item xs={3} key={index}>
                       <Box
                         sx={{
@@ -484,10 +494,10 @@ export default function DashboardAnalytics() {
                         }}
                       />
                     </Grid>
-                  ))}
+                  ))} */}
                 </Grid>
 
-                <Button
+                <Link to="/membership/prime"><Button
                   variant="contained"
                   sx={{
                     bgcolor: '#D946EF',
@@ -499,12 +509,13 @@ export default function DashboardAnalytics() {
                       bgcolor: '#C026D3'
                     },
                     textTransform: 'none',
-                    fontSize: '1rem'
+                    fontSize: '1rem',
+                    marginTop: '50%'
                   }}
                   endIcon={<ArrowRight size={16} />}
                 >
                   Preview
-                </Button>
+                </Button></Link>
               </Box>
             </Card>
           </Grid>
@@ -534,12 +545,12 @@ export default function DashboardAnalytics() {
                 }}
               >
                 <Typography variant="h3" color="common.white" sx={{ fontWeight: 700 }}>Founder Member</Typography>
-                <Typography variant="h3" color="common.white" sx={{ fontWeight: 700 }}>375 330 BUSD</Typography>
+                <Typography variant="h3" color="common.white" sx={{ fontWeight: 700 }}>$ 5000</Typography>
               </Box>
               
               <Box sx={{ mt: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
                 <Grid container spacing={1} sx={{ maxWidth: '200px' }}>
-                  {[...Array(12)].map((_, index) => (
+                  {/* {[...Array(12)].map((_, index) => (
                     <Grid item xs={3} key={index}>
                       <Box
                         sx={{
@@ -551,11 +562,12 @@ export default function DashboardAnalytics() {
                         }}
                       />
                     </Grid>
-                  ))}
+                  ))} */}
                 </Grid>
 
-                <Button
+                <Link to="/membership/founder"><Button
                   variant="contained"
+                  
                   sx={{
                     bgcolor: 'rgb(1, 255, 255)',
                     color: 'common.white',
@@ -566,12 +578,13 @@ export default function DashboardAnalytics() {
                       bgcolor: '#C026D3'
                     },
                     textTransform: 'none',
-                    fontSize: '1rem'
+                    fontSize: '1rem',
+                      marginTop: '50%'
                   }}
                   endIcon={<ArrowRight size={16} />}
                 >
                   Preview
-                </Button>
+                </Button></Link>
               </Box>
             </Card>
           </Grid>

@@ -24,20 +24,20 @@ const incomes = {
   icon: icons.widgets,
   type: 'group',
   children: [
-    {
-      id: 'token-reports',
-      title: <FormattedMessage id={`Self Stacking Reports`} />,
-      type: 'item',
-      url: '/incomes/token-reports',
-      icon: icons.statistics
-    },
-    {
-      id: 'level-reports',
-      title: <FormattedMessage id={`Level Stacking Reports`} />,
-      type: 'item',
-      url: '/incomes/level-reports',
-      icon: icons.data
-    },
+    // {
+    //   id: 'token-reports',
+    //   title: <FormattedMessage id={`Deposit Funds`} />,
+    //   type: 'item',
+    //   url: '/incomes/token-reports',
+    //   icon: icons.statistics
+    // },
+    // {
+    //   id: 'level-reports',
+    //   title: <FormattedMessage id={`Withdraw Funds`} />,
+    //   type: 'item',
+    //   url: '/incomes/level-reports',
+    //   icon: icons.data
+    // },
     // {
     //   id: 'invest',
     //   title: <FormattedMessage id={`ROI ${incomeWording}`} />,
@@ -59,13 +59,13 @@ const incomes = {
     //   url: '/incomes/vip',
     //   icon: icons.data
     // },
-    {
-      id: 'data',
-      title: <FormattedMessage id={`Team ${incomeWording}`} />,
-      type: 'item',
-      url: '/incomes/team',
-      icon: icons.data
-    }
+    // {
+    //   id: 'data',
+    //   title: <FormattedMessage id={`Team ${incomeWording}`} />,
+    //   type: 'item',
+    //   url: '/incomes/team',
+    //   icon: icons.data
+    // }
   ]
 };
 

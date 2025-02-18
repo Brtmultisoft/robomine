@@ -3,6 +3,7 @@ const logger = require("../services/logger");
 const log = new logger("validationController").getChildLogger();
 
 module.exports = (joiSchema, reqProperty) => {
+  
   return (req, res, next) => {
     const { error } = joiSchema.validate(req[reqProperty]);
     if (error) {

@@ -76,7 +76,8 @@ class User {
                 country: 1,
                 state: 1,
                 wallet_address:1,
-                city: 1
+                city: 1,
+                total_investment:1,
             },
         });
         options.pipeline = pipeline;

@@ -33,5 +33,5 @@ export default function ROI() {
     []
   );
 
-  return <CommonDatatable columns={columns} apiPoint={apiPoint} type={0} />
+  return <CommonDatatable columns={columns} apiPoint={apiPoint} type={5} />
 }

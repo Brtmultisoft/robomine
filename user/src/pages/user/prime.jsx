@@ -1,77 +1,156 @@
 import React from 'react';
-import { Box, Typography, Grid, Card, CardContent } from '@mui/material';
+import { Box, Typography, Grid, Card, CardContent, useTheme, useMediaQuery } from '@mui/material';
 import MainCard from 'components/MainCard';
 import { Button } from '@mui/material';
 import { Copy, ArrowRight } from 'iconsax-react';
+import axios from 'utils/axios';
+import { useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2';
 
 const PrimePackage = () => {
+  const theme = useTheme();
+  const navigate = useNavigate();
+  
+  // Breakpoint hooks for responsive design
+  const isXs = useMediaQuery(theme.breakpoints.down('sm'));
+  const isSm = useMediaQuery(theme.breakpoints.between('sm', 'md'));
+  const isMd = useMediaQuery(theme.breakpoints.between('md', 'lg'));
+
+  const handlePrimeMembership = async () => {
+    try {
+      const response = await axios.post('/add-membership', {
+        membershipType: 'prime'
+      });
+
+      if (response.data.status) {
+        Swal.fire({
+          icon: 'success',
+          title: 'Success!',
+          text: response.data.msg,
+          showConfirmButton: false,
+          timer: 1500
+        });
+      }
+    } catch (error) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: error.response?.data?.msg || 'Something went wrong!'
+      });
+    }
+  };
+
   return (
     <MainCard title="Prime Membership">
-      <Grid item xs={12} md={6}>
-        <Card
-          sx={{
-            bgcolor: 'grey.900',
-            background: 'linear-gradient(135deg,rgb(190, 99, 99) 0%,rgb(203, 206, 190) 100%)',
-            p: 2.5,
-            borderRadius: 3,
-            position: 'relative',
-            overflow: 'hidden',
-            height: '220px', // Fixed height for rectangle shape
-            boxShadow: '0 4px 20px rgba(0,0,0,0.4)',
-            '&:hover': {
-              boxShadow: '0 4px 25px rgba(0,0,0,0.6)',
-            }
-          }}
-        >
-          <Box
-            sx={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'flex-start'
-            }}
-          >
-            <Typography variant="h3" color="common.white" sx={{ fontWeight: 700 }}>Prime Membership</Typography>
-            <Typography variant="h3" color="common.white" sx={{ fontWeight: 700 }}>$ 2500</Typography>
-          </Box>
-
-          <Box sx={{ mt: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
-            <ul
-              style={{
-                listStyleType: 'none',
-                padding: 0,
-                margin: 0,
-                color: 'white',
-                fontSize: '1.25rem',
-                lineHeight: '1.6',
-              }}
-            >
-              <li>(i) Prime members earn 5% of CTO</li>
-              <li>(ii) Non-working members earn max X2</li>
-              <li>(iii) Working members earn max x3 and many more.....</li>
-            </ul>
-
-            <Button
-              variant="contained"
-              onClick={() => handlePreviewClick('x6')}
+      <Box sx={{ width: '110%', p: { xs: 1, sm: 2, md: 3} }}>
+        <Grid container justifyContent="start">
+          <Grid item xs={12} sm={10} md={8} lg={6}>
+            <Card
               sx={{
-                bgcolor: 'rgb(226, 71, 71)',
-                color: 'common.white',
-                borderRadius: '20px',
-                px: 3,
-                py: 1,
+                bgcolor: 'grey.900',
+                background: 'linear-gradient(135deg, rgb(190, 99, 99) 0%, rgb(203, 206, 190) 100%)',
+                borderRadius: { xs: 2, sm: 3 },
+                position: 'relative',
+                overflow: 'hidden',
+                height: 'auto',
+                minHeight: { xs: '200px', sm: '220px' },
+                boxShadow: '0 4px 20px rgba(0,0,0,0.4)',
                 '&:hover': {
-                  bgcolor: '#C026D3'
-                },
-                textTransform: 'none',
-                fontSize: '1rem'
+                  boxShadow: '0 4px 25px rgba(0,0,0,0.6)',
+                  transform: 'translateY(-5px)',
+                  transition: 'all 0.3s ease'
+                }
               }}
-              endIcon={<ArrowRight size={16} />}
             >
-              Buy Now
-            </Button>
-          </Box>
-        </Card>
-      </Grid>
+              <CardContent sx={{ p: { xs: 2, sm: 2.5, md: 3 } }}>
+                {/* Header Section */}
+                <Box
+                  sx={{
+                    display: 'flex',
+                    flexDirection: { xs: 'column', sm: 'row' },
+                    justifyContent: 'space-between',
+                    alignItems: { xs: 'center', sm: 'flex-start' },
+                    gap: { xs: 2, sm: 0 }
+                  }}
+                >
+                  <Typography 
+                    variant={isXs ? "h4" : "h3"} 
+                    color="common.white" 
+                    sx={{ 
+                      fontWeight: 700,
+                      textAlign: { xs: 'center', sm: 'left' }
+                    }}
+                  >
+                    Prime Membership
+                  </Typography>
+                  <Typography 
+                    variant={isXs ? "h4" : "h3"} 
+                    color="common.white" 
+                    sx={{ 
+                      fontWeight: 700,
+                      textAlign: { xs: 'center', sm: 'right' }
+                    }}
+                  >
+                    $ 2500
+                  </Typography>
+                </Box>
+
+                {/* Benefits Section */}
+                <Box 
+                  sx={{ 
+                    mt: { xs: 2, sm: 3 },
+                    display: 'flex',
+                    flexDirection: { xs: 'column', sm: 'row' },
+                    justifyContent: 'space-between',
+                    alignItems: { xs: 'center', sm: 'flex-end' },
+                    gap: { xs: 3, sm: 0 }
+                  }}
+                >
+                  <ul
+                    style={{
+                      listStyleType: 'none',
+                      padding: 0,
+                      margin: 0,
+                      color: 'white',
+                      fontSize: isXs ? '1rem' : '1.25rem',
+                      lineHeight: '1.6',
+                      textAlign: isXs ? 'center' : 'left'
+                    }}
+                  >
+                    <li>(i) Prime members earn 5% of CTO</li>
+                    <li>(ii) Non-working members earn max X2</li>
+                    <li>(iii) Working members earn max x3 and many more.....</li>
+                  </ul>
+
+                  <Button
+                    variant="contained"
+                    onClick={handlePrimeMembership}
+                    sx={{
+                      bgcolor: 'rgb(226, 71, 71)',
+                      color: 'common.white',
+                      borderRadius: '20px',
+                      px: { xs: 2, sm: 3 },
+                      py: { xs: 0.75, sm: 1 },
+                      '&:hover': {
+                        bgcolor: '#C026D3',
+                        transform: 'scale(1.05)',
+                        transition: 'all 0.3s ease'
+                      },
+                      textTransform: 'none',
+                      fontSize: { xs: '0.875rem', sm: '1rem' },
+                      width: { xs: '100%', sm: 'auto' },
+                      marginTop: { xs: 2, sm: 0 }
+                    }}
+                    endIcon={<ArrowRight size={16} />}
+                  >
+                    Buy Now
+                  </Button>
+                </Box>
+              </CardContent>
+            </Card>
+          </Grid>
+        </Grid>
+      </Box>
     </MainCard>
   );
 };

@@ -34,7 +34,7 @@ export default function Packages() {
       investment_plan_id: type+investment_plan_id,
       amount: price
     })
-    setRefresh(!refresh)
+    
   };
   
   useEffect(() => {
@@ -54,7 +54,7 @@ export default function Packages() {
     };
 
     fetchPurchasedPackages();
-  }, [refresh])
+  }, [])
   
   //  Check if a package is already purchased
   const isPackagePurchased = (slotValue) => {

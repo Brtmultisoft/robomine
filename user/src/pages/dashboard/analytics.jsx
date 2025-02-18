@@ -30,15 +30,17 @@ import EcommerceDataCard from 'components/cards/statistics/EcommerceDataCard';
 import { useEffect, useState } from 'react';
 import useAuth from 'hooks/useAuth';
 import { Book } from 'iconsax-react';
-
+import axios from 'utils/axios';
 // ==============================|| DASHBOARD - ANALYTICS ||============================== //
 
 export default function DashboardAnalytics() {
   const theme = useTheme();
   const [user, setUser] = useState({});
   const { user: userData } = useAuth();
+  const [directIncome, setDirectIncome] = useState(0);
   const navigate = useNavigate();
- console.log(userData)
+   
+
   useEffect(() => {
     setUser(userData);
   }, [userData]);
@@ -64,7 +66,16 @@ export default function DashboardAnalytics() {
   const handlePreviewClick = (type) => {
     navigate(`/packages/${type}`);
   };
-
+  useEffect(() => {
+    const fetchDirectIncome = async () => {
+      const response = await axios.get('/get-user-direct');
+      
+      
+     
+    };
+    fetchDirectIncome();
+  }, []);
+ 
   return (
     <>
       {/* Profile Header */}
@@ -94,7 +105,7 @@ export default function DashboardAnalytics() {
           />
           <Stack spacing={1}>
             <Typography variant="h5" color="common.white" sx={{overflow: 'hidden'}}>
-              ID 1
+              ID {userData?.id}
             </Typography>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <Typography variant="body2" color="grey.500">
@@ -190,7 +201,7 @@ export default function DashboardAnalytics() {
 
           <Grid item xs={12} sm={6} lg={4}>
             <NewOrders
-              count={ `$${userData?.wallet || 0}`}
+              count={ `$${(userData?.extra?.totalIncome).toFixed(2) || 0}`}
               value="Total Earnings"
               subtitle="Total Earnings"
               increment={387}
@@ -200,7 +211,7 @@ export default function DashboardAnalytics() {
 
           <Grid item xs={12} sm={6} lg={4}>
             <NewOrders
-              count={`$${userData?.ratio || 0}`}
+              count={`$${(userData?.extra?.directIncome).toFixed(2) || 0}`}
               value="Direct Income"
               subtitle="Direct Income"
               increment={0}
@@ -211,7 +222,7 @@ export default function DashboardAnalytics() {
 
           <Grid item xs={12} sm={6} lg={4}>
             <NewOrders
-              count={`$${userData?.profits?.busd || 0}`}
+              count={`$${(userData?.extra?.levelIncome).toFixed(2) || 0}`}
               value="Level Income"
               subtitle="Level Income"
               // secondaryCount={`$${userData?.profits?.bnb || 0}`}
@@ -231,7 +242,7 @@ export default function DashboardAnalytics() {
           </Grid>
           <Grid item xs={12} sm={6} lg={4}>
             <NewOrders
-              count={`$${userData?.profits?.busd || 0}`}
+              count={`$${(userData?.extra?.provisionIncome).toFixed(2) || 0}`}
               value="Provision Bonus"
               subtitle="Provision Bonus"
               // secondaryCount={userData?.profits?.bnb || "364.9904 BNB"}

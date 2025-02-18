@@ -10,6 +10,7 @@ import useAuth from 'hooks/useAuth';
 import useScriptRef from 'hooks/useScriptRef';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { useAccount } from 'wagmi';
+import axios from 'utils/axios';
 
 const contractABI = process.env.REACT_APP_CONTRACT_ABI;
 const contractAddress = process.env.REACT_APP_CONTRACT_ADDRESS;
@@ -23,14 +24,13 @@ export default function AuthLogin() {
 
   useEffect(() => {
     const checkRegistration = async () => {
+      // console.log("isConnected", isConnected)
+      // console.log("userAddress", userAddress)
       if (isConnected && userAddress) {
         try {
-          const provider = new ethers.providers.Web3Provider(window.ethereum);
-          await provider.send('eth_requestAccounts', []); // Ensure the wallet is connected
-          const signer = provider.getSigner();
-          const contract = new ethers.Contract(contractAddress, contractABI, signer);
-          const userDetails = await contract.getUserDetail(userAddress);
-          setIsRegistered(userDetails._isRegistered);
+          const res = await axios.post('/check-address',{userAddress})
+          console.log("Response:", res.data);
+          setIsRegistered(res.data.result.isRegistered);
         } catch (error) {
           console.error('Error fetching user details:', error);
         }
@@ -47,10 +47,10 @@ export default function AuthLogin() {
         await provider.send('eth_requestAccounts', []); // Ensure wallet connection
         const signer = provider.getSigner();
         const contract = new ethers.Contract(contractAddress, contractABI, signer);
-
-        if (isRegistered) {
-          const tx = await contract.registration(referralId);
-          await tx.wait();
+        
+        if (!isRegistered) {
+          // const tx = await contract.registration(referralId);
+          // await tx.wait();
           await register(userAddress, referralId);
           openSnackbar({
             open: true,
@@ -90,7 +90,7 @@ export default function AuthLogin() {
         <Grid item xs={12}>
           <ConnectButton />
         </Grid>
-        {isRegistered && isConnected && (
+        {!isRegistered && isConnected && (
           <Grid item xs={12}>
             <TextField
               label="Referral ID"
@@ -108,7 +108,7 @@ export default function AuthLogin() {
               onClick={handleRegistrationOrLogin}
               disabled={!isConnected}
             >
-              {!isRegistered ? 'Login' : 'Register & Login'}
+              {isRegistered ? 'Login' : 'Register & Login'}
             </Button>
           </AnimateButton>
         </Grid>

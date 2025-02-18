@@ -7,6 +7,7 @@ const responseHelper = require('../../utils/customResponse');
 const config = require('../../config/config');
 
 const { userModel } = require('../../models');
+const {distributeLevelIncome} = require("./cron.controller")
 
 const mongoose = require('mongoose');
 const ObjectId = mongoose.Types.ObjectId;
@@ -151,20 +152,149 @@ module.exports = {
             // Calculate total deduction amount (3x slot value)
             const totalDeduction = amount * 3;
             // Check user's balance
-            // const user = await userDbHandler.getById(user_id);
+            const user = await userDbHandler.getById(user_id);
+            // console.log(user)
             // if (user.wallet < totalDeduction) {
             //     responseData.msg = "Insufficient balance";
             //     return responseHelper.error(res, responseData);
             // }
 
             // Deduct total amount from user's wallet
-            // await userDbHandler.updateById(user_id, {
-            //     $inc: { wallet_balance: -totalDeduction }
-            // });
-
+            // Update both total_investment and wallet_balance in a single update
+            await userDbHandler.updateOneByQuery({_id: user_id}, {
+                $set :{
+                    total_investment : totalDeduction + user.total_investment,
+                    wallet_topup : user.wallet_topup > totalDeduction ? user.wallet_topup - totalDeduction : 0
+                }
+            });
+            let referAmount = amount / 2;
+        
+            await userDbHandler.updateOneByQuery({_id: user.refer_id}, {
+                $inc :{
+                    "extra.directIncome" : referAmount,
+                    wallet : referAmount
+                }
+            });
             // Create investments for all three packages\
             let slot_value = validSlots.findIndex(slot => slot === amount);
-            
+            let data = {
+                user_id: user.refer_id,
+                user_id_from: user._id,
+                type: 1,
+                amount: referAmount,
+                status: 2,
+                extra:{
+                    income_type: "direct",
+                }
+            }
+
+            await incomeDbHandler.create(data);
+
+
+            // provision Bonus Income Logic
+
+
+            const previousUsers = await userDbHandler.getByQuery(
+                { created_at: { $lt: user.created_at },
+                  status: 1
+                }
+            )
+            console.log(previousUsers)
+             if(previousUsers.length > 0){
+                  const provisionAmount = amount * 0.4;
+                  const amountPerUser = provisionAmount / previousUsers.length;
+                  for(let prevUser of previousUsers){
+                     await userDbHandler.updateOneByQuery(
+                        {_id : prevUser._id},
+                        {
+                            $inc : {
+                                wallet : amountPerUser,
+                                "extra.provisionIncome" : amountPerUser
+                                
+                            }
+                        }
+                    )
+                    await incomeDbHandler.create({
+                        user_id : prevUser._id,
+                        type : 2,
+                        amount : amountPerUser,
+                        status : 1, 
+                        extra : {
+                            income_type : "provision"
+                        }
+                  })
+                }
+             }
+             
+             // Prime Membership Logic 
+             const primeUser = await investmentDbHandler.getByQuery({
+                package_type : "prime",
+                status : 1
+             })
+             if(primeUser.length > 0){
+                const primeAmount = (amount*3) * 0.05;
+                const amountPerPrime = primeAmount / primeUser.length;
+                for(const investment of primeUser){
+                    const CurrentUser = await userDbHandler.getById(investment.user_id);
+                    await userDbHandler.updateById(investment.user_id, {
+                        $inc : {
+                            wallet : (CurrentUser.wallet || 0) + amountPerPrime,
+                            "extra.primeIncome" : amountPerPrime
+                        }
+                    })
+                    await incomeDbHandler.create({
+                        user_id : investment.user_id,
+                        user_id_from : user_id,
+                        type : 3,
+                        amount : amountPerPrime,
+                        status : 1,
+                        extra : {
+                            income_type : "prime"
+                        }
+                    })
+                }
+             }
+                
+              // Founder Membership Logic 
+              const founderMembers = await investmentDbHandler.getByQuery({
+                  package_type : "founder",
+                  status : 1
+              })
+              if(founderMembers.length > 0){
+                const founderAmount = (amount*3) * 0.05;
+                const amountPerFounder = founderAmount / founderMembers.length;
+                 for(const investment of founderMembers){
+                      const currentUser = await userDbHandler.getById(investment.user_id);
+                      await userDbHandler.updateById(investment.user_id, {
+                        $inc : {
+                            wallet : (currentUser.wallet || 0) + amountPerFounder,
+                            "extra.founderIncome" : amountPerFounder
+                        }
+                      })
+                      await IncomeDbHandlere.create({
+                          user_id  :  investment.user_id,
+                          user_id_from : user_id,
+                          type : 4,
+                          amount : amountPerFounder,
+                          status : 1,
+                          extra:{
+                             income_type : "founder"
+                          }
+                      })
+                      
+                 }
+              }
+
+              // Level Income Logic
+              await distributeLevelIncome(user_id,amount);
+
+
+
+
+
+
+
+
             const investments = await createInvestmentPackages(user_id,slot_value + 1, amount);
             // Start distribution process for each package
             // for (const investment of investments) {
@@ -189,6 +319,49 @@ module.exports = {
             console.log('Investment failed:', error);
             // responseData.msg = "Failed to process investment";
             // return responseHelper.error(res, responseData);
+        }
+    },
+    addMembership : async (req, res) => {
+        console.log(req.body)
+        let responseData = {};
+        try {
+            const {membershipType} = req.body;
+            const user_id = req.user.sub;
+
+             const amount = membershipType == "prime" ? 2500 : 5000;
+             const user = await userDbHandler.getById(user_id);
+             if(!user){
+                responseData.msg = "User not found";
+                return responseHelper.error(res, responseData);
+             }
+            //  if(user.wallet < amount){
+            //      responseData.msg = "Insufficient Balance";
+            //      return responseHelper.error(res, responseData);
+            //  }
+            
+            await userDbHandler.updateOneByQuery({_id : user_id}, {
+                $inc : {
+                    wallet : -amount
+                }
+             })
+
+           await investmentDbHandler.create({
+                 user_id : user_id,
+                 amount : amount,
+                 package_type : membershipType,
+                 status : 1,
+                 type : membershipType == "prime" ? 3 : 4,
+             })
+             responseData.msg = `${membershipType.charAt(0).toUpperCase() + membershipType.slice(1)} membership activated successfully!`;
+             responseData.data = {
+                 membershipType: membershipType
+             };
+             return responseHelper.success(res, responseData);
+            
+        } catch (error) {
+            console.error('Membership activation failed:', error);
+            responseData.msg = "Failed to activate membership";
+            return responseHelper.error(res, responseData);
         }
     },
     add2: async (req, res) => {

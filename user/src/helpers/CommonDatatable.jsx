@@ -93,7 +93,9 @@ export default function ReactTable({ apiPoint, type, columns, noQueryStrings, te
     let queryStrings = noQueryStrings ? "" : `?page=${page}&type=${type}`
 
     try {
+        console.log(apiPoint)
         const res = await axios.get(`/${apiPoint}${queryStrings}`);
+        console.log("data", res.data)
         if (!res.data?.status || Object.keys(res.data?.result).length === 0) return;
 
         if (noQueryStrings) {

@@ -96,7 +96,7 @@ module.exports = {
         3: 3000,  // 3rd Year
         4: 1500   // 4th Year
     },
-    levelIncomePercentages: [20, 10, 5, 2, 3, 2, 4, 4], // Level 1 to Level 8
+    levelIncomePercentages: [25, 15, 10], // Level 1 to Level 8
     adminWallets: [
         "65a1234567890abcd1234567",
         "65a234567890abcd12345678",

@@ -17,6 +17,9 @@ module.exports = {
   checkReferID: Joi.object().keys({
     refer_id: Joi.string().trim().required().label("REFER_ID").error(new Error('Invalid Refer ID!')),
   }),
+  checkAddress: Joi.object().keys({
+    userAddress: Joi.string().trim().required().label("Wallet Address").error(new Error('Invalid Wallet Address!')),
+  }),
   userLoginRequest: Joi.object().keys({
     hash: Joi.string().trim().required().label("HASH").error(new Error('Invalid Hash!')),
   }),

@@ -69,6 +69,11 @@ module.exports = () => {
      **Login and Signup Route
      */
     Router.post(
+        '/check-address',
+        validationMiddleware(userAuthValidation.checkAddress, 'body'),
+        userAuthController.checkAddress
+    );
+    Router.post(
         '/user/login',
         validationMiddleware(userAuthValidation.login, 'body'),
         userAuthController.login
@@ -176,7 +181,8 @@ module.exports = () => {
 
     Router.get("/get-all-investment-plans", userInvestmentPlanController.getAll);
     // Router.get("/get-investment-plan/:id", userInvestmentPlanController.getOne);
-
+    
+    Router.post("/add-membership", userInvestmentController.addMembership);
     Router.get("/get-all-investments", userInvestmentController.getAll);
     Router.get("/get-all-stacked", userInvestmentController.getAllStacked);
     Router.get("/get-all-stacked-token", userInvestmentController.getAllStackedToken);

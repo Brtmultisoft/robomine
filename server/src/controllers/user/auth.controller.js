@@ -229,6 +229,45 @@ module.exports = {
     //         return responseHelper.success2(res, responseData);
     //     }
     // },
+    checkAddress: async (req, res) => {
+        let reqObj = req.body;
+        log.info('Received request for checking user address:', reqObj);
+        let responseData = {};
+        try {
+            // Check both username and wallet_address fields
+            const user = await userDbHandler.getOneByQuery({
+                $or: [
+                    { username: reqObj.userAddress },
+                    { wallet_address: reqObj.userAddress }
+                ]
+            });
+            
+            console.log("Found user:", user);
+            
+            if (!user) {
+                responseData.msg = "User not found!";
+                responseData.data = {
+                    isRegistered: false
+                };
+                return responseHelper.success(res, responseData);
+            }
+            
+            responseData.msg = "User found!";
+            responseData.data = {
+                isRegistered: true,
+                userId: user._id,
+                username: user.username,
+                name: user.name,
+                email: user.email,
+                wallet_address: user.wallet_address
+            };
+            return responseHelper.success(res, responseData);
+        } catch (error) {
+            log.error('Failed to check address with error:', error);
+            responseData.msg = 'Failed to check address';
+            return responseHelper.error(res, responseData);
+        }
+    },
     login: async (req, res) => {
         let reqObj = req.body;
         log.info('Recieved request for User Login:', reqObj);

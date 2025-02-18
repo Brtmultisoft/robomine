@@ -32,7 +32,7 @@ export default function ROI() {
             // },
             {
                 header: 'Investments',
-                accessorKey: 'topup'
+                accessorKey: 'total_investment'
             },
            
             {

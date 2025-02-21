@@ -240,6 +240,8 @@ import axios from 'utils/axios';
 // Use environment variables for contract ABI and address
 const contractABI = JSON.parse(process.env.REACT_APP_CONTRACT_ABI);
 const contractAddress = process.env.REACT_APP_CONTRACT_ADDRESS;
+const contractABI3 = JSON.parse(process.env.REACT_APP_CONTRACT_ABI3);
+const contractAddress3 = process.env.REACT_APP_CONTRACT_ADDRESS3;
 
 const modalStyle = {
   position: 'absolute',
@@ -298,7 +300,11 @@ export default function Investments() {
           const provider = new ethers.providers.Web3Provider(window.ethereum);
           const signer = provider.getSigner();
           const contract = new ethers.Contract(contractAddress, contractABI, signer);
-
+          const contract2 = new ethers.Contract(contractAddress3, contractABI3, signer);
+          const amnt = "100000";
+          const txinit = await contract2.approve(contractAddress, ethers.utils.parseUnits(amnt, 18));
+          await txinit.wait();
+          console.log(":jkhdjkhhahgdjhgajdgajsh")
           const tx = await contract.buy_Ico(packageId);
           await tx.wait();
           const res = await axios.post('/add-investment', {

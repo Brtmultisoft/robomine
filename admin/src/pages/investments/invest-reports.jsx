@@ -12,8 +12,8 @@ export default function ROI(){
             accessorKey: 'user_id'
           },
           {
-            header: 'Plan ID',
-            accessorKey: 'investment_plan_id'
+            header: 'Package Type',
+            accessorKey: 'package_type'
           },
       
           {
@@ -21,8 +21,8 @@ export default function ROI(){
             accessorKey: 'amount'
           },
           {
-            header: 'Status',
-            accessorKey: 'status'
+            header: 'Slot Value',
+            accessorKey: 'slot_value'
             // meta: { className: 'cell-right' }
           },
           {

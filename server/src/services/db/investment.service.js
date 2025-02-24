@@ -44,7 +44,7 @@ class Investment {
 
 		let filter = params;
 		const options = pick(data, ['sort_by', 'limit', 'page']);
-		options.sort_fields = ['amount', 'amount_r', 'amount_coin', 'bonus', 'days', 'type', 'release_at', 'created_at'];
+		options.sort_fields = ['amount', 'amount_r', 'amount_coin', 'bonus', 'days', 'type', 'release_at', 'created_at', 'package_type', 'slot_value'];
 		options.populate = '';
 		if (!user_id) {
 			const pipeline = [];
@@ -91,7 +91,9 @@ class Investment {
 					status: 1,
 					release_at: 1,
 					extra: 1,
-					created_at: 1
+					created_at: 1,
+					package_type: 1,
+					slot_value: 1
 				},
 			});
 			options.pipeline = pipeline;

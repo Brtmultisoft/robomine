@@ -249,8 +249,8 @@ export default function DashboardDefault() {
       </Grid>
       <Grid item xs={12} sm={6} lg={3}>
         <EcommerceDataCard
-          title="Matching Bonus"
-          count={user?.matchingIncome}
+          title="Provision Bonus"
+          count={user?.extra?.provision}
           color="warning"
           iconPrimary={<Book color={theme.palette.warning.dark} />}
           percentage={

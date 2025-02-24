@@ -13,14 +13,11 @@ export default function ROI() {
         accessorKey: 'user_id'
       },
       {
-        header: 'Media Type',
-        accessorKey: 'extra.mediaType',
-        cell: (props) => {
-          return props.getValue()
-        },
+        header: 'From',
+        accessorKey: 'user_id_from'
       },
       {
-        header: 'Tokens',
+        header: 'Amount',
         accessorKey: 'amount'
       },
       {
@@ -39,6 +36,6 @@ export default function ROI() {
 
   return <>
     <ExportCSV type={"income-type-0"} />
-    <CommonDatatable columns={columns} apiPoint={apiPoint} type={1} />
+    <CommonDatatable columns={columns} apiPoint={apiPoint} type={6} />
   </>
 }

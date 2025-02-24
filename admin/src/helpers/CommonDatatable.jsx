@@ -73,6 +73,7 @@ export default function ReactTable({ apiPoint, type, columns }) {
     try {
 
       const res = await axios.get(`/${apiPoint}?page=${page}&type=${type}`);
+      console.log("data" , res.data)
       if (!res.data?.status) return;
 
       setData((old) => {

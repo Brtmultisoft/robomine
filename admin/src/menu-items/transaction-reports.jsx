@@ -50,13 +50,13 @@ const transactions = {
     //   url: '/transaction-reports/transfer-fund-reports',
     //   icon: icons.data
     // },
-    {
-      id: 'Deduct Fund',
-      title: <FormattedMessage id="Deduct Fund" />,
-      type: 'item',
-      url: '/transaction-reports/deduct-fund-reports',
-      icon: icons.data
-    },
+    // {
+    //   id: 'Deduct Fund',
+    //   title: <FormattedMessage id="Deduct Fund" />,
+    //   type: 'item',
+    //   url: '/transaction-reports/deduct-fund-reports',
+    //   icon: icons.data
+    // },
   ]
 };
 

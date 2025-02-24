@@ -24,18 +24,18 @@ const incomes = {
   icon: icons.widgets,
   type: 'group',
   children: [
-    // {
-    //   id: 'token-reports',
-    //   title: <FormattedMessage id={`Self Tasks Reports`} />,
-    //   type: 'item',
-    //   url: '/incomes/token-reports',
-    //   icon: icons.statistics
-    // },
+    {
+      id: 'token-reports',
+      title: <FormattedMessage id={`Global Pool Matrix Bonus`} />,
+      type: 'item',
+      url: '/incomes/token-reports',
+      icon: icons.statistics
+    },
 
 
     {
       id: 'invest',
-      title: <FormattedMessage id={`ROI ${incomeWording}`} />,
+      title: <FormattedMessage id={`Provision ${incomeWording}`} />,
       type: 'item',
       url: '/incomes/roi',
       icon: icons.statistics
@@ -49,7 +49,7 @@ const incomes = {
     },
     {
       id: 'level-reports',
-      title: <FormattedMessage id={`Level Reports`} />,
+      title: <FormattedMessage id={`Level Income`} />,
       type: 'item',
       url: '/incomes/level-reports',
       icon: icons.data
@@ -61,13 +61,13 @@ const incomes = {
     //   url: '/incomes/vip',
     //   icon: icons.data
     // },
-    {
-      id: 'data',
-      title: <FormattedMessage id={`Admins ${incomeWording}`} />,
-      type: 'item',
-      url: '/incomes/team',
-      icon: icons.data
-    },
+    // {
+    //   id: 'data',
+    //   title: <FormattedMessage id={`Direct Income`} />,
+    //   type: 'item',
+    //   url: '/incomes/team',
+    //   icon: icons.data
+    // },
     // {
     //   id: 'general-settings',
     //   title: <FormattedMessage id={`General Settings`} />,

@@ -243,6 +243,7 @@ const MainRoutes = {
               path: 'transfer-fund-reports',
               element: <TransferFunds_Reports />
             },
+            // },
             {
               path: 'deduct-fund-reports',
               element: <DeductFunds_Reports />

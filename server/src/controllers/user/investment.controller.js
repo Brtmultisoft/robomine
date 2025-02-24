@@ -161,6 +161,7 @@ module.exports = {
 
             // Deduct total amount from user's wallet
             // Update both total_investment and wallet_balance in a single update
+            console.log("user.total_investment",user.total_investment)
             await userDbHandler.updateOneByQuery({_id: user_id}, {
                 $set :{
                     total_investment : totalDeduction + user.total_investment,

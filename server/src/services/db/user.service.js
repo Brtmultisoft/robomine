@@ -110,7 +110,7 @@ class User {
     getByQueryToArray(query, projection = {}) {
         return this._model.find(query, projection).lean()
     }
-    updateById(id, data, option = {}) {
+updateById(id, data, option = {}) {
         option = { ...{ new: true }, ...option }
         return this._model.findByIdAndUpdate(id, { $set: data }, option);
     }

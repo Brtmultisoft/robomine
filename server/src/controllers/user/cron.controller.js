@@ -1,9 +1,8 @@
-
 'use strict';
 const logger = require('../../services/logger');
 const log = new logger('IncomeController').getChildLogger();
 const { incomeDbHandler, userDbHandler, investmentDbHandler, settingDbHandler } = require('../../services/db');
-const { getTopLevelByRefer } = require('../../services/commonFun');
+const { getTopLevelByRefer, getPlacementIdByRefer, getPlacementId } = require('../../services/commonFun');
 const mongoose = require('mongoose');
 const cron = require('node-cron');
 const config = require('../../config/config');
@@ -20,7 +19,7 @@ const distributeTokens = async () => {
         if (elapsedYears > 4) return log.info("Token distribution period ended");
 
         const dailyTokens = config.tokenDistributionByYear[elapsedYears];
-        console.log(dailyTokens);
+        // console.log(dailyTokens);
         
         // Total Staking Calculation
         const totalInvestments = await investmentModel.aggregate([
@@ -30,7 +29,7 @@ const distributeTokens = async () => {
         if (!totalInvestments.length) return log.info("No active investments found");
 
         const totalStaked = totalInvestments[0].totalStaked;
-        console.log(totalStaked);
+        // console.log(totalStaked);
         
 
         // 50% Public Staking & 50% Admin Wallets
@@ -56,14 +55,14 @@ const distributeTokens = async () => {
         const investments = await investmentModel.find({ status: 1, type:1 });
         for (const investment of investments) {
             const userShare = (investment.amount / totalStaked) * publicShare * 0.50;
-            console.log("investment amount", investment.amount);
+            // console.log("investment amount", investment.amount);
             
-            console.log(userShare);
+            // console.log(userShare);
             
             const levelIncomeShare = userShare * 0.50; // 50% for Level ROI
             const rewardAchieverShare = userShare * 0.50; // 50% for Reward & Achiever
-            console.log(levelIncomeShare);
-            console.log(rewardAchieverShare);
+            // console.log(levelIncomeShare);
+            // console.log(rewardAchieverShare);
             await userDbHandler.updateOneByQuery(
                 { _id: ObjectId(investment.user_id) },
                 { $inc: { reward: userShare, "extra.dailyIncome": userShare } }
@@ -156,5 +155,55 @@ const distributeTokensHandler = async (req, res) => {
     }
 };
 
-module.exports = { distributeTokensHandler, distributeLevelIncome };
+const distributeGlobalAutoPoolMatrixIncome = async (user_id, amount) => {
+    try {
+        // Fetch the new user
+        const newUser = await userDbHandler.getById(user_id);
+        if (!newUser) throw new Error("User not found");
+
+        // Use the placement_id stored in the newUser object
+        let currentPlacementId = newUser.placement_id;
+        if (!currentPlacementId) throw new Error("No placement available");
+
+        // Calculate matrix income (10% of the amount)
+        const matrixIncome = (amount * 10) / 100;
+
+        // Traverse the placement hierarchy until placement_id becomes null
+        while (currentPlacementId) {
+            const placementUser = await userDbHandler.getOneByQuery({ _id: ObjectId(currentPlacementId) });
+            if (!placementUser) break;
+
+            // Distribute matrix income to the placement user
+            await userDbHandler.updateOneByQuery({ _id: ObjectId(currentPlacementId) }, {
+                $inc: {
+                    wallet: matrixIncome,
+                    "extra.matrixIncome": matrixIncome
+                }
+            });
+
+            await incomeDbHandler.create({
+                user_id: ObjectId(currentPlacementId),
+                user_id_from: ObjectId(user_id),
+                amount: matrixIncome,
+                type: 6,
+                status: 1,
+                extra: {
+                    income_type: "matrix",
+                }
+            });
+
+            // Move to the next placement user
+            currentPlacementId = placementUser.placement_id;
+        }
+
+        return true;
+
+    } catch (error) {
+        log.error("Error in matrix income distribution:", error);
+        throw error;
+    }
+};
+
+
+module.exports = { distributeTokensHandler, distributeLevelIncome, distributeGlobalAutoPoolMatrixIncome };
 

@@ -201,7 +201,7 @@ export default function DashboardAnalytics() {
 
           <Grid item xs={12} sm={6} lg={4}>
             <NewOrders
-              count={ `$${(userData?.extra?.totalIncome).toFixed(2) || 0}`}
+              count={ `$${(userData?.extra?.totalIncome)?.toFixed(3) || 0}`}
               value="Total Earnings"
               subtitle="Total Earnings"
               increment={387}
@@ -211,7 +211,7 @@ export default function DashboardAnalytics() {
 
           <Grid item xs={12} sm={6} lg={4}>
             <NewOrders
-              count={`$${(userData?.extra?.directIncome).toFixed(2) || 0}`}
+              count={`$${(userData?.extra?.directIncome)?.toFixed(3) || 0}`}
               value="Direct Income"
               subtitle="Direct Income"
               increment={0}
@@ -222,7 +222,7 @@ export default function DashboardAnalytics() {
 
           <Grid item xs={12} sm={6} lg={4}>
             <NewOrders
-              count={`$${(userData?.extra?.levelIncome).toFixed(2) || 0}`}
+              count={`$${(userData?.extra?.levelIncome)?.toFixed(3) || 0}`}
               value="Level Income"
               subtitle="Level Income"
               // secondaryCount={`$${userData?.profits?.bnb || 0}`}
@@ -232,7 +232,7 @@ export default function DashboardAnalytics() {
           </Grid>
           <Grid item xs={12} sm={6} lg={4}>
             <NewOrders
-              count={`${userData?.profits?.busd || 0}`}
+              count={`${userData?.profits?.busd?.toFixed(3) || 0}`}
               value="Capping Limit"
               subtitle="Capping Limit"
               // secondaryCount={`$${userData?.profits?.bnb || 0}`}
@@ -242,7 +242,7 @@ export default function DashboardAnalytics() {
           </Grid>
           <Grid item xs={12} sm={6} lg={4}>
             <NewOrders
-              count={`$${(userData?.extra?.provisionIncome).toFixed(2) || 0}`}
+              count={`$${(userData?.extra?.provisionIncome)?.toFixed(3) || 0}`}
               value="Provision Bonus"
               subtitle="Provision Bonus"
               // secondaryCount={userData?.profits?.bnb || "364.9904 BNB"}
@@ -251,7 +251,16 @@ export default function DashboardAnalytics() {
             />
           </Grid>
 
-          {/* Add more cards following the same pattern */}
+           <Grid item xs={12} sm={6} lg={4}>
+            <NewOrders
+              count={`$${(userData?.extra?.matrixIncome)?.toFixed(3) || 0}`}
+              value="Global Auto Pool Matrix Income"
+              subtitle="Global Auto Pool Matrix Income"
+              increment={0}
+              darkMode={true}
+            />
+          </Grid>     
+          
         </Grid>
       </Box>
 

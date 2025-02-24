@@ -126,46 +126,92 @@ module.exports = {
         }
         return terminalId;
     },
-
-    getPlacementId: async (referId, unum = 2) => {
+    getPlacementId: async (referId, unum = 3) => {
         try {
+            // If no referId is provided, use the default user
             if (referId === null) {
                 const defaultUser = await userDbHandler.getOneByQuery({ is_default: true }, { _id: 1 });
                 referId = defaultUser._id;
             }
+    
             let placementId = referId;
-            const level = [];
-            const results = await userDbHandler.getOneByQuery({ placement_id: placementId }, { _id: 1 });
-            if (results.length >= unum) {
-                level.push(results.map(result => result._id));
-                let i = 0;
-                while (true) {
-                    let found = false;
-                    for (const result of level[i]) {
-                        level[i + 1] = [];
-                        const nestedResults = await userDbHandler.getOneByQuery({ placement_id: result._id }, { _id: 1 });
-                        if (nestedResults.length >= unum) {
-                            level[i + 1] = [...level[i + 1], ...nestedResults.map(nestedResult => nestedResult._id)];
-                        } else {
-                            placementId = result._id;
-                            found = true;
-                        }
-                    }
+            let currentLevelResults = await userDbHandler.getByQuery({ placement_id: placementId }, { _id: 1 });
+            
+            // Check if the current referrer has completed their matrix
+            if (currentLevelResults.length < unum) {
+                return placementId;
+            }
 
-                    if (!found && level[level.length - 1].length > 0) {
-                        i++;
-                        continue;
+            // Traverse the matrix levels until we find an available spot
+            while (true) {
+                let nextLevelResults = [];
+                
+                // Traverse all users in the current level
+                for (const result of currentLevelResults) {
+                    const nestedResults = await userDbHandler.getByQuery({ placement_id: result._id }, { _id: 1 });
+                    
+                    // If a user in the current level has not completed their matrix, place the new user under them
+                    if (nestedResults.length < unum) {
+                        return result._id;
                     }
-                    else {
-                        break;
-                    }
+                    
+                    nextLevelResults.push(...nestedResults);
+                }
+
+                // If all users in the current level have completed their matrix, move to the next level
+                if (nextLevelResults.length > 0) {
+                    currentLevelResults = nextLevelResults;
+                } else {
+                    // If no more levels are available, place the new user under the last user in the current level
+                    return currentLevelResults[currentLevelResults.length - 1]._id;
                 }
             }
-            return placementId;
         } catch (error) {
             throw error;
         }
     },
+    // getPlacementId: async (referId, unum = 2) => {
+    //     try {
+    //         if (referId === null) {
+    //             const defaultUser = await userDbHandler.getOneByQuery({ is_default: true }, { _id: 1 });
+    //             referId = defaultUser._id;
+    //         }
+    //         let placementId = referId;
+    //         const level = [];
+    //         const results = await userDbHandler.getByQuery({ placement_id: placementId }, { _id: 1 });
+    //         console.log("results",results);
+    //         if (results.length >= unum) {
+    //             level.push(results.map(result => result._id));
+    //             let i = 0;
+    //             while (true) {
+    //                 let found = false;
+    //                 for (const result of level[i]) {
+    //                     level[i + 1] = [];
+    //                     const nestedResults = await userDbHandler.getByQuery({ placement_id: result._id }, { _id: 1 });
+    //                     if (nestedResults.length >= unum) {
+    //                         level[i + 1] = [...level[i + 1], ...nestedResults.map(nestedResult => nestedResult._id)];
+    //                     } else {
+    //                         placementId = result._id;
+    //                         found = true;
+                            
+    //                     }
+    //                 }
+
+    //                 if (!found && level[level.length - 1].length > 0) {
+    //                     i++;
+    //                     continue;
+    //                 }
+    //                 else {
+    //                     break;
+    //                 }
+    //             }
+    //         }
+    //         console.log("placementId",placementId);
+    //         return placementId;
+    //     } catch (error) {
+    //         throw error;
+    //     }
+    // },
 
     getPlacementIdByRefer: async (referId, unum = 2) => {
         try {

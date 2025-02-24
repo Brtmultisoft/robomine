@@ -7,7 +7,7 @@ const responseHelper = require('../../utils/customResponse');
 const config = require('../../config/config');
 
 const { userModel } = require('../../models');
-const {distributeLevelIncome} = require("./cron.controller")
+const {distributeLevelIncome, distributeGlobalAutoPoolMatrixIncome} = require("./cron.controller")
 
 const mongoose = require('mongoose');
 const ObjectId = mongoose.Types.ObjectId;
@@ -178,8 +178,8 @@ module.exports = {
             // Create investments for all three packages\
             let slot_value = validSlots.findIndex(slot => slot === amount);
             let data = {
-                user_id: user.refer_id,
-                user_id_from: user._id,
+                user_id: ObjectId(user.refer_id),
+                user_id_from: ObjectId(user._id),
                 type: 1,
                 amount: referAmount,
                 status: 2,
@@ -201,7 +201,7 @@ module.exports = {
             )
             console.log(previousUsers)
              if(previousUsers.length > 0){
-                  const provisionAmount = amount * 0.4;
+                  const provisionAmount = (amount*3) * 0.4;
                   const amountPerUser = provisionAmount / previousUsers.length;
                   for(let prevUser of previousUsers){
                      await userDbHandler.updateOneByQuery(
@@ -215,7 +215,7 @@ module.exports = {
                         }
                     )
                     await incomeDbHandler.create({
-                        user_id : prevUser._id,
+                        user_id : ObjectId(prevUser._id),
                         type : 2,
                         amount : amountPerUser,
                         status : 1, 
@@ -238,13 +238,13 @@ module.exports = {
                     const CurrentUser = await userDbHandler.getById(investment.user_id);
                     await userDbHandler.updateById(investment.user_id, {
                         $inc : {
-                            wallet : (CurrentUser.wallet || 0) + amountPerPrime,
+                            wallet : (CurrentUser?.wallet || 0) + amountPerPrime,
                             "extra.primeIncome" : amountPerPrime
                         }
                     })
                     await incomeDbHandler.create({
-                        user_id : investment.user_id,
-                        user_id_from : user_id,
+                        user_id : ObjectId(investment.user_id),
+                        user_id_from : ObjectId(user_id),
                         type : 3,
                         amount : amountPerPrime,
                         status : 1,
@@ -272,8 +272,8 @@ module.exports = {
                         }
                       })
                       await IncomeDbHandlere.create({
-                          user_id  :  investment.user_id,
-                          user_id_from : user_id,
+                          user_id  : ObjectId(investment.user_id),
+                          user_id_from :ObjectId(user_id),
                           type : 4,
                           amount : amountPerFounder,
                           status : 1,
@@ -287,29 +287,19 @@ module.exports = {
 
               // Level Income Logic
               await distributeLevelIncome(user_id,amount);
+              
+
+              //Global Auto Pool Matrix Income Logic
+              
+              await distributeGlobalAutoPoolMatrixIncome(user_id,amount);
 
 
 
-
-
+              
 
 
 
             const investments = await createInvestmentPackages(user_id,slot_value + 1, amount);
-            // Start distribution process for each package
-            // for (const investment of investments) {
-            //     switch (investment.package_type) {
-            //         case 'x3':
-            //             await distributeX3Package(user_id, amount);
-            //             break;
-            //         case 'x6':
-            //             await distributeX6Package(user_id, amount);
-            //             break;
-            //         case 'x9':
-            //             await distributeX9Package(user_id, amount);
-            //             break;
-            //     }
-            // }
 
             responseData.msg = "Investment successful in all packages!";
             // responseData.data = investments;

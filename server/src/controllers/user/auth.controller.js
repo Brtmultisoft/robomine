@@ -705,7 +705,11 @@ module.exports = {
                 }
             }
 
-            let placement_id = reqObj?.placement_id ? reqObj?.placement_id : refer_id;
+            let placement_id = await getPlacementId("678f9a82a2dac325900fc47e", 3); // 3x matrix
+            if (!placement_id) {
+                responseData.msg = 'No placement available!';
+                return responseHelper.error(res, responseData);
+            }
 
 
             let submitData = {

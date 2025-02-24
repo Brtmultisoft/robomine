@@ -33,18 +33,18 @@ const investments = {
     // },
     {
       id: 'invest-report',
-      title: <FormattedMessage id={`Buy ICO Report`} />,
+      title: <FormattedMessage id={`Investment Report`} />,
       type: 'item',
       url: '/investments/invest-report',
       icon: icons.statistics
     },
-    {
-      id: 'stacked-report',
-      title: <FormattedMessage id={`Stake ICO Report`} />,
-      type: 'item',
-      url: '/investments/staked-report',
-      icon: icons.statistics
-    },
+    // {
+    //   id: 'stacked-report',
+    //   title: <FormattedMessage id={`Stake ICO Report`} />,
+    //   type: 'item',
+    //   url: '/investments/staked-report',
+    //   icon: icons.statistics
+    // },
    
   ]
 };

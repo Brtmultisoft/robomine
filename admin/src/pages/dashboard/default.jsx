@@ -113,10 +113,12 @@ export default function DashboardDefault() {
 
     (async () => {
       const response = await axios.get("/get-all-users-data")
-      if (response.status === 200)
+      if (response.status === 200){
+        console.log(response.data?.result)
         setUserData(response.data?.result)
-      else
+      } else {  
         console.log(response?.data)
+      }
     })()
 
 
@@ -217,7 +219,7 @@ export default function DashboardDefault() {
      
       <Grid item xs={12} sm={6} lg={3}>
         <EcommerceDataCard
-          title="ROI Bonus"
+          title="Direct Bonus"
           count={user?.dailyIncome}
           color="warning"
           iconPrimary={<Book color={theme.palette.warning.dark} />}

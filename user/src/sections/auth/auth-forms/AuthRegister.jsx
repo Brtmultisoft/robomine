@@ -74,8 +74,8 @@ export default function AuthRegister() {
   const checkRefID = (data) => {
     checkReferID(data)
       .then((res) => {
-        console.log(res.data?.result._id);
-        // setRefer_id(res.data?.result._id);
+        // console.log(res.data?.result._id);
+        setRefer_id(res.data?.result._id);
       })
       .catch((error) => {
         setRefer_id({ msg: 'Invalid Refer ID!' });

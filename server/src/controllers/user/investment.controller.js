@@ -152,8 +152,7 @@ module.exports = {
             // Calculate total deduction amount (3x slot value)
             const totalDeduction = amount * 3;
             // Check user's balance
-            const user = await userDbHandler.getById(user_id);
-            // console.log(user)
+            const user = await userDbHandler.getOneByQuery({_id : user_id});
             if (user.wallet < totalDeduction) {
                 responseData.msg = "Insufficient balance";
                 return responseHelper.error(res, responseData);

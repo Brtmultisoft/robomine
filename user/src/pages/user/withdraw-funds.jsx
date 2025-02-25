@@ -101,7 +101,7 @@ export default function AddFunds() {
 
             if (!amount || amount <= 0) throw "Invalid amount!"
             if (amount > user[`${walletType}`]) throw "Amount must be less or equal than your balance!"
-            if (!address || address.length <= 26) throw "Invalid address!"
+            // if (!address || address.length <= 26) throw "Invalid address!"
 
             // HARDCODED: withdrawalGasMinimumAmount
             if(user.extra?.gas_wallet < 2) throw "You don't have enough gas amount in your gas wallet to proceed with the withdrawal!"
@@ -110,7 +110,7 @@ export default function AddFunds() {
                 url: `/add-withdrawal`,
                 data: {
                     amount,
-                    address,
+                    // address,
                     walletType
                 },
                 setState
@@ -184,7 +184,7 @@ export default function AddFunds() {
                         autoFocus
                     />
                 </Stack>
-                <Stack>
+                {/* <Stack>
                     <TextField
                         fullWidth
                         id="personal-address"
@@ -193,7 +193,7 @@ export default function AddFunds() {
                         placeholder="Enter Address"
                         autoFocus
                     />
-                </Stack>
+                </Stack> */}
                 <Stack spacing={10}>
                     <Button variant="contained" onClick={handleTXN}>
                         Withdraw

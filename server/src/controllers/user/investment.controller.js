@@ -194,37 +194,7 @@ module.exports = {
             // provision Bonus Income Logic
 
 
-            const previousUsers = await userDbHandler.getByQuery(
-                { created_at: { $lt: user.created_at },
-                  status: 1
-                }
-            )
-            console.log(previousUsers)
-             if(previousUsers.length > 0){
-                  const provisionAmount = (amount*3) * 0.4;
-                  const amountPerUser = provisionAmount / previousUsers.length;
-                  for(let prevUser of previousUsers){
-                     await userDbHandler.updateOneByQuery(
-                        {_id : prevUser._id},
-                        {
-                            $inc : {
-                                wallet : amountPerUser,
-                                "extra.provisionIncome" : amountPerUser
-                                
-                            }
-                        }
-                    )
-                    await incomeDbHandler.create({
-                        user_id : ObjectId(prevUser._id),
-                        type : 2,
-                        amount : amountPerUser,
-                        status : 1, 
-                        extra : {
-                            income_type : "provision"
-                        }
-                  })
-                }
-             }
+            
              
              // Prime Membership Logic 
              const primeUser = await investmentDbHandler.getByQuery({

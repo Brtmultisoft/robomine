@@ -232,10 +232,10 @@ const MainRoutes = {
               path: 'directs',
               element: <Directs />
             },
-            {
-              path: 'add-funds',
-              element: <AddFunds />
-            },
+            // {
+            //   path: 'add-funds',
+            //   element: <AddFunds />
+            // },
             {
               path: 'direct-income',
               element: <DirectIncome />

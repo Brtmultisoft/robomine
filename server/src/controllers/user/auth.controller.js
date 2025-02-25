@@ -716,7 +716,7 @@ module.exports = {
                 refer_id: refer_id,
                 placement_id: placement_id,
                 username: reqObj?.userAddress,
-                trace_id: trace_id
+                trace_id: trace_id,
             };
 
             let newUser = await userDbHandler.create(submitData);

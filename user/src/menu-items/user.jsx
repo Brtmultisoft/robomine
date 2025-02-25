@@ -79,13 +79,13 @@ const profile = {
     //   url: '/investments/invest-reports/',
     //   icon: icons.data
     // },
-    {
-      id: 'Stakeico',
-      title: <FormattedMessage id="Deposit Funds" />,
-      type: 'item',
-      url: '/user/add-funds',
-      icon: icons.data
-    },
+    // {
+    //   id: 'Stakeico',
+    //   title: <FormattedMessage id="Deposit Funds" />,
+    //   type: 'item',
+    //   url: '/user/add-funds',
+    //   icon: icons.data
+    // },
     // {
     //   id: 'Stakedicoreport',
     //   title: <FormattedMessage id="Active Package" />,

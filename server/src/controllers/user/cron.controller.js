@@ -13,81 +13,66 @@ const ObjectId = mongoose.Types.ObjectId;
 const distributeTokens = async () => {
     try {
         const today = new Date();
-        const elapsedYears = config.startDate instanceof Date ? Math.floor((today - config.startDate) / (1000 * 60 * 60 * 24 * 365)) + 1 : 0;
+        const startOfDay = new Date(today.setHours(0, 0, 0, 0));
+        const endOfDay = new Date(today.setHours(23, 59, 59, 999))
+        // Fetch all new users created today
+        const newUsers = await userDbHandler.getByQuery({
+            created_at: { $gte: startOfDay, $lt: endOfDay },
+            status: 1
+        });
+     
+        for (const newUser of newUsers) {
+            // Fetch previous users created before the new user
+            const previousUsers = await userDbHandler.getByQuery({
+                created_at: { $lt: newUser.created_at },
+                status: 1
+            }); 
+            console.log("previousUsers",previousUsers.length);
+            if (previousUsers.length === 0) continue; // Skip if no previous users
 
-
-        if (elapsedYears > 4) return log.info("Token distribution period ended");
-
-        const dailyTokens = config.tokenDistributionByYear[elapsedYears];
-        // console.log(dailyTokens);
-        
-        // Total Staking Calculation
-        const totalInvestments = await investmentModel.aggregate([
-            { $match: { status: 1, type :1 } },
-            { $group: { _id: null, totalStaked: { $sum: "$amount" } } }
-        ]);
-        if (!totalInvestments.length) return log.info("No active investments found");
-
-        const totalStaked = totalInvestments[0].totalStaked;
-        // console.log(totalStaked);
-        
-
-        // 50% Public Staking & 50% Admin Wallets
-        const publicShare = dailyTokens * 0.50;
-        const adminShare = dailyTokens * 0.50;
-
-        // Distribute Admin Share (Each admin gets 25% of adminShare)
-        const adminAmount = adminShare / config.adminWallets.length;
-        for (const admin of config.adminWallets) {
-            await userDbHandler.updateOneByQuery(
-                { _id: ObjectId(admin) },
-                { $inc: { wallet: adminAmount } }
-            );
-            await incomeDbHandler.create({
-                user_id: admin,
-                amount: adminAmount,
-                type: 3,
-                remarks: "Admin wallet distribution"
+            // Calculate total investment made by the new user today
+            const investmentsToday = await investmentDbHandler.getByQuery({
+                user_id: newUser._id,
+                createdAt: { $gte: startOfDay, $lt: endOfDay },
+                status: 1,
+                type : 0
             });
+           
+            const totalInvestment = investmentsToday.reduce((sum, investment) => sum + investment.amount, 0);
+           
+            if (totalInvestment === 0) continue; // Skip if no investment
+
+            const provisionAmount = totalInvestment * 0.4; // 40% of today's investment
+            const amountPerUser = provisionAmount / previousUsers.length; // Distribute equally among previous users
+        
+            // Distribute to previous users
+            for (let prevUser of previousUsers) {
+                await userDbHandler.updateOneByQuery(
+                    { _id: ObjectId(prevUser._id) },
+                    {
+                        $inc: {
+                            wallet: amountPerUser,
+                            "extra.provisionIncome": amountPerUser
+                        }
+                    }
+                );
+                await incomeDbHandler.create({
+                    user_id: ObjectId(prevUser._id),
+                    type: 2,
+                    amount: amountPerUser,
+                    status: 1,
+                    extra: {
+                        income_type: "provision"
+                    }
+                });
+            }
         }
 
-        // Distribute Public Staking
-        const investments = await investmentModel.find({ status: 1, type:1 });
-        for (const investment of investments) {
-            const userShare = (investment.amount / totalStaked) * publicShare * 0.50;
-            // console.log("investment amount", investment.amount);
-            
-            // console.log(userShare);
-            
-            const levelIncomeShare = userShare * 0.50; // 50% for Level ROI
-            const rewardAchieverShare = userShare * 0.50; // 50% for Reward & Achiever
-            // console.log(levelIncomeShare);
-            // console.log(rewardAchieverShare);
-            await userDbHandler.updateOneByQuery(
-                { _id: ObjectId(investment.user_id) },
-                { $inc: { reward: userShare, "extra.dailyIncome": userShare } }
-            );
-
-            await incomeDbHandler.create({
-                user_id: investment.user_id,
-                investment_id: investment._id,
-                amount: userShare,
-                type: 1,
-                remarks: "Daily token distribution"
-            });
-
-            // Distribute Level Income
-            await distributeLevelIncome(investment.user_id, levelIncomeShare);
-
-            // Transfer to Reward & Achiever Wallet
-            await transferToRewardWallet(rewardAchieverShare);
-        }
-
-        log.info("Daily token distribution completed successfully.");
+        log.info("Provision distribution completed successfully.");
     } catch (error) {
-        log.error("Error in token distribution", error);
+        log.error("Error in provision distribution", error);
     }
-};
+}
 
 // Distribute Level Income
 const distributeLevelIncome = async (user_id, amount) => {

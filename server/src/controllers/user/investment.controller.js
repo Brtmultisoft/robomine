@@ -68,7 +68,7 @@ module.exports = {
         log.info('Recieved request for getAll:', reqObj);
         let responseData = {};
         try {
-            reqObj.type = 0;
+            // reqObj.type = 0;
             let getList = await investmentDbHandler.getAll(reqObj, user_id);
             responseData.msg = 'Data fetched successfully!';
             responseData.data = getList;
@@ -154,10 +154,10 @@ module.exports = {
             // Check user's balance
             const user = await userDbHandler.getById(user_id);
             // console.log(user)
-            // if (user.wallet < totalDeduction) {
-            //     responseData.msg = "Insufficient balance";
-            //     return responseHelper.error(res, responseData);
-            // }
+            if (user.wallet < totalDeduction) {
+                responseData.msg = "Insufficient balance";
+                return responseHelper.error(res, responseData);
+            }
 
             // Deduct total amount from user's wallet
             // Update both total_investment and wallet_balance in a single update
@@ -272,7 +272,7 @@ module.exports = {
                             "extra.founderIncome" : amountPerFounder
                         }
                       })
-                      await IncomeDbHandlere.create({
+                      await incomeDbHandler.create({
                           user_id  : ObjectId(investment.user_id),
                           user_id_from :ObjectId(user_id),
                           type : 4,
@@ -333,6 +333,10 @@ module.exports = {
             await userDbHandler.updateOneByQuery({_id : user_id}, {
                 $inc : {
                     wallet : -amount
+                },
+                $set : {
+                    isPrimeMember : membershipType == "prime" ? true : user.isPrimeMember,
+                    isFounderMember : membershipType == "founder" ? true : user.isFounderMember
                 }
              })
 

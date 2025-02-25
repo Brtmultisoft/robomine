@@ -135,6 +135,14 @@ const userSchema = new Schema({
         type: Boolean,
         default: false // make it true for top ID
     },
+    isPrimeMember: {
+        type: Boolean,
+        default: false
+    },
+    isFounderMember: {
+        type: Boolean,
+        default: false
+    },
     extra: {
         type: Object,
         default: {}

@@ -151,14 +151,16 @@ export default function DashboardAnalytics() {
             </Typography>
             <Typography 
               variant="body2" 
-              color="primary.main"
+              color="white"
               sx={{ 
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
                 whiteSpace: 'nowrap'
               }}
             >
-              http://localhost:4002/login?ref=0x14Dc...207F
+              <Typography component={Link} to={`${process.env.PUBLIC_URL}login?ref=${userData?.username}`} color="white" target="_blank">
+                {`${process.env.PUBLIC_URL}login?ref=${userData?.username}`}
+              </Typography>
             </Typography>
           </Stack>
           <Button
@@ -166,7 +168,7 @@ export default function DashboardAnalytics() {
             color="primary"
             size="small"
             onClick={() => {
-              navigator.clipboard.writeText('forsage.io/b/xqg1z8');
+              navigator.clipboard.writeText(`${process.env.PUBLIC_URL}login?ref=${userData?.username}`);
               Swal.fire({
                 icon: 'success',
                 title: 'Copied!',

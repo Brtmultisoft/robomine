@@ -20,7 +20,7 @@ class Investment {
 		return model.save(data);
 	}
 	async getAll(data, user_id = null) {
-		let params = {type:data.type || 0};
+		let params = {};
 		if (user_id) {
 			params.user_id = ObjectId(user_id);
 		}
@@ -44,7 +44,7 @@ class Investment {
 
 		let filter = params;
 		const options = pick(data, ['sort_by', 'limit', 'page']);
-		options.sort_fields = ['amount', 'amount_r', 'amount_coin', 'bonus', 'days', 'type', 'release_at', 'created_at', 'package_type', 'slot_value'];
+		options.sort_fields = ['amount', 'amount_r', 'amount_coin', 'bonus', 'days', 'release_at', 'created_at', 'package_type', 'slot_value'];
 		options.populate = '';
 		if (!user_id) {
 			const pipeline = [];

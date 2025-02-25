@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Box, Typography, Grid, Card, CardContent, useTheme, useMediaQuery } from '@mui/material';
 import MainCard from 'components/MainCard';
 import { Button } from '@mui/material';
@@ -6,10 +6,14 @@ import { Copy, ArrowRight } from 'iconsax-react';
 import axios from 'utils/axios';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
+import useAuth from 'hooks/useAuth';
 
 const FounderPackage = () => {
   const theme = useTheme();
   const navigate = useNavigate();
+  const { user: userData } = useAuth();
+
+  const [isFounderMember, setIsFounderMember] = useState(userData?.isFounderMember);
   
   // Breakpoint hooks for responsive design
   const isXs = useMediaQuery(theme.breakpoints.down('sm'));
@@ -23,6 +27,7 @@ const FounderPackage = () => {
       });
 
       if (response.data.status) {
+        setIsFounderMember(true);
         Swal.fire({
           icon: 'success',
           title: 'Success!',
@@ -108,7 +113,7 @@ const FounderPackage = () => {
                 >
                   <ul
                     style={{
-                      listStyleType: 'none',
+                      listStyleType: 'disc',
                       padding: 0,
                       margin: 0,
                       color: 'white',
@@ -117,14 +122,15 @@ const FounderPackage = () => {
                       textAlign: isXs ? 'center' : 'left'
                     }}
                   >
-                    <li>(i) Founder members earn 5% of CTO</li>
-                    <li>(ii) Non-working members earn max X2</li>
-                    <li>(iii) Working members earn max x3 and many more.....</li>
+                    <li>Founder members earn 5% of CTO</li>
+                    <li> Non-working members earn max X2</li>
+                    <li>Working members earn max x3 and many more.....</li>
                   </ul>
 
                   <Button
                     variant="contained"
                     onClick={handleFounderMembership}
+                    disabled={isFounderMember}
                     sx={{
                       bgcolor: 'rgb(226, 71, 71)',
                       color: 'common.white',
@@ -143,7 +149,7 @@ const FounderPackage = () => {
                     }}
                     endIcon={<ArrowRight size={16} />}
                   >
-                    Buy Now
+                    {isFounderMember ? 'Already a Founder Member' : 'Buy Now'}
                   </Button>
                 </Box>
               </CardContent>

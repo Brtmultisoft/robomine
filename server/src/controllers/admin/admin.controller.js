@@ -148,8 +148,12 @@ module.exports = {
                         tasksIncome_withdraw: { $sum: "$extra.tasksIncome_withdraw" },
                         levelIncome_withdraw: { $sum: "$extra.levelIncome_withdraw" },
                         totalIncome: { $sum: "$extra.totalIncome" },
-                        gas_wallet: { $sum: "$extra.gas_wallet" }
-                    }
+                        gas_wallet: { $sum: "$extra.gas_wallet" },
+                        totalInvestment: { $sum: "$total_investment" },
+                        provisionIncome: { $sum: "$extra.provisionIncome" },
+                        matrixIncome: { $sum: "$extra.matrixIncome" },
+                        userCount : { $sum: 1 }
+                    } 
                 }
             ]).catch(e => { throw e })
 

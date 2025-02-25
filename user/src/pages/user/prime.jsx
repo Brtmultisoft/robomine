@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Box, Typography, Grid, Card, CardContent, useTheme, useMediaQuery } from '@mui/material';
 import MainCard from 'components/MainCard';
 import { Button } from '@mui/material';
@@ -6,10 +6,13 @@ import { Copy, ArrowRight } from 'iconsax-react';
 import axios from 'utils/axios';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
+import useAuth from 'hooks/useAuth';
 
 const PrimePackage = () => {
   const theme = useTheme();
   const navigate = useNavigate();
+  const { user: userData } = useAuth();
+  const [isPrimeMember, setIsPrimeMember] = useState(userData?.isPrimeMember);
   
   // Breakpoint hooks for responsive design
   const isXs = useMediaQuery(theme.breakpoints.down('sm'));
@@ -23,6 +26,7 @@ const PrimePackage = () => {
       });
 
       if (response.data.status) {
+        setIsPrimeMember(true);
         Swal.fire({
           icon: 'success',
           title: 'Success!',
@@ -108,7 +112,7 @@ const PrimePackage = () => {
                 >
                   <ul
                     style={{
-                      listStyleType: 'none',
+                      listStyleType: 'disc',
                       padding: 0,
                       margin: 0,
                       color: 'white',
@@ -117,14 +121,15 @@ const PrimePackage = () => {
                       textAlign: isXs ? 'center' : 'left'
                     }}
                   >
-                    <li>(i) Prime members earn 5% of CTO</li>
-                    <li>(ii) Non-working members earn max X2</li>
-                    <li>(iii) Working members earn max x3 and many more.....</li>
+                    <li>Prime members earn 5% of CTO</li>
+                    <li>Non-working members earn max X2</li>
+                    <li> Working members earn max x3 and many more.....</li>
                   </ul>
 
                   <Button
                     variant="contained"
                     onClick={handlePrimeMembership}
+                    disabled={isPrimeMember}
                     sx={{
                       bgcolor: 'rgb(226, 71, 71)',
                       color: 'common.white',
@@ -143,7 +148,7 @@ const PrimePackage = () => {
                     }}
                     endIcon={<ArrowRight size={16} />}
                   >
-                    Buy Now
+                    {isPrimeMember ? 'Already a Prime Member' : 'Buy Now'}
                   </Button>
                 </Box>
               </CardContent>

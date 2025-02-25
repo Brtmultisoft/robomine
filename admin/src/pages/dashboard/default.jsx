@@ -113,6 +113,7 @@ export default function DashboardDefault() {
 
     (async () => {
       const response = await axios.get("/get-all-users-data")
+      console.log(response)
       if (response.status === 200){
         console.log(response.data?.result)
         setUserData(response.data?.result)
@@ -154,12 +155,12 @@ export default function DashboardDefault() {
 
       <Grid item xs={12} sm={6} lg={3}>
         <EcommerceDataCard
-          title="Wallet"
-          count={process.env.VITE_APP_CURRENCY_TYPE + ' ' + (user?.wallet?.toFixed(5) ?? 0)}
+          title="Total Team"
+          count={(user?.userCount ?? 0)}
           iconPrimary={<Wallet3 />}
           percentage={
             <Typography color="primary" sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              <ArrowUp size={16} style={{ transform: 'rotate(45deg)' }} /> {generateRandomPercentage(user?.wallet)}%
+              <ArrowUp size={16} style={{ transform: 'rotate(45deg)' }} /> {generateRandomPercentage(user?.userCount)}%
             </Typography>
           }
         >
@@ -204,12 +205,12 @@ export default function DashboardDefault() {
       {/* row 1 */}
       <Grid item xs={12} sm={6} lg={3}>
         <EcommerceDataCard
-          title="Total Stacked"
-          count={user?.wallet}
+          title="Total Investment"
+          count={user?.totalInvestment}
           iconPrimary={<Wallet3 />}
           percentage={
             <Typography color="primary" sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              <ArrowUp size={16} style={{ transform: 'rotate(45deg)' }} /> {generateRandomPercentage(user?.wallet)}%
+              <ArrowUp size={16} style={{ transform: 'rotate(45deg)' }} /> {generateRandomPercentage(user?.totalInvestment)}%
             </Typography>
           }
         >
@@ -217,21 +218,6 @@ export default function DashboardDefault() {
         </EcommerceDataCard>
       </Grid>
      
-      <Grid item xs={12} sm={6} lg={3}>
-        <EcommerceDataCard
-          title="Direct Bonus"
-          count={user?.dailyIncome}
-          color="warning"
-          iconPrimary={<Book color={theme.palette.warning.dark} />}
-          percentage={
-            <Typography color="warning.dark" sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              <ArrowDown size={16} style={{ transform: 'rotate(-45deg)' }} /> {generateRandomPercentage(user?.dailyIncome)}%
-            </Typography>
-          }
-        >
-          <EcommerceDataChart color={theme.palette.warning.dark} />
-        </EcommerceDataCard>
-      </Grid>
       <Grid item xs={12} sm={6} lg={3}>
         <EcommerceDataCard
           title="Direct Bonus"
@@ -249,13 +235,13 @@ export default function DashboardDefault() {
       </Grid>
       <Grid item xs={12} sm={6} lg={3}>
         <EcommerceDataCard
-          title="Provision Bonus"
-          count={user?.extra?.provision}
+          title="Level Income"
+          count={user?.levelIncome}
           color="warning"
           iconPrimary={<Book color={theme.palette.warning.dark} />}
           percentage={
             <Typography color="warning.dark" sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              <ArrowDown size={16} style={{ transform: 'rotate(-45deg)' }} /> {generateRandomPercentage(user?.matchingIncome)}%
+              <ArrowDown size={16} style={{ transform: 'rotate(-45deg)' }} /> {generateRandomPercentage(user?.levelIncome)}%
             </Typography>
           }
         >
@@ -264,13 +250,28 @@ export default function DashboardDefault() {
       </Grid>
       <Grid item xs={12} sm={6} lg={3}>
         <EcommerceDataCard
-          title="VIP Bonus"
-          count={user?.vipIncome}
+          title="Provision Bonus"
+          count={user?.provisionIncome}
           color="warning"
           iconPrimary={<Book color={theme.palette.warning.dark} />}
           percentage={
             <Typography color="warning.dark" sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              <ArrowDown size={16} style={{ transform: 'rotate(-45deg)' }} /> {generateRandomPercentage(user?.vipIncome)}%
+              <ArrowDown size={16} style={{ transform: 'rotate(-45deg)' }} /> {generateRandomPercentage(user?.provisionIncome)}%
+            </Typography>
+          }
+        >
+          <EcommerceDataChart color={theme.palette.warning.dark} />
+        </EcommerceDataCard>
+      </Grid>
+      <Grid item xs={12} sm={6} lg={3}>
+        <EcommerceDataCard
+          title="Global Matrix Auto Pool Bonus"
+          count={user?.matrixIncome}
+          color="warning"
+          iconPrimary={<Book color={theme.palette.warning.dark} />}
+          percentage={
+            <Typography color="warning.dark" sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+              <ArrowDown size={16} style={{ transform: 'rotate(-45deg)' }} /> {generateRandomPercentage(user?.matrixIncome)}%
             </Typography>
           }
         >

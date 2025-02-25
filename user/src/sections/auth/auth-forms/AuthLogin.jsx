@@ -20,8 +20,16 @@ export default function AuthLogin() {
   const [referralId, setReferralId] = useState('');
   const { address: userAddress, isConnected } = useAccount();
   const { login, register } = useAuth();
-  const scriptedRef = useScriptRef();
 
+  const scriptedRef = useScriptRef();
+   
+  useEffect(()=>{
+    const params = new URLSearchParams(window.location.search);
+    const ref = params.get("ref");
+    if(ref){
+      setReferralId(ref);
+    }
+  },[])
   useEffect(() => {
     const checkRegistration = async () => {
       // console.log("isConnected", isConnected)
@@ -96,6 +104,7 @@ export default function AuthLogin() {
               label="Referral ID"
               variant="outlined"
               fullWidth
+              
               value={referralId}
               onChange={(e) => setReferralId(e.target.value)}
             />

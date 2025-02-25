@@ -75,6 +75,7 @@ module.exports = {
         let reqObj = req.query;
         try {
             let getData = await investmentDbHandler.getSum(reqObj);
+            console.log(getData);
             responseData.msg = "Data fetched successfully!";
             responseData.data = getData;
             return responseHelper.success(res, responseData);

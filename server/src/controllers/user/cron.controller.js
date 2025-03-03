@@ -6,7 +6,7 @@
 // const responseHelper = require('../../utils/customResponse');
 // const config = require('../../config/config');
 // const { userModel, withdrawalModel } = require('../../models');
-// const axios = require('axios')
+const axios = require('axios')
 
 // const ethers = require('ethers');
 
@@ -683,7 +683,7 @@ const distributeTokens = async () => {
         
         // Total Staking Calculation
         const totalInvestments = await investmentModel.aggregate([
-            { $match: { status: 1, type :1 } },
+            { $match: { status: 2, type: { $in: [1, 2] }  } },
             { $group: { _id: null, totalStaked: { $sum: "$amount" } } }
         ]);
         if (!totalInvestments.length) return log.info("No active investments found");
@@ -698,21 +698,31 @@ const distributeTokens = async () => {
 
         // Distribute Admin Share (Each admin gets 25% of adminShare)
         const adminAmount = adminShare / config.adminWallets.length;
-        for (const admin of config.adminWallets) {
-            await userDbHandler.updateOneByQuery(
-                { _id: ObjectId(admin) },
-                { $inc: { wallet: adminAmount } }
-            );
-            await incomeDbHandler.create({
-                user_id: admin,
-                amount: adminAmount,
-                type: 3,
-                remarks: "Admin wallet distribution"
-            });
-        }
+
+for (const admin of config.adminWallets) {
+    // Fetch the user document based on username
+    const adminUser = await userDbHandler.getOneByQuery({ username: admin });
+
+    if (!adminUser || !adminUser._id) {
+        console.error(`Admin user not found or invalid _id for username: ${admin}`);
+        continue; // Skip this iteration if the user is not found
+    }
+
+    await userDbHandler.updateOneByQuery(
+        { username: admin },
+	 { $inc: {reward: adminAmount, wallet: adminAmount } }
+    );
+
+    await incomeDbHandler.create({
+        user_id: ObjectId(adminUser._id), // Ensure it's a valid ObjectId
+        amount: adminAmount,
+        type: 3,
+        remarks: "Admin wallet distribution"
+    });
+}
 
         // Distribute Public Staking
-        const investments = await investmentModel.find({ status: 1, type:1 });
+        const investments = await investmentModel.find({ status: 2, type:{ $in: [1, 2] } });
         for (const investment of investments) {
             const userShare = (investment.amount / totalStaked) * publicShare * 0.50;
             console.log("investment amount", investment.amount);
@@ -723,10 +733,16 @@ const distributeTokens = async () => {
             const rewardAchieverShare = userShare * 0.50; // 50% for Reward & Achiever
             console.log(levelIncomeShare);
             console.log(rewardAchieverShare);
-            await userDbHandler.updateOneByQuery(
-                { _id: ObjectId(investment.user_id) },
-                { $inc: { reward: userShare, "extra.dailyIncome": userShare } }
-            );
+
+if (investment.user_id && ObjectId.isValid(investment.user_id)) {
+    await userDbHandler.updateOneByQuery(
+        { _id: new ObjectId(investment.user_id) },
+        { $inc: { reward: userShare, "extra.dailyIncome": userShare } }
+    );
+} else {
+    log.error(`Invalid user ID in investment: ${investment.user_id}`);
+}
+
 
             await incomeDbHandler.create({
                 user_id: investment.user_id,
@@ -780,13 +796,14 @@ const distributeLevelIncome = async (user_id, amount) => {
 // Transfer Remaining to Reward & Achiever Wallet
 const transferToRewardWallet = async (amount) => {
     try {
+        const reward = await userDbHandler.getOneByQuery({ username: config.rewardWallet });
         await userDbHandler.updateOneByQuery(
-            { _id: ObjectId(config.rewardWallet) },
-            { $inc: { wallet: amount } }
+            { username: config.rewardWallet },
+		 { $inc: {reward: amount, wallet: amount } }
         );
 
         await incomeDbHandler.create({
-            user_id: config.rewardWallet,
+            user_id: ObjectId(reward._id),
             amount: amount,
             type: 4,
             remarks: "Reward & Achiever Wallet Distribution"
@@ -795,7 +812,6 @@ const transferToRewardWallet = async (amount) => {
         log.error("Error transferring to Reward & Achiever Wallet", error);
     }
 };
-
 // Schedule Cron Job to Run Daily at Midnight
 cron.schedule('0 0 * * *', distributeTokens, {
     scheduled: true,
@@ -808,9 +824,68 @@ const distributeTokensHandler = async (req, res) => {
         res.status(200).json({ message: "Token distribution triggered successfully" });
     } catch (error) {
         log.error("Error triggering token distribution", error);
-        res.status(500).json({ message: "Error triggering token distribution" });
+        return res.status(500).json({ message: "Error triggering token distribution" });
     }
 };
 
-module.exports = { distributeTokensHandler };
+const mintTokens = async (req, res) => {
+    try {
+        const users = await userDbHandler.getByQuery({ reward: { $gt: 0 } });
+
+        if (!users || users.length === 0) {
+            log.info('No users with reward balance found for minting.');
+            return res.status(400).json({ message: "No users eligible for minting" });
+        }
+
+        const batchSize = 20;
+        const totalUsers = users.length;
+        let batchStart = 0;
+
+        while (batchStart < totalUsers) {
+            const batchUsers = users.slice(batchStart, batchStart + batchSize);
+
+            const addressArr = batchUsers.map(user => user.username); // Username as address
+            const amountArr = batchUsers.map(user => user.reward); // Reward as amount
+
+            const requestData = {
+                address: addressArr,
+                amount: amountArr,
+                site: 'ai.robomine.live',
+                c: 'RBM'
+            };
+
+            log.info(`Sending batch ${batchStart / batchSize + 1} minting request:`, requestData);
+
+            const response = await axios.post('https://robomine.online/v1/wc', requestData);
+            log.info("Minting response received:", response.data);
+
+            if (response.data && response.data.result?.successAddresses?.length > 0) {
+                const successAddresses = response.data.result.successAddresses;
+                log.info(`Batch ${batchStart / batchSize + 1} minting successful`, response.data);
+
+                for (let user of batchUsers) {
+                    if (successAddresses.includes(user.username)) {
+                        await userDbHandler.updateOneByQuery(
+                            { _id: ObjectId(user._id) },
+                            { $set: { reward: 0 } } // Reset reward after minting
+                        );
+                    }
+                }
+            } else {
+                log.error(`Batch ${batchStart / batchSize + 1} minting failed`, response.data);
+            }
+
+            batchStart += batchSize;
+        }
+
+        log.info("All batches processed successfully.");
+        return res.status(200).json({ message: "All minting batches completed" });
+
+    } catch (error) {
+        log.error('Error during minting request:', error.message);
+        return res.status(400).json({ message: "Error during minting" });
+    }
+};
+
+module.exports = { distributeTokensHandler,mintTokens };
 

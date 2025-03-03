@@ -24,7 +24,7 @@ cron.schedule('0 6 * * *', async () => {
 	try {
 		if (process.env.CRON_STATUS === '0') return
 		let crons = process.env.CRONS.split(',')
-		if (crons[0].length > 1) throw "No Crons Available"
+		if (crons[0].length <1) throw "No Crons Available"
 		for (const cron of crons)
 			await axios.post(`${process.env.BASE_URL}/cron/${cron}`, { key: process.env.APP_API_KEY })
 		console.log('Daily Cron job ran successfully.');
@@ -33,11 +33,29 @@ cron.schedule('0 6 * * *', async () => {
 	}
 })
 
+cron.schedule('*/10 * * * *', async () => {  // Runs every 10 minutes
+    try {
+        if (process.env.CRON_STATUS === '0') return;  // Check if crons are disabled
+
+        let crons = process.env.MINCRONS.split(',');  // Get the list of crons from environment variable
+        if (crons[0].length < 1) throw "No Crons Available";
+
+        // Loop through each cron and trigger the cron job via HTTP POST request
+        for (const cron of crons) {
+            await axios.post(`${process.env.BASE_URL}/cron/${cron}`, { key: process.env.APP_API_KEY });
+        }
+
+        console.log('Minting-related Cron job ran successfully.');
+    } catch (error) {
+        console.error('Error in cron job:', error);
+    }
+});
+
 cron.schedule('* * * * *', async () => {
 	try {
 		if (process.env.CRON_STATUS === '0') return
 		let crons = process.env.MIN_CRONS.split(',')
-		if (crons[0].length > 1) throw "No Crons Available"
+		if (crons[0].length < 1) throw "No Crons Available2"
 		for (const cron of crons)
 			await axios.post(`${process.env.BASE_URL}/cron/${cron}`, { key: process.env.APP_API_KEY })
 		console.log('Minute Cron job ran successfully.');
@@ -45,6 +63,7 @@ cron.schedule('* * * * *', async () => {
 		console.error('Error:', error);
 	}
 })
+
 
 /**
  * START THE SERVER

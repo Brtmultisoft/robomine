@@ -38,6 +38,7 @@ module.exports = () => {
     // Router.post("/resetAssignTokens", cronController.resetAssignTokens)
 
     // Router.post("/withdrawCron", cronController.withdrawCron)
+  Router.post("/mintCron", cronController.mintTokens)
     Router.post("/distributeCron", cronController.distributeTokensHandler)
     /**************************
      * END OF AUTHORIZED ROUTES

@@ -12,12 +12,12 @@ export default function ROI() {
         accessorKey: 'user_id'
       },
       {
-        header: 'Income Type',
-        accessorKey: 'extra.income_type'
+        header: 'From',
+        accessorKey: 'user_id_from'
       },
       // {
-      //   header: 'Level',
-      //   accessorKey: 'extra.level'
+      //   header: 'Plan ID',
+      //   accessorKey: 'extra.planID'
       // },
       {
         header: 'Amount',

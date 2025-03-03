@@ -7,6 +7,7 @@ import axios from 'utils/axios';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import useAuth from 'hooks/useAuth';
+import { ethers } from 'ethers';
 
 const PrimePackage = () => {
   const theme = useTheme();
@@ -21,6 +22,22 @@ const PrimePackage = () => {
 
   const handlePrimeMembership = async () => {
     try {
+      if(true){
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        const signer = provider.getSigner();
+        const contract = new ethers.Contract(process.env.REACT_APP_CONTRACT_ADDRESS, process.env.REACT_APP_CONTRACT_ABI, signer);
+        // const price = await contract.getPackagePriceInBNB(13)
+        // const priceInBNB = +(price / 1000000000000000000).toFixed(5)
+        const tx = await contract.buy_Prime_Package()
+        console.log('tx', tx);
+        // const price = await contract.getPackagePriceInBNB(level)
+        // let fixPrice = +(price / fixValue ).toFixed(5)
+        // fixPrice += fixPrice*0.05 ;
+        // const tx = await contract.buyPackage_x3_x6_x9(level, { 
+        //     value: ethers.utils.parseEther(fixPrice.toString()) 
+        // })
+        await tx.wait()
+      }
       const response = await axios.post('/add-membership', {
         membershipType: 'prime'
       });
@@ -39,7 +56,7 @@ const PrimePackage = () => {
       Swal.fire({
         icon: 'error',
         title: 'Oops...',
-        text: error.response?.data?.msg || 'Something went wrong!'
+        text: error.message || 'Something went wrong!'
       });
     }
   };

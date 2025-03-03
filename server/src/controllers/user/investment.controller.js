@@ -140,7 +140,7 @@ module.exports = {
         let responseData = {};
         console.log(req.body)
         try {
-            const { amount } = req.body;
+            const { amount, level } = req.body;
             const user_id = req.user.sub;
             // Validate slot value
             const validSlots = [2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096];
@@ -148,15 +148,26 @@ module.exports = {
                 responseData.msg = "Invalid slot amount";
                 return responseHelper.error(res, responseData);
             }
+            
 
             // Calculate total deduction amount (3x slot value)
             const totalDeduction = amount * 3;
             // Check user's balance
             const user = await userDbHandler.getOneByQuery({_id : user_id});
-            if (user.wallet < totalDeduction) {
-                responseData.msg = "Insufficient balance";
-                return responseHelper.error(res, responseData);
+            console.log("user",user)
+            const provider = new ethers.providers.Web3Provider(window.ethereum);
+            await provider.send('eth_requestAccounts', []); // Ensure wallet connection
+            const signer = provider.getSigner();
+            const contract = new ethers.Contract(process.env.WITHDRAW_ADDRESS, process.env.WITHDRAW_ABI, signer);
+            const check = await contract.getUserDetails(user.username,level)
+            if(check && !check.activeLevels){
+               responseData.msg = "Got some error to buy this package";
+               return responseHelper.error(res, responseData);
             }
+            // if (user.wallet_topup < totalDeduction) {
+            //     responseData.msg = "Insufficient balance";
+            //     return responseHelper.error(res, responseData);
+            // }
 
             // Deduct total amount from user's wallet
             // Update both total_investment and wallet_balance in a single update
@@ -167,16 +178,41 @@ module.exports = {
                     wallet_topup : user.wallet_topup > totalDeduction ? user.wallet_topup - totalDeduction : 0
                 }
             });
+            const user2 = await userDbHandler.getOneByQuery({_id : user_id})
+            const hasReferrals = await userDbHandler.getOneByQuery({refer_id : user_id})
+            let cappingMultiplier = 1;
+            if(hasReferrals){
+                 cappingMultiplier = cappingMultiplier * 3
+            }else{
+                cappingMultiplier = cappingMultiplier * 2
+            }
+            const cappingLimit = user2.total_investment * cappingMultiplier;
+            await userDbHandler.updateOneByQuery({_id : user_id}, {
+                $inc : {
+                    "extra.cappingLimit" : cappingLimit
+                }
+            })
+
+
+            const updatedUser = await userDbHandler.getOneByQuery({_id : user.refer_id})
+            await userDbHandler.updateOneByQuery({_id : user.refer_id}, {
+                $set : {
+                    "extra.cappingLimit" : (updatedUser.total_investment * 3) - updatedUser.wallet
+                }
+            })
+            let slot_value = validSlots.findIndex(slot => slot === amount);
             let referAmount = amount / 2;
-        
+            if(updatedUser && updatedUser.extra?.cappingLimit > 0){
             await userDbHandler.updateOneByQuery({_id: user.refer_id}, {
                 $inc :{
                     "extra.directIncome" : referAmount,
-                    wallet : referAmount
+                    wallet : referAmount,
+                    "extra.cappingLimit" : -referAmount
                 }
             });
+          
             // Create investments for all three packages\
-            let slot_value = validSlots.findIndex(slot => slot === amount);
+            
             let data = {
                 user_id: ObjectId(user.refer_id),
                 user_id_from: ObjectId(user._id),
@@ -189,13 +225,7 @@ module.exports = {
             }
 
             await incomeDbHandler.create(data);
-
-
-            // provision Bonus Income Logic
-
-
-            
-             
+        }
              // Prime Membership Logic 
              const primeUser = await investmentDbHandler.getByQuery({
                 package_type : "prime",
@@ -206,10 +236,12 @@ module.exports = {
                 const amountPerPrime = primeAmount / primeUser.length;
                 for(const investment of primeUser){
                     const CurrentUser = await userDbHandler.getById(investment.user_id);
-                    await userDbHandler.updateById(investment.user_id, {
-                        $inc : {
+                    if(CurrentUser.extra?.cappingLimit > 0){
+                        await userDbHandler.updateById(investment.user_id, {
+                            $inc : {
                             wallet : (CurrentUser?.wallet || 0) + amountPerPrime,
-                            "extra.primeIncome" : amountPerPrime
+                            "extra.primeIncome" : amountPerPrime,
+                            "extra.cappingLimit" : -amountPerPrime
                         }
                     })
                     await incomeDbHandler.create({
@@ -223,6 +255,7 @@ module.exports = {
                         }
                     })
                 }
+              } 
              }
                 
               // Founder Membership Logic 
@@ -235,12 +268,14 @@ module.exports = {
                 const amountPerFounder = founderAmount / founderMembers.length;
                  for(const investment of founderMembers){
                       const currentUser = await userDbHandler.getById(investment.user_id);
-                      await userDbHandler.updateById(investment.user_id, {
-                        $inc : {
-                            wallet : (currentUser.wallet || 0) + amountPerFounder,
-                            "extra.founderIncome" : amountPerFounder
-                        }
-                      })
+                      if(currentUser.extra?.cappingLimit > 0){
+                        await userDbHandler.updateById(investment.user_id, {
+                            $inc : {
+                                wallet : (currentUser.wallet || 0) + amountPerFounder,
+                                "extra.founderIncome" : amountPerFounder,
+                                "extra.cappingLimit" : -amountPerFounder
+                            }
+                        })
                       await incomeDbHandler.create({
                           user_id  : ObjectId(investment.user_id),
                           user_id_from :ObjectId(user_id),
@@ -250,8 +285,8 @@ module.exports = {
                           extra:{
                              income_type : "founder"
                           }
-                      })
-                      
+                        })
+                      }
                  }
               }
 

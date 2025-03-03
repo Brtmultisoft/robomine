@@ -249,6 +249,14 @@ const MainRoutes = {
               element: <VipBonus />
             },
             {
+               path : 'prime-income',
+               element : <TeamBonus />
+            },
+            {
+               path : 'founder-income',
+               element : <TokenReports />
+            },
+            {
               path: 'active-package',
               element: <InvestReports />
             },

@@ -20,24 +20,26 @@ export default function AuthLogin() {
   const [referralId, setReferralId] = useState('');
   const { address: userAddress, isConnected } = useAccount();
   const { login, register } = useAuth();
+  const fixValue = 1000000000000000000
 
   const scriptedRef = useScriptRef();
-   
-  useEffect(()=>{
+
+  useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    const ref = params.get("ref");
-    if(ref){
+    const ref = params.get('ref');
+    if (ref) {
       setReferralId(ref);
     }
-  },[])
+  }, []);
   useEffect(() => {
     const checkRegistration = async () => {
       // console.log("isConnected", isConnected)
       // console.log("userAddress", userAddress)
       if (isConnected && userAddress) {
         try {
-          const res = await axios.post('/check-address',{userAddress})
-          console.log("Response:", res.data);
+          const res = await axios.post('/check-address', { userAddress });
+          console.log('Response:', res.data);
+
           setIsRegistered(res.data.result.isRegistered);
         } catch (error) {
           console.error('Error fetching user details:', error);
@@ -55,10 +57,13 @@ export default function AuthLogin() {
         await provider.send('eth_requestAccounts', []); // Ensure wallet connection
         const signer = provider.getSigner();
         const contract = new ethers.Contract(contractAddress, contractABI, signer);
-        
+
         if (!isRegistered) {
-          // const tx = await contract.registration(referralId);
-          // await tx.wait();
+          
+          if (true) {
+            const tx = await contract.registration(referralId);
+            await tx.wait()
+           }
           await register(userAddress, referralId);
           openSnackbar({
             open: true,
@@ -104,7 +109,6 @@ export default function AuthLogin() {
               label="Referral ID"
               variant="outlined"
               fullWidth
-              
               value={referralId}
               onChange={(e) => setReferralId(e.target.value)}
             />
@@ -112,11 +116,7 @@ export default function AuthLogin() {
         )}
         <Grid item xs={12}>
           <AnimateButton>
-            <Button
-              variant="contained"
-              onClick={handleRegistrationOrLogin}
-              disabled={!isConnected}
-            >
+            <Button variant="contained" onClick={handleRegistrationOrLogin} disabled={!isConnected}>
               {isRegistered ? 'Login' : 'Register & Login'}
             </Button>
           </AnimateButton>
@@ -125,4 +125,3 @@ export default function AuthLogin() {
     </MainCard>
   );
 }
-

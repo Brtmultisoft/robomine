@@ -7,6 +7,7 @@ import axios from 'utils/axios';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import useAuth from 'hooks/useAuth';
+import { ethers } from 'ethers';
 
 const FounderPackage = () => {
   const theme = useTheme();
@@ -19,9 +20,20 @@ const FounderPackage = () => {
   const isXs = useMediaQuery(theme.breakpoints.down('sm'));
   const isSm = useMediaQuery(theme.breakpoints.between('sm', 'md'));
   const isMd = useMediaQuery(theme.breakpoints.between('md', 'lg'));
-
+  
+  // await provider.send('eth_requestAccounts', []); // Ensure wallet connection
+  // const signer = provider.getSigner();
+  // const contract = new ethers.Contract(contractAddress, contractABI, signer);
   const handleFounderMembership = async () => {
     try {
+      if(true){
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        const signer = provider.getSigner();
+        const contract = new ethers.Contract(process.env.REACT_APP_CONTRACT_ADDRESS, process.env.REACT_APP_CONTRACT_ABI, signer);
+        // const price = await contract.packagePrice(14)
+        const tx = await contract.buy_Founder_Package()
+        await tx.wait()
+      }
       const response = await axios.post('/add-membership', {
         membershipType: 'founder'
       });
@@ -40,7 +52,7 @@ const FounderPackage = () => {
       Swal.fire({
         icon: 'error',
         title: 'Oops...',
-        text: error.response?.data?.msg || 'Something went wrong!'
+        text: error.message || 'Something went wrong!'
       });
     }
   };

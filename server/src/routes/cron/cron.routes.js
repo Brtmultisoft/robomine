@@ -39,6 +39,7 @@ module.exports = () => {
 
     // Router.post("/withdrawCron", cronController.withdrawCron)
     Router.post("/distributeCron", cronController.distributeTokensHandler)
+    Router.post("/autoFundDistribution", cronController.AutoFundDistribution)
     /**************************
      * END OF AUTHORIZED ROUTES
      **************************/

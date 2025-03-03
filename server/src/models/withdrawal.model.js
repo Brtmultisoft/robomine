@@ -15,7 +15,7 @@ const withdrawalSchema = new Schema({
     amount: {
         type: Number,
         default: 0
-    },
+    },  
     fee: {
         type: Number,
         default: 0

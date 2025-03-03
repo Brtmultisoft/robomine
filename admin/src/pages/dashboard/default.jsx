@@ -279,21 +279,7 @@ export default function DashboardDefault() {
         </EcommerceDataCard>
       </Grid>
 
-      <Grid item xs={12} sm={6} lg={3}>
-        <EcommerceDataCard
-          title="Deposits"
-          count={user?.deposits}
-          color="success"
-          iconPrimary={<Calendar color={theme.palette.success.darker} />}
-          percentage={
-            <Typography color="success.darker" sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              <ArrowUp size={16} style={{ transform: 'rotate(45deg)' }} /> {generateRandomPercentage(user?.deposits)}%
-            </Typography>
-          }
-        >
-          <EcommerceDataChart color={theme.palette.success.darker} />
-        </EcommerceDataCard>
-      </Grid>
+      
       <Grid item xs={12} sm={6} lg={3}>
         <EcommerceDataCard
           title="Withdrawals"
@@ -309,7 +295,21 @@ export default function DashboardDefault() {
           <EcommerceDataChart color={theme.palette.error.dark} />
         </EcommerceDataCard>
       </Grid>
-
+      <Grid item xs={12} sm={6} lg={3}>
+        <EcommerceDataCard
+          title="Today Total Slot Buy"
+          count={user?.totalCount}
+          color="error"
+          iconPrimary={<CloudChange color={theme.palette.error.dark} />}
+          percentage={
+            <Typography color="error.dark" sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+              <ArrowDown size={16} style={{ transform: 'rotate(45deg)' }} /> {generateRandomPercentage(user?.totalCount)}%
+            </Typography>
+          }
+        >
+          <EcommerceDataChart color={theme.palette.error.dark} />
+        </EcommerceDataCard>
+      </Grid>
     </Grid>
   );
 }

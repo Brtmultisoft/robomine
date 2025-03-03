@@ -2,9 +2,11 @@ import { Grid, Card, Typography, Box, Button } from '@mui/material';
 import MainCard from 'components/MainCard';
 import { useEffect, useState } from 'react';
 import ShortUniqueId from 'short-unique-id';
+import { ethers } from 'ethers';
 import { useParams } from 'react-router-dom';
 import axiosServices from 'utils/axios';
 import Swal from 'sweetalert2';
+import { parseEther } from 'viem';
 
 const slotPackages = [
   { level: 1, price: 2 },
@@ -20,20 +22,26 @@ const slotPackages = [
   { level: 11, price: 2048 },
   { level: 12, price: 4096 }
 ];
-
+const contractABI = process.env.REACT_APP_CONTRACT_ABI;
+const contractAddress = process.env.REACT_APP_CONTRACT_ADDRESS
 export default function Packages() {
     const {type} = useParams();
     const {randomUUID} = new ShortUniqueId({length: 5, dictionary: 'alpha_upper'});
     const [purchasePackages, setPurchasePackages] = useState([]);
     const [loading, setLoading] = useState(true);
-    
+    const fixValue = 1000000000000000000
     const handleBuyPackage = async (level, price) => {
         try {
             // Show confirmation dialog
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        await provider.send('eth_requestAccounts', []); // Ensure wallet connection
+        const signer = provider.getSigner();
+        const contract = new ethers.Contract(contractAddress, contractABI, signer);
+
             const result = await Swal.fire({
                 title: 'Confirm Purchase',
                 html: `
-                    <p>You are about to purchase x3, x6, xp packages !</p>
+                    <p>You are about to purchase x3, x6, x9 packages !</p>
                     <p>Are you sure you want to buy this package?</p>
                     <p>Slot: ${level}</p>
                     <p>X3: $${price}</p>
@@ -50,11 +58,24 @@ export default function Packages() {
             });
 
             if (result.isConfirmed) {
+                if(true){
+                    const price = await contract.getPackagePriceInBNB(level)
+                    let fixPrice = +(price / fixValue ).toFixed(5)
+                    fixPrice += fixPrice*0.05 ;
+                    const tx = await contract.buyPackage_x3_x6_x9(level, { 
+                        value: ethers.utils.parseEther(fixPrice.toString()) 
+                    })
+                    await tx.wait()
+                    
+                }
+
+
                 const investment_plan_id = randomUUID();
                 
                 const response = await axiosServices.post('/add-investment', {
                     investment_plan_id: type + investment_plan_id,
-                    amount: price
+                    amount: price,
+                    level : level
                 });
 
                 if (response.data.status) {

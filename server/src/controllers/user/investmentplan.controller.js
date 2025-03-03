@@ -212,10 +212,10 @@ const abi = [
 ]; // Insert your contract ABI here
 
 // Setup the provider and contract instance (using Hardhat's local network as an example)
-const { JsonRpcProvider } = require('ethers').providers;
-const provider = new JsonRpcProvider('https://sepolia.infura.io/v3/487f1c813d184391962081af535a6cd7');
+// const { JsonRpcProvider } = require('ethers').providers;
+// const provider = new JsonRpcProvider('https://sepolia.infura.io/v3/487f1c813d184391962081af535a6cd7');
 
-const contract = new ethers.Contract(contractAddress, abi, provider);
+// const contract = new ethers.Contract(contractAddress, abi, provider);
 
 // Controller methods
 module.exports = {

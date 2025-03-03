@@ -32,8 +32,11 @@ export default function ROI(){
             cell: (props) => {
               return new Date(props.getValue()).toLocaleString();
             },
-            enableColumnFilter: false,
-            enableGrouping: false
+            enableColumnFilter: true,
+            enableGrouping: true,
+            filter: 'created_at',
+            sortType: 'datetime',
+            sortDescFirst: true,
           }
         ],
         []

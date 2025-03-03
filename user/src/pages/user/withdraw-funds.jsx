@@ -5,6 +5,8 @@ import { openSnackbar } from 'api/snackbar';
 import axios from 'utils/axios';
 import Handler from 'myComponents/requests';
 import Loader from 'components/Loader';
+import { ethers } from 'ethers';
+import Swal from 'sweetalert2';
 
 export default function AddFunds() {
 
@@ -33,20 +35,20 @@ export default function AddFunds() {
                 header: 'USDT Amount',
                 accessorKey: 'amount'
             },
-            {
-                header: 'Tokens',
-                accessorKey: 'net_amount',
-                cell: (props) => {
-                    return props.getValue()?.toFixed(5) ?? 0
-                },
-            },
-            {
-                header: 'Coversion Rate',
-                accessorKey: 'rate',
-                cell: (props) => {
-                    return props.getValue()?.toFixed(5) ?? 0
-                },
-            },
+            // {
+            //     header: 'Tokens',
+            //     accessorKey: 'net_amount',
+            //     cell: (props) => {
+            //         return props.getValue()?.toFixed(5) ?? 0
+            //     },
+            // },
+            // {
+            //     header: 'Coversion Rate',
+            //     accessorKey: 'rate',
+            //     cell: (props) => {
+            //         return props.getValue()?.toFixed(5) ?? 0
+            //     },
+            // },
             {
                 header: 'Status',
                 accessorKey: 'status',
@@ -79,89 +81,125 @@ export default function AddFunds() {
 
     const [amount, setAmount] = useState()
     const [address, setAddress] = useState()
-    const [walletType, setWalletType] = useState('tasksIncome')
+    const [walletType, setWalletType] = useState('wallet')
 
     const [user, setUser] = useState()
     const [tasksIncome, setTasksIncome] = useState()
     const [levelIncome, setLevelIncome] = useState()
 
-    const [state, setState] = useState(false);
-
+    const [state, setState] = useState({
+        loading : false,
+        success : false,
+        msg : ''
+    });
+    const contractABI = process.env.REACT_APP_CONTRACT_ABI;
+    const contractAddress = process.env.REACT_APP_CONTRACT_ADDRESS
     useEffect(() => {
         let user = JSON.parse(window.localStorage.getItem('user'));
         if (user) {
             setUser(user)
-            setTasksIncome(user?.extra?.tasksIncome)
+            setAddress(user?.username)
+            setTasksIncome(user?.wallet)
             setLevelIncome(user?.extra?.levelIncome)
         }
     }, [])
-
+    const fixValue = 1000000000000000000
+   console.log("user", user)
     const handleTXN = async () => {
         try {
-
             if (!amount || amount <= 0) throw "Invalid amount!"
-            if (amount > user[`${walletType}`]) throw "Amount must be less or equal than your balance!"
-            // if (!address || address.length <= 26) throw "Invalid address!"
+            if (amount > user?.wallet) throw "Amount must be less or equal than your balance!"
+            if (!address || address.length <= 26) throw "Invalid address!"
 
-            // HARDCODED: withdrawalGasMinimumAmount
-            if(user.extra?.gas_wallet < 2) throw "You don't have enough gas amount in your gas wallet to proceed with the withdrawal!"
+            // Show confirmation dialog
+            // const result = await Swal.fire({
+            //     title: 'Confirm Withdrawal',
+            //     text: `Are you sure you want to withdraw ${amount} ${process.env.VITE_APP_CURRENCY_TYPE}?`,
+            //     icon: 'warning',
+            //     showCancelButton: true,
+            //     confirmButtonColor: '#3085d6',
+            //     cancelButtonColor: '#d33',
+            //     confirmButtonText: 'Yes, withdraw!'
+            // });
 
-            await Handler({
-                url: `/add-withdrawal`,
-                data: {
-                    amount,
-                    // address,
-                    walletType
-                },
-                setState
-            }).then(() => {
-                setAmount('')
-                setAddress('')
-                switch(walletType){
-                    case 'tasksIncome':
-                        setTasksIncome(old => old - parseFloat(amount))
-                        break;
-                    case 'levelIncome':
-                        setLevelIncome(old => old - parseFloat(amount))
-                        break;
-                    default: 
-                        console.log("Something went wrong...")
+            // If user confirms
+            if (true) {
+                setState({ loading: true, msg: "Processing withdrawal..." })
+                  const provider = new ethers.providers.Web3Provider(window.ethereum);
+                    console.log("withdraw")
+                    await provider.send('eth_requestAccounts', []); 
+                    const signer = provider.getSigner();
+                    const contract = new ethers.Contract(contractAddress, contractABI, signer);
+                    const usdTobnb = await contract.bnbToUsd(amount)
+                    const withdrawAmount = (amount / usdTobnb).toFixed(5)
+                if(true){
+                  
+                    const tx = await contract.withdraw({ value : ethers.utils.parseEther(withdrawAmount.toString())})
+                    await tx.wait()
                 }
-                // setUser((old) => {
-                    // console.log(old.extra[`${walletType}`], parseFloat(amount))
-                    // return { ...old, [`extra.${walletType}`]: old.extra[`${walletType}`] - parseFloat(amount) }
-                // })
-            }).catch((e) => console.log(e));
+                await Handler({
+                    url: `/add-withdrawal`,
+                    data: {
+                        amount,
+                        net_amount : withdrawAmount,
+                        address : user.username,
+                        walletType : 'wallet'
+                    },
+                    setState
+                }).then(() => {
+                    setAmount('')
+                    setAddress('')
+                    setTasksIncome(old => old - parseFloat(amount))
+                    setUser((old) => ({...old, wallet : old.wallet - parseFloat(amount)}))
+                    
+                    // Show success message
+                    Swal.fire({
+                        title: 'Success!',
+                        text: 'Withdrawal processed successfully!',
+                        icon: 'success',
+                        timer: 2000,
+                        showConfirmButton: false
+                    }).then(() => {
+                        // Refresh the page data
+                        window.location.reload();
+                    });
+
+                }).catch((e) => {
+                    console.error(e)
+                    Swal.fire({
+                        title: 'Error!',
+                        text: 'Failed to process withdrawal. Please try again.',
+                        icon: 'error'
+                    });
+                });
+            }
 
         } catch (e) {
-            // console.log(e)
-            openSnackbar({
-                open: true,
-                message: e,
-                variant: 'alert',
-
-                alert: {
-                    color: 'error'
-                }
-            })
+            console.error(e)
+            Swal.fire({
+                title: 'Error!',
+                text: typeof e === 'string' ? e : 'Something went wrong!',
+                icon: 'error'
+            });
+            setState({loading : false})
         }
     }
+   console.log("user", user)
 
 
-
-    return state ? (
+    return state.loading ? (
         <Loader />
     ) : (
         <>
             <Stack sx={{ pb: 3 }}>
                 <Typography variant="subtitle1">
-                    Tasks Balance: {process.env.VITE_APP_CURRENCY_TYPE}{tasksIncome ?? 0}
+                    Wallet Balance: {process.env.VITE_APP_CURRENCY_TYPE}{tasksIncome ?? 0}
                     <br />
-                    Level Balance: {process.env.VITE_APP_CURRENCY_TYPE}{levelIncome ?? 0}
+                    {/* Level Balance: {process.env.VITE_APP_CURRENCY_TYPE}{levelIncome ?? 0} */}
                 </Typography>
             </Stack>
             <Stack direction="row" alignItems="center" spacing={isMobileDevice ? 12 : 1.25} sx={{ pb: 3 }}>
-                <Stack>
+                {/* <Stack>
                     <Select
                         fullWidth
                         id="wallet-type"
@@ -169,17 +207,17 @@ export default function AddFunds() {
                         onChange={(e) => setWalletType(e.target.value)}
                         autoFocus
                     >
-                        <MenuItem key={1} value="tasksIncome">Tasks Wallet</MenuItem>
+                        <MenuItem key={1} value="wallet">Tasks Wallet</MenuItem>
                         <MenuItem key={2} value="levelIncome">Level Wallet</MenuItem>
                     </Select>
 
-                </Stack>
+                </Stack> */}
                 <Stack>
                     <TextField
                         fullWidth
                         id="personal-amount"
                         value={amount}
-                        onChange={(e) => { setAmount(e.target.value) }}
+                        onChange={(e) => {setAmount(e.target.value) }}
                         placeholder="Enter Amount"
                         autoFocus
                     />

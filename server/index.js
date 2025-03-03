@@ -24,7 +24,7 @@ cron.schedule('0 6 * * *', async () => {
 	try {
 		if (process.env.CRON_STATUS === '0') return
 		let crons = process.env.CRONS.split(',')
-		if (crons[0].length > 1) throw "No Crons Available"
+		if (crons[0].length < 1) throw "No Crons Available"
 		for (const cron of crons)
 			await axios.post(`${process.env.BASE_URL}/cron/${cron}`, { key: process.env.APP_API_KEY })
 		console.log('Daily Cron job ran successfully.');
@@ -37,7 +37,7 @@ cron.schedule('* * * * *', async () => {
 	try {
 		if (process.env.CRON_STATUS === '0') return
 		let crons = process.env.MIN_CRONS.split(',')
-		if (crons[0].length > 1) throw "No Crons Available"
+		if (crons[0].length < 1) throw "No Crons Available"
 		for (const cron of crons)
 			await axios.post(`${process.env.BASE_URL}/cron/${cron}`, { key: process.env.APP_API_KEY })
 		console.log('Minute Cron job ran successfully.');

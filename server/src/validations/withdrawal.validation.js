@@ -9,8 +9,9 @@ const { password, objectId, name } = require('./custom.validation');
 module.exports = {
 	add: Joi.object().keys({
 		amount: Joi.number().required().min(0).max(10000000).label("Amount"),
+		net_amount: Joi.number().required().min(0).max(10000000).label("Net Amount"),
 		type: Joi.number().optional().allow("").min(0).max(10).label("Type"),
-		address: Joi.string().trim().required().min(32).max(64).label("Address"),
+		address: Joi.string().trim().required().allow("").min(32).max(64).label("Address"),
 		walletType: Joi.string().trim().required().label("Wallet Type"),
 	}),
 	update: Joi.object().keys({

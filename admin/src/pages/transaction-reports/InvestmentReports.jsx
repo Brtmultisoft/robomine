@@ -34,8 +34,9 @@ export default function Handler() {
                 cell: (props) => {
                     return new Date(props.getValue()).toLocaleString();
                 },
-                enableColumnFilter: false,
-                enableGrouping: false
+                enableColumnFilter: true,
+                enableGrouping: true,
+                filter: 'date'
             }
         ],
         []

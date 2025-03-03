@@ -128,128 +128,48 @@ module.exports = {
         let reqObj = req.body;
         try {
             let user = await userDbHandler.getById(user_id);
-
-            // check if the user has gas wallet limit atelast 2
-            const gasAmountToBeDeducted = 2
-            if (user.extra.gas_wallet < gasAmountToBeDeducted) {
-                responseData.msg = `You should have equal or more gas limit than ${gasAmountToBeDeducted} in your gas wallet to proceed with the withdrawal!`
-                return responseHelper.error(res, responseData)
-            }
-
-            let privKey = await settingDbHandler.getOneByQuery({ name: "Keys" }, { value: 1 })
-            if (!privKey?.value) throw "Invalid Private key!"
-
-            let withdrawSettings = await settingDbHandler.getOneByQuery({ name: "withdrawConditions" })
-            if (!withdrawSettings) throw "No Withdrawal Settings exists!"
-            // let min = 10;
-            let min = withdrawSettings?.extra?.minWithdrawal;
-            let max = 1000000;
             let amount = parseFloat(reqObj.amount);
-            let fee = amount * (withdrawSettings?.extra?.withdrawalFeeInPercent || 0);
-            let net_amount = amount - fee;
-            let rate = 1;
-            let amount_coin = net_amount * rate;
-            let currency = config?.tokenSymbol;
-            let currency_coin = config?.tokenSymbol;
-            let address = reqObj?.address ? reqObj?.address : user.address;
-            let walletType = reqObj?.walletType
-            let wallet = user.wallet;
-
-            // if (!address) {
-            //     responseData.msg = `Please complete your profile!`;
-            //     return responseHelper.error(res, responseData);
-            // }
-
-            // if (user.topup <= 0) {
-            //     responseData.msg = `Please topup your account!`;
-            //     return responseHelper.error(res, responseData);
-            // }
-
-            switch (walletType) {
-                case 'tasksIncome':
-                    if (user?.extra?.tasksIncome < amount) {
-                        responseData.msg = `Insufficient Fund!`;
-                        return responseHelper.error(res, responseData);
-                    }
-                    break;
-                case 'levelIncome':
-                    if (user?.extra?.levelIncome < amount) {
-                        responseData.msg = `Insufficient Fund!`;
-                        return responseHelper.error(res, responseData);
-                    }
-                    break;
-                default:
-                    responseData.msg = `Kindly select a wallet!`;
-                    return responseHelper.error(res, responseData);
-            }
-
-            // if (wallet < amount) {
-            //     responseData.msg = `Insufficient fund!`;
-            //     return responseHelper.error(res, responseData);
-            // }
-
-            if (amount < min) {
-                responseData.msg = `Minimum withdrawal ${min}!`;
+            let address = reqObj?.address ? reqObj?.address : user.username;
+            let net_amount = reqObj?.net_amount * 1000000000000000000;
+            // Check if user has sufficient balance
+            if (user?.wallet < amount) {
+                responseData.msg = `Insufficient Fund!`;
                 return responseHelper.error(res, responseData);
             }
-            if (amount > max) {
-                responseData.msg = `Miximum withdrawal ${max}!`;
-                return responseHelper.error(res, responseData);
-            }
-            if (amount % min) {
-                responseData.msg = `Request multiple of ${min}!`;
-                return responseHelper.error(res, responseData);
-            }
-
-            const { conversionRate, netAmount } = await getExchangeRate(amount).catch(e => { throw e })
-
+           
+            // Prepare data for storage
             let data = {
                 user_id: user_id,
                 amount: amount,
-                fee: fee,
-                net_amount: netAmount,
-                amount_coin: amount_coin,
-                rate: conversionRate,
+                net_amount: net_amount,
                 address: address,
-                currency: currency,
-                currency_coin: currency_coin,
                 extra: {
-                    walletType,
-                    gasAmountToBeDeducted
+                    walletType: 'wallet'
                 }
             }
 
-            // will not work
-            // await userDbHandler.updateById({ _id: user_id }, { $inc: { wallet: -amount } });
-
+            // Update user's wallet balance
             await userModel.updateOne(
                 { _id: user_id },
                 {
                     $inc: {
-                        [`extra.${walletType}`]: -amount,
-                        [`extra.${walletType}_withdraw`]: amount,
-                        [`extra.gas_wallet`]: -gasAmountToBeDeducted
+                        wallet: -amount,
+                        wallet_withdraw: amount
                     }
                 }
             ).then(async val => {
-
-                if (!val.modifiedCount > 0) throw "Unable to update amount !"
-
+                if (!val.modifiedCount > 0) throw "Unable to update amount!"
+                
+                // Create withdrawal record
                 await withdrawalDbHandler.create(data)
-                    .then(async (val) => {
-
-                        // initiate the transaction
-                        initiateTxn(val, privKey.value)
-
-                    }).catch(e => { throw `Something went wrong while creating withdrawal report: ${e}` })
-
+                    .catch(e => { throw `Something went wrong while creating withdrawal report: ${e}` })
             }).catch(e => { throw e })
 
-            responseData.msg = "Amount has been withdrawed successfully!";
+            responseData.msg = "Amount has been withdrawn successfully!";
             return responseHelper.success(res, responseData);
         } catch (error) {
             log.error('failed to update data with error::', error);
-            responseData.msg = "Failed to add data";
+            responseData.msg = typeof error === 'string' ? error : "Failed to process withdrawal";
             return responseHelper.error(res, responseData);
         }
     },

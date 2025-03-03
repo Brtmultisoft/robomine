@@ -83,11 +83,11 @@ const userSchema = new Schema({
     },
     wallet: {
         type: Number,
-        default: 1000,
+        default: 0,
     },
     wallet_topup: {
         type: Number,
-        default: 0,
+        default: 1000,
     },
     wallet_token: {
         type: Number,

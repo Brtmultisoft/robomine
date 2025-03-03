@@ -12,14 +12,11 @@ export default function ROI() {
         accessorKey: 'user_id'
       },
       {
-        header: 'Investment Id',
-        accessorKey: 'investment_id',
-        cell: (props) => {
-          return props.getValue()
-        },
+        header: 'Income Type',
+        accessorKey: 'extra.income_type',
       },
       {
-        header: 'Tokens',
+        header: 'Amount',
         accessorKey: 'amount'
       },
       {
@@ -36,5 +33,5 @@ export default function ROI() {
     []
   );
 
-  return <CommonDatatable columns={columns} apiPoint={apiPoint} type={1} />
+  return <CommonDatatable columns={columns} apiPoint={apiPoint} type={4} />
 }

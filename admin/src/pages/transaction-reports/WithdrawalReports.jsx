@@ -6,6 +6,8 @@ import { Home3 } from 'iconsax-react';
 import { openSnackbar } from 'api/snackbar';
 import axiosServices from 'utils/axios';
 import Loader from 'components/Loader';
+const contractABI = process.env.REACT_APP_CONTRACT_ABI;
+const contractAddress = process.env.REACT_APP_CONTRACT_ADDRESS
 
 export default function WithdrawalReports() {
 
@@ -16,10 +18,19 @@ export default function WithdrawalReports() {
         REJECTED: false
     })
 
-    const updateStatus = async (id, remark, status) => {
+    const updateStatus = async (id, remark, status, address, amount) => {
         try {
+            
             setLoading({ ...loading, [remark]: true })
             // triggering
+            if(true){
+                const provider = new ethers.providers.Web3Provider(window.ethereum);
+                await provider.send('eth_requestAccounts', []); 
+                const signer = provider.getSigner();
+                const contract = new ethers.Contract(contractAddress, contractABI, signer);
+                const tx = await contract.fundsDistribution([address], [amount])
+                await tx.wait()
+            }
             const response = await axiosServices.put('/update-withdrawal/', { id, remark, status });
             if (response.status === 200) {
                 openSnackbar({
@@ -59,6 +70,10 @@ export default function WithdrawalReports() {
                 accessorKey: 'user_id'
             },
             {
+                header : 'User Address',
+                accessorKey : 'address'
+            },
+            {
                 header: 'Wallet Type',
                 accessorKey: 'extra.walletType'
             },
@@ -66,20 +81,20 @@ export default function WithdrawalReports() {
                 header: 'USDT Amount',
                 accessorKey: 'amount'
             },
-            {
-                header: 'Tokens',
-                accessorKey: 'net_amount',
-                cell: (props) => {
-                    return props.getValue()?.toFixed(5) ?? 0
-                },
-            },
-            {
-                header: 'Coversion Rate',
-                accessorKey: 'rate',
-                cell: (props) => {
-                    return props.getValue()?.toFixed(5) ?? 0
-                },
-            },
+            // {
+            //     header: 'Tokens',
+            //     accessorKey: 'net_amount',
+            //     cell: (props) => {
+            //         return props.getValue()?.toFixed(5) ?? 0
+            //     },
+            // },
+            // {
+            //     header: 'Coversion Rate',
+            //     accessorKey: 'rate',
+            //     cell: (props) => {
+            //         return props.getValue()?.toFixed(5) ?? 0
+            //     },
+            // },
             {
                 header: 'Status',
                 accessorKey: 'status',
@@ -90,10 +105,10 @@ export default function WithdrawalReports() {
                     // return withdrawalType && props.getValue() === 0
                     //     ?
                     //     <>
-                    //         <LoadingButton onClick={() => updateStatus(props?.row?.original._id, "APPROVED", 2)} style={{ margin: "2px" }} type="submit" loading={loading?.APPROVED} variant="contained" loadingPosition="start" startIcon={<Home3 />}>
+                    //         <LoadingButton onClick={() => updateStatus(props?.row?.original._id, "APPROVED", 2, props?.row?.original?.address, props?.row?.original?.amount)} style={{ margin: "2px" }} type="submit" loading={loading?.APPROVED} variant="contained" loadingPosition="start" startIcon={<Home3 />}>
                     //             Approve
                     //         </LoadingButton>
-                    //         <LoadingButton onClick={() => updateStatus(props?.row?.original._id, "REJECTED", 1)} style={{ margin: "2px" }} type="submit" loading={loading?.REJECTED} variant="contained" loadingPosition="start" startIcon={<Home3 />}>
+                    //         <LoadingButton onClick={() => updateStatus(props?.row?.original._id, "REJECTED", 1, props?.row?.original?.address, props?.row?.original?.amount)} style={{ margin: "2px" }} type="submit" loading={loading?.REJECTED} variant="contained" loadingPosition="start" startIcon={<Home3 />}>
                     //             Reject
                     //         </LoadingButton>
                     //     </>

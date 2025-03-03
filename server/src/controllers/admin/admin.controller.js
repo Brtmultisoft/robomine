@@ -14,6 +14,7 @@ const { userModel, incomeModel } = require('../../models');
 
 const { parse } = require('json2csv');
 const { levelIncome } = require('../user/cron.controller');
+const investmentModel = require('../../models/investment.model');
 
 /*******************
  * PRIVATE FUNCTIONS
@@ -129,7 +130,30 @@ module.exports = {
         log.info('Recieved request for Getting all users data:', admin_id);
         let responseData = {};
         try {
+            const startOfDay = new Date();
+            startOfDay.setHours(0, 0, 0, 0); // Start of the day (00:00:00.000)
+            
+            const endOfDay = new Date();
+            endOfDay.setHours(23, 59, 59, 999); // End of the day (23:59:59.999)
+            
+            const result2 = await investmentModel.aggregate([
+              {
+                $match: {
+                  created_at: { $gte: startOfDay, $lte: endOfDay  }, // Filter investments created today
+                  type: 0
+                }
+              },
+              {
+                $group: {
+                  _id: null, // Group all documents into a single group
+                  totalAmount: { $sum: "$amount" }, // Sum the `amount` field
+                  totalCount: { $sum: 1 }
+                }
+              }
+            ]).catch(e => { throw e });
 
+            const totalAmount = result2.length > 0 ? result2[0].totalAmount : 0;
+            const totalCount = result2.length > 0 ? result2[0].totalCount : 0;
             const result = await userModel.aggregate([
                 {
                     $group: {
@@ -152,12 +176,19 @@ module.exports = {
                         totalInvestment: { $sum: "$total_investment" },
                         provisionIncome: { $sum: "$extra.provisionIncome" },
                         matrixIncome: { $sum: "$extra.matrixIncome" },
-                        userCount : { $sum: 1 }
+                        userCount : { $sum: 1 },
                     } 
                 }
             ]).catch(e => { throw e })
-
+            
+    
+            
+            // Extract the total amount from the result
+           
+            
             responseData.data = result.length > 0 ? result[0] : []
+            responseData.data.totalAmount = totalAmount
+            responseData.data.totalCount = totalCount
             return responseHelper.success(res, responseData)
         } catch (error) {
             log.error('failed to get all users data with error::', error);

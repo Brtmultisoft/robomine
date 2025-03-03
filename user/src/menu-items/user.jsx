@@ -66,6 +66,20 @@ const profile = {
       icon: icons.data
     },
     {
+      id: 'Prime Member Income  ',
+      title: <FormattedMessage id="Prime Member Income" />,
+      type: 'item',
+      url: '/user/prime-income',
+      icon: icons.data
+    },
+    {
+      id: 'Founder Member Income',
+      title: <FormattedMessage id="Founder Member Income" />,
+      type: 'item',
+      url: '/user/founder-income',
+      icon: icons.data
+    },
+    {
       id: 'Active Package',
       title: <FormattedMessage id="Active Package" />,
       type: 'item',

@@ -149,6 +149,8 @@ const Stakedreport = Loadable(lazy(() => import('pages/investments/staked-report
 const DirectIncome = Loadable(lazy(() => import('pages/incomes/DirectIncome')));
 const ROI = Loadable(lazy(() => import('pages/incomes/ROI')));
 const TeamBonus = Loadable(lazy(() => import('pages/incomes/TeamBonus')));
+const PrimeIncome = Loadable(lazy(() => import('pages/incomes/PrimeMemberIncome')));
+const FounderIncome = Loadable(lazy(() => import('pages/incomes/FounderMemberIncome')));
 const GeneralSettings = Loadable(lazy(() => import('pages/incomes/GeneralSettings')));
 
 const TransferFunds = Loadable(lazy(() => import('pages/user/TransferFunds')))
@@ -276,6 +278,13 @@ const MainRoutes = {
             {
               path: 'team',
               element: <TeamBonus />
+            },{
+              path : 'prime-income',
+              element : <PrimeIncome />
+            },
+            {
+              path : 'founder-income',
+              element : <FounderIncome />
             }
           ]
         },

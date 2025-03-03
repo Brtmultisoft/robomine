@@ -144,25 +144,18 @@ export default function GeneralSettings() {
 
   const inputRef = useInputRef();
 
-  const getValue = (name) => {
-    for (const key of settings) {
-      if (key?.name === name) {
-        console.log(name, key.value)
-        return key?.value
-      }
-    }
-  }
 
-  useEffect(() => {
-    (async () => {
-      const res = await axiosServices.get("get-all-settings")
-      if (res.status === 200) {
-        setSettings(res?.data?.result[3])
-      }
-      else
-        setSettings([])
-    })()
-  }, [])
+
+  // useEffect(() => {
+  //   (async () => {
+  //     const res = await axiosServices.get("get-all-settings")
+  //     if (res.status === 200) {
+  //       setSettings(res?.data?.result[3])
+  //     }
+  //     else
+  //       setSettings([])
+  //   })()
+  // }, [])
 
   return <>
 
@@ -216,7 +209,6 @@ export default function GeneralSettings() {
                     <TextField
                       fullWidth
                       id="key"
-                      value={values.key}
                       onBlur={handleBlur}
                       onChange={handleChange}
                       placeholder=""

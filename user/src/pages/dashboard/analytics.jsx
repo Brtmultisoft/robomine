@@ -191,7 +191,7 @@ export default function DashboardAnalytics() {
       <Box sx={{ bgcolor: 'grey.900', p: 3, borderRadius: 2 }}>
         <Grid container spacing={3}>
           {/* Row 1 - Statistics Cards */}
-          <Grid item xs={12} sm={6} lg={4}>
+          {/* <Grid item xs={12} sm={6} lg={4}>
             <NewOrders
               count={userData?.partners || 0}
               value="Team"
@@ -199,7 +199,7 @@ export default function DashboardAnalytics() {
               increment={0}
               darkMode={true}
             />
-          </Grid>
+          </Grid> */}
 
           <Grid item xs={12} sm={6} lg={4}>
             <NewOrders
@@ -234,7 +234,7 @@ export default function DashboardAnalytics() {
           </Grid>
           <Grid item xs={12} sm={6} lg={4}>
             <NewOrders
-              count={`${userData?.profits?.busd?.toFixed(3) || 0}`}
+              count={`${userData?.extra?.cappingLimit || 0}`}
               value="Capping Limit"
               subtitle="Capping Limit"
               // secondaryCount={`$${userData?.profits?.bnb || 0}`}

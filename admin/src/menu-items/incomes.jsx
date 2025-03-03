@@ -54,27 +54,27 @@ const incomes = {
       url: '/incomes/level-reports',
       icon: icons.data
     },
-    // {
-    //   id: 'data',
-    //   title: <FormattedMessage id={`VIP ${incomeWording}`} />,
-    //   type: 'item',
-    //   url: '/incomes/vip',
-    //   icon: icons.data
-    // },
-    // {
-    //   id: 'data',
-    //   title: <FormattedMessage id={`Direct Income`} />,
-    //   type: 'item',
-    //   url: '/incomes/team',
-    //   icon: icons.data
-    // },
-    // {
-    //   id: 'general-settings',
-    //   title: <FormattedMessage id={`General Settings`} />,
-    //   type: 'item',
-    //   url: '/incomes/general-settings',
-    //   icon: icons.data
-    // },
+    {
+      id: 'data',
+      title: <FormattedMessage id={`Prime Member Income`} />,
+      type: 'item',
+      url: '/incomes/prime-income',
+      icon: icons.data
+    },
+    {
+      id: 'data',
+      title: <FormattedMessage id={`Founder Member Income`} />,
+      type: 'item',
+      url: '/incomes/founder-income',
+      icon: icons.data
+    },
+    {
+      id: 'general-settings',
+      title: <FormattedMessage id={`General Settings`} />,
+      type: 'item',
+      url: '/incomes/general-settings',
+      icon: icons.data
+    },
   ]
 };
 

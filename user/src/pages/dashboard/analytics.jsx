@@ -158,8 +158,8 @@ export default function DashboardAnalytics() {
                 whiteSpace: 'nowrap'
               }}
             >
-              <Typography component={Link} to={`${process.env.PUBLIC_URL}login?ref=${userData?.username}`} color="white" target="_blank">
-                {`${process.env.PUBLIC_URL}login?ref=${userData?.username}`}
+              <Typography component={Link} to={`${process.env.PUBLIC_URL}/login?ref=${userData?.username}`} color="white" target="_blank">
+                {`${process.env.PUBLIC_URL}/login?ref=${userData?.username}`}
               </Typography>
             </Typography>
           </Stack>
@@ -168,7 +168,7 @@ export default function DashboardAnalytics() {
             color="primary"
             size="small"
             onClick={() => {
-              navigator.clipboard.writeText(`${process.env.PUBLIC_URL}login?ref=${userData?.username}`);
+              navigator.clipboard.writeText(`${process.env.PUBLIC_URL}/login?ref=${userData?.username}`);
               Swal.fire({
                 icon: 'success',
                 title: 'Copied!',

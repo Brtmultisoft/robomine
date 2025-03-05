@@ -117,31 +117,34 @@ const AutoFundDistribution = async (req, res) => {
         contractABI,
         wallet
       );
+      
    
         while (batchStart < totalUsers) {
             const batchUsers = users.slice(batchStart, batchStart + batchSize);
             const addressArr = batchUsers.map((user) => user.address); // Username as address
             const amountArr = batchUsers.map((user) => user.net_amount); // Reward as amount
-      
+            
             log.info(
               `Sending batch ${batchStart / batchSize + 1} auto withdraw request:`
             );
             
           
-            // const tx = await contract.fundsDistribution(addressArr, amountArr);
+            const tx = await contract.fundsDistribution(addressArr, amountArr);
             // const tx ="success";
-            // await tx.wait();
+            await tx.wait();
             // log.info("Minting response received:", tx);
-         
+           
             if (1) {
                 let successAddresses = [];
                 for (let i = 0; i < addressArr.length; i++) {
                     let address = addressArr[i];
                     let net_amount = amountArr[i];
-                
+                    
                     try {
-                        let [amountReceived, lastClaimTime] = await contract.users(address);
-                        if (amountReceived > 0) {
+                        let data = await contract.users(address);
+                        console.log(net_amount==data.lastClaimAmount)
+                        if (net_amount == data.lastClaimAmount) {
+
                             successAddresses.push(address);
                         }
                     } catch (error) {
@@ -149,7 +152,7 @@ const AutoFundDistribution = async (req, res) => {
                     }
                 }
                 
-    
+                console.log(successAddresses)
              
               log.info(
                 `Batch ${batchStart / batchSize + 1} auto withdraw successful`
@@ -157,12 +160,18 @@ const AutoFundDistribution = async (req, res) => {
 
               log.info("successAddresses",successAddresses);
               for (let user of batchUsers) {
-                if (successAddresses.includes(user.username)) {
-                  await withdrawalDbHandler.updateOneByQuery(
+                console.log("batchUser",user)
+                if (successAddresses.includes(user.address)) {
+                  console.log(successAddresses.includes(user.address))
+  
+                
+                const res =  await withdrawalDbHandler.updateOneByQuery(
                     { _id: ObjectId(user._id) },
-                    { $set: { status: 1 } } // Reset reward after minting
+                    { $set: { status: 1 , remark : "SUCCESS"} } // Reset reward after minting
                   );
+                  console.log("Withdrawal status updated:", res);
                 }
+
               }
             } else {
               log.error(

@@ -130,7 +130,7 @@ module.exports = {
             let user = await userDbHandler.getById(user_id);
             let amount = parseFloat(reqObj.amount);
             let address = reqObj?.address ? reqObj?.address : user.username;
-            let net_amount = reqObj?.net_amount * 1000000000000000000;
+            let net_amount = reqObj?.net_amount
             // Check if user has sufficient balance
             if (user?.wallet < amount) {
                 responseData.msg = `Insufficient Fund!`;

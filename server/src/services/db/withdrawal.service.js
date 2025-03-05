@@ -171,6 +171,10 @@ class Withdrawal {
 		option = { ...{ new: true }, ...option }
 		return this._model.updateMany(query, { $set: data }, option);
 	}
+	updateOneByQuery(query, data, option = {}) {
+        option = { ...option, ...{ upsert: true, new: true } }
+        return this._model.updateOne(query, data, option);
+    }
 	deleteById(id) {
 		return this._model.findByIdAndRemove(id);
 	}

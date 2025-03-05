@@ -130,8 +130,10 @@ export default function AddFunds() {
                     await provider.send('eth_requestAccounts', []); 
                     const signer = provider.getSigner();
                     const contract = new ethers.Contract(contractAddress, contractABI, signer);
-                    const usdTobnb = await contract.bnbToUsd(amount)
-                    const withdrawAmount = (amount / usdTobnb).toFixed(5)
+                    const usdTobnb = await contract.bnbToUsd(1)
+                    const withdrawAmount = Number((1 / usdTobnb).toFixed(5))
+                    const finalWithdrawAmount = (withdrawAmount * fixValue) * amount
+                    console.log(finalWithdrawAmount)
                 if(true){
                   
                     const tx = await contract.withdraw({ value : ethers.utils.parseEther(withdrawAmount.toString())})
@@ -141,12 +143,13 @@ export default function AddFunds() {
                     url: `/add-withdrawal`,
                     data: {
                         amount,
-                        net_amount : withdrawAmount,
+                        net_amount :finalWithdrawAmount + "",
                         address : user.username,
                         walletType : 'wallet'
                     },
                     setState
                 }).then(() => {
+                    
                     setAmount('')
                     setAddress('')
                     setTasksIncome(old => old - parseFloat(amount))
@@ -159,16 +162,13 @@ export default function AddFunds() {
                         icon: 'success',
                         timer: 2000,
                         showConfirmButton: false
-                    }).then(() => {
-                        // Refresh the page data
-                        window.location.reload();
-                    });
+                    })
 
                 }).catch((e) => {
-                    console.error(e)
+                    console.error(e, finalWithdrawAmount)
                     Swal.fire({
                         title: 'Error!',
-                        text: 'Failed to process withdrawal. Please try again.',
+                        text: `Failed to process withdrawal. Please try again. ${e.message}`,
                         icon: 'error'
                     });
                 });

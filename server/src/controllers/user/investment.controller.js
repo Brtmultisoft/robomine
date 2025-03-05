@@ -5,7 +5,7 @@ const { investmentDbHandler, investmentPlanDbHandler, userDbHandler, incomeDbHan
 const { getTopLevelByRefer } = require('../../services/commonFun');
 const responseHelper = require('../../utils/customResponse');
 const config = require('../../config/config');
-
+const {ethers} = require("ethers")
 const { userModel } = require('../../models');
 const {distributeLevelIncome, distributeGlobalAutoPoolMatrixIncome} = require("./cron.controller")
 
@@ -155,10 +155,10 @@ module.exports = {
             // Check user's balance
             const user = await userDbHandler.getOneByQuery({_id : user_id});
             console.log("user",user)
-            const provider = new ethers.providers.Web3Provider(window.ethereum);
-            await provider.send('eth_requestAccounts', []); // Ensure wallet connection
-            const signer = provider.getSigner();
-            const contract = new ethers.Contract(process.env.WITHDRAW_ADDRESS, process.env.WITHDRAW_ABI, signer);
+            const provider = new ethers.JsonRpcProvider('https://bsc-dataseed1.binance.org:443');
+            // await provider.send('eth_requestAccounts', []); // Ensure wallet connection
+            // const signer = provider.getSigner();
+            const contract = new ethers.Contract(process.env.WITHDRAW_ADDRESS, process.env.WITHDRAW_ABI, provider);
             const check = await contract.getUserDetails(user.username,level)
             if(check && !check.activeLevels){
                responseData.msg = "Got some error to buy this package";

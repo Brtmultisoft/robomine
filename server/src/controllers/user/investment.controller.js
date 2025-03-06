@@ -198,7 +198,8 @@ module.exports = {
             const updatedUser = await userDbHandler.getOneByQuery({_id : user.refer_id})
             await userDbHandler.updateOneByQuery({_id : user.refer_id}, {
                 $set : {
-                    "extra.cappingLimit" : (updatedUser.total_investment * 3) - updatedUser.wallet
+                    "extra.cappingLimit" : (updatedUser.total_investment * 3) - updatedUser.wallet,
+                    "extra.totalCappingLimit" : updatedUser.total_investment * 3
                 }
             })
             let slot_value = validSlots.findIndex(slot => slot === amount);

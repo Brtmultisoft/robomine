@@ -233,10 +233,10 @@ const MainRoutes = {
               element: <Investment_Reports />
             },
            
-            {
-              path: 'deposits',
-              element: <Deposit_Reports />
-            },
+            // {
+            //   path: 'deposits',
+            //   element: <Deposit_Reports />
+            // },
             {
               path: 'withdrawals',
               element: <WithdrawalFunds_Reports />

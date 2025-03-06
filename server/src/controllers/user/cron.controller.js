@@ -212,6 +212,7 @@ const distributeLevelIncome = async (user_id, amount) => {
         { _id: ObjectId(levelUser) },
         {
           $inc: {
+            wallet : levelAmount,
             reward: levelAmount,
             "extra.levelIncome": levelAmount,
             "extra.totalIncome": levelAmount,

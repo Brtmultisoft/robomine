@@ -22,13 +22,13 @@ const transactions = {
   icon: icons.widgets,
   type: 'group',
   children: [
-    {
-      id: 'Deposits',
-      title: <FormattedMessage id="Deposits" />,
-      type: 'item',
-      url: '/transaction-reports/deposits',
-      icon: icons.data
-    },
+    // {
+    //   id: 'Deposits',
+    //   title: <FormattedMessage id="Deposits" />,
+    //   type: 'item',
+    //   url: '/transaction-reports/deposits',
+    //   icon: icons.data
+    // },
     {
       id: 'Withdrawals',
       title: <FormattedMessage id="Withdrawals" />,

@@ -87,7 +87,7 @@ const userSchema = new Schema({
     },
     wallet_topup: {
         type: Number,
-        default: 1000,
+        default: 0,
     },
     wallet_token: {
         type: Number,

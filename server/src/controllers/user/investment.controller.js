@@ -189,7 +189,8 @@ module.exports = {
             const cappingLimit = user2.total_investment * cappingMultiplier;
             await userDbHandler.updateOneByQuery({_id : user_id}, {
                 $inc : {
-                    "extra.cappingLimit" : cappingLimit
+                    "extra.cappingLimit" : cappingLimit,
+                     "extra.totalCappingLimit" : cappingLimit
                 }
             })
 

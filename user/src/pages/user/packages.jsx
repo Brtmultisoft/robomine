@@ -96,7 +96,7 @@ export default function Packages() {
             console.error('Purchase failed:', error);
             Swal.fire({
                 title: 'Error!',
-                text: error.response?.data?.msg || 'Failed to purchase package',
+                text: error.message|| 'Failed to purchase package',
                 icon: 'error'
             });
         }

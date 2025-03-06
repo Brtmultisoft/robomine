@@ -203,7 +203,7 @@ export default function DashboardAnalytics() {
 
           <Grid item xs={12} sm={6} lg={4}>
             <NewOrders
-              count={ `$${(userData?.extra?.totalIncome)?.toFixed(3) || 0}`}
+              count={ `$${(userData?.wallet)?.toFixed(3) || 0}`}
               value="Total Earnings"
               subtitle="Total Earnings"
               increment={387}
@@ -235,8 +235,18 @@ export default function DashboardAnalytics() {
           <Grid item xs={12} sm={6} lg={4}>
             <NewOrders
               count={`${userData?.extra?.cappingLimit || 0}`}
-              value="Capping Limit"
-              subtitle="Capping Limit"
+              value="Left Earning Limit"
+              subtitle="Left Earning Limit"
+              // secondaryCount={`$${userData?.profits?.bnb || 0}`}
+              increment={0}
+              darkMode={true}
+            />
+          </Grid>
+          <Grid item xs={12} sm={6} lg={4}>
+            <NewOrders
+              count={`${userData?.extra?.totalCappingLimit || 0} `}
+              value="Total Earning Limit"
+              subtitle="Total Earning Limit"
               // secondaryCount={`$${userData?.profits?.bnb || 0}`}
               increment={0}
               darkMode={true}

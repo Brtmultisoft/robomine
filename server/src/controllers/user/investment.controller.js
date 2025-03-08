@@ -186,14 +186,13 @@ module.exports = {
             }else{
                 cappingMultiplier = cappingMultiplier * 2
             }
-            const cappingLimit = user2.total_investment * cappingMultiplier;
+            const cappingLimit = (user2.total_investment * cappingMultiplier-user2.wallet);
             await userDbHandler.updateOneByQuery({_id : user_id}, {
-                $inc : {
+                $set : {
                     "extra.cappingLimit" : cappingLimit,
                      "extra.totalCappingLimit" : cappingLimit
                 }
             })
-
 
             const updatedUser = await userDbHandler.getOneByQuery({_id : user.refer_id})
             await userDbHandler.updateOneByQuery({_id : user.refer_id}, {
@@ -204,7 +203,7 @@ module.exports = {
             })
             let slot_value = validSlots.findIndex(slot => slot === amount);
             let referAmount = amount / 2;
-            if(updatedUser && updatedUser.extra?.cappingLimit > 0){
+            if(updatedUser && updatedUser?.extra?.cappingLimit > 0 && updatedUser?.extra?.cappingLimit >= referAmount){
             await userDbHandler.updateOneByQuery({_id: user.refer_id}, {
                 $inc :{
                     "extra.directIncome" : referAmount,
@@ -238,7 +237,7 @@ module.exports = {
                 const amountPerPrime = primeAmount / primeUser.length;
                 for(const investment of primeUser){
                     const CurrentUser = await userDbHandler.getById(investment.user_id);
-                    if(CurrentUser.extra?.cappingLimit > 0){
+                    if(CurrentUser.extra?.cappingLimit > 0 && CurrentUser.extra?.cappingLimit >= amountPerPrime){
                         await userDbHandler.updateById(investment.user_id, {
                             $inc : {
                             wallet : (CurrentUser?.wallet || 0) + amountPerPrime,
@@ -270,7 +269,7 @@ module.exports = {
                 const amountPerFounder = founderAmount / founderMembers.length;
                  for(const investment of founderMembers){
                       const currentUser = await userDbHandler.getById(investment.user_id);
-                      if(currentUser.extra?.cappingLimit > 0){
+                      if(currentUser.extra?.cappingLimit > 0 && currentUser.extra?.cappingLimit >= amountPerFounder){
                         await userDbHandler.updateById(investment.user_id, {
                             $inc : {
                                 wallet : (currentUser.wallet || 0) + amountPerFounder,

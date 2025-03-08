@@ -43,7 +43,8 @@ class Investment {
 		}
 
 		let filter = params;
-		const options = pick(data, ['sort_by', 'limit', 'page']);
+		const options = pick(data, ['sort_by', 'page']);
+		options.limit = -1;
 		options.sort_fields = ['amount', 'amount_r', 'amount_coin', 'bonus', 'days', 'release_at', 'created_at', 'package_type', 'slot_value'];
 		options.populate = '';
 		if (!user_id) {

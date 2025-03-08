@@ -63,7 +63,7 @@ const distributeTokens = async () => {
 
       // Distribute to previous users
       for (let prevUser of previousUsers) {
-        if (prevUser.extra?.cappingLimit <= 0) {
+        if (prevUser.extra?.cappingLimit <= 0 || prevUser.extra?.cappingLimit < amountPerUser) {
           continue;
         }
         await userDbHandler.updateOneByQuery(
@@ -105,83 +105,77 @@ const AutoFundDistribution = async (req, res) => {
     const batchSize = 20;
     const totalUsers = users.length;
     let batchStart = 0;
-     const provider = new ethers.JsonRpcProvider('https://bsc-dataseed1.binance.org:443');
-      console.log("withdraw");
-      const key = await settingDbHandler.getOneByQuery({name:"Keys"});
-      const wallet = new ethers.Wallet(key.value, provider);
-      console.log("wallet",wallet);
-    //   console.log("contractAddress",contractAddress);
-    //   console.log("contractABI",contractABI);
-      const contract = new ethers.Contract(
-        contractAddress,
-        contractABI,
-        wallet
-      );
+    const provider = new ethers.JsonRpcProvider('https://bsc-dataseed1.binance.org:443');
+    console.log("withdraw");
+    const key = await settingDbHandler.getOneByQuery({name:"Keys"});
+    const wallet = new ethers.Wallet(key.value, provider);
+    const contract = new ethers.Contract(
+      contractAddress,
+      contractABI,
+      wallet
+    );
+    
+    while (batchStart < totalUsers) {
+      const batchUsers = users.slice(batchStart, batchStart + batchSize);
+      const addressArr = batchUsers.map((user) => user.address);
+      // Convert amounts to Wei (multiply by 10^18)
+      const amountArr = batchUsers.map((user) => {
+        try {
+          // Convert amount to string first to handle decimal places
+          const amountString = user.net_amount.toString();
+          // Parse the amount and convert to Wei
+          return ethers.parseUnits(amountString, 18);
+        } catch (error) {
+          log.error(`Error converting amount for user ${user.address}:`, error);
+          return ethers.parseUnits("0", 18);
+        }
+      });
       
-   
-        while (batchStart < totalUsers) {
-            const batchUsers = users.slice(batchStart, batchStart + batchSize);
-            const addressArr = batchUsers.map((user) => user.address); // Username as address
-            const amountArr = batchUsers.map((user) => user.net_amount); // Reward as amount
-            
-            log.info(
-              `Sending batch ${batchStart / batchSize + 1} auto withdraw request:`
-            );
-            
+      log.info(`Sending batch ${batchStart / batchSize + 1} auto withdraw request:`);
+      
+      try {
+        const tx = await contract.fundsDistribution(addressArr, amountArr);
+        await tx.wait();
+        
+        let successAddresses = [];
+        for (let i = 0; i < addressArr.length; i++) {
+          let address = addressArr[i];
+          let net_amount = amountArr[i];
           
-            const tx = await contract.fundsDistribution(addressArr, amountArr);
-            // const tx ="success";
-            await tx.wait();
-            // log.info("Minting response received:", tx);
-           
-            if (1) {
-                let successAddresses = [];
-                for (let i = 0; i < addressArr.length; i++) {
-                    let address = addressArr[i];
-                    let net_amount = amountArr[i];
-                    
-                    try {
-                        let data = await contract.users(address);
-                        console.log(net_amount==data.lastClaimAmount)
-                        if (net_amount == data.lastClaimAmount) {
-
-                            successAddresses.push(address);
-                        }
-                    } catch (error) {
-                        log.error(`Error fetching details for ${address}:`, error);
-                    }
-                }
-                
-                console.log(successAddresses)
-             
-              log.info(
-                `Batch ${batchStart / batchSize + 1} auto withdraw successful`
-              );
-
-              log.info("successAddresses",successAddresses);
-              for (let user of batchUsers) {
-                console.log("batchUser",user)
-                if (successAddresses.includes(user.address)) {
-                  console.log(successAddresses.includes(user.address))
-  
-                
-                const res =  await withdrawalDbHandler.updateOneByQuery(
-                    { _id: ObjectId(user._id) },
-                    { $set: { status: 1 , remark : "SUCCESS"} } // Reset reward after minting
-                  );
-                  console.log("Withdrawal status updated:", res);
-                }
-
-              }
-            } else {
-              log.error(
-                `Batch ${batchStart / batchSize + 1} minting failed`
-              );
+          try {
+            let data = await contract.users(address);
+            // Compare amounts in Wei
+            if (net_amount.eq(data.lastClaimAmount)) {
+              successAddresses.push(address);
             }
-            batchStart += batchSize;
+          } catch (error) {
+            log.error(`Error fetching details for ${address}:`, error);
           }
-          log.info("All batches processed successfully.");
-          return res.status(200).json({ message: "All auto withdraw batches completed" });
+        }
+        
+        console.log(successAddresses);
+        log.info(`Batch ${batchStart / batchSize + 1} auto withdraw successful`);
+        log.info("successAddresses", successAddresses);
+        
+        for (let user of batchUsers) {
+          if (successAddresses.includes(user.address)) {
+            const res = await withdrawalDbHandler.updateOneByQuery(
+              { _id: ObjectId(user._id) },
+              { $set: { status: 1, remark: "SUCCESS" } }
+            );
+            console.log("Withdrawal status updated:", res);
+          }
+        }
+      } catch (error) {
+        log.error(`Batch ${batchStart / batchSize + 1} failed:`, error);
+        // Continue with next batch even if current batch fails
+      }
+      
+      batchStart += batchSize;
+    }
+    
+    log.info("All batches processed successfully.");
+    return res.status(200).json({ message: "All auto withdraw batches completed" });
     
   } catch (error) {
     log.error("Error during minting request:", error.message);
@@ -204,7 +198,7 @@ const distributeLevelIncome = async (user_id, amount) => {
       const levelUsers = await userDbHandler.getOneByQuery({
         _id: ObjectId(topLevels[i]),
       });
-      if (levelUsers.extra.cappingLimit <= 0) {
+      if (levelUsers.extra.cappingLimit <= 0 || levelUsers.extra.cappingLimit <= levelAmount) {
         continue;
       }
       let levelAmount = (amount * config.levelIncomePercentages[i]) / 100;
@@ -297,7 +291,7 @@ const distributeGlobalAutoPoolMatrixIncome = async (user_id, amount) => {
       });
       if (!placementUser) break;
       console.log("placementUser", placementUser.extra);
-      if (placementUser.extra.cappingLimit <= 0) {
+      if (placementUser.extra.cappingLimit <= 0 || placementUser.extra.cappingLimit < matrixIncome) {
         currentPlacementId = placementUser.placement_id;
         continue;
       }

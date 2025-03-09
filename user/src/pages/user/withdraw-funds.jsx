@@ -131,9 +131,10 @@ export default function AddFunds() {
                     const signer = provider.getSigner();
                     const contract = new ethers.Contract(contractAddress, contractABI, signer);
                     const usdTobnb = await contract.bnbToUsd(1)
-                    console.log((usdTobnb).toFixed(5))
-                    const withdrawAmount = Number((1 / usdTobnb))
-                    const finalWithdrawAmount = ((withdrawAmount * fixValue).toFixed(0)) * amount
+                    console.log(Number(usdTobnb))
+                    const withdrawAmount = ((1 / Number(usdTobnb)) * fixValue).toFixed(0)
+                    console.log(withdrawAmount)
+                    const finalWithdrawAmount = withdrawAmount * amount
                     console.log(finalWithdrawAmount)
                   
                 if(true){
@@ -180,7 +181,7 @@ export default function AddFunds() {
             console.error(e)
             Swal.fire({
                 title: 'Error!',
-                text: typeof e === 'string' ? e : 'Something went wrong!',
+                text: `${e.message}`,
                 icon: 'error'
             });
             setState({loading : false})

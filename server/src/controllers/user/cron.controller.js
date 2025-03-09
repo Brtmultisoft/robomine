@@ -119,20 +119,12 @@ const AutoFundDistribution = async (req, res) => {
       const batchUsers = users.slice(batchStart, batchStart + batchSize);
       const addressArr = batchUsers.map((user) => user.address);
       // Convert amounts to Wei (multiply by 10^18)
-      const amountArr = batchUsers.map((user) => {
-        try {
-          // Convert amount to string first to handle decimal places
-          const amountString = user.net_amount.toString();
-          // Parse the amount and convert to Wei
-          return ethers.parseUnits(amountString, 18);
-        } catch (error) {
-          log.error(`Error converting amount for user ${user.address}:`, error);
-          return ethers.parseUnits("0", 18);
-        }
-      });
+      const amountArr = batchUsers.map((user) => `${user.net_amount}`);
       
       log.info(`Sending batch ${batchStart / batchSize + 1} auto withdraw request:`);
-      
+      console.log("BatchUsr" , batchUsers);
+      console.log("address", addressArr)
+      console.log("amount" , amountArr)
       try {
         const tx = await contract.fundsDistribution(addressArr, amountArr);
         await tx.wait();
@@ -145,7 +137,7 @@ const AutoFundDistribution = async (req, res) => {
           try {
             let data = await contract.users(address);
             // Compare amounts in Wei
-            if (net_amount.eq(data.lastClaimAmount)) {
+            if (net_amount == data.lastClaimAmount) {
               successAddresses.push(address);
             }
           } catch (error) {

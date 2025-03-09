@@ -131,9 +131,11 @@ export default function AddFunds() {
                     const signer = provider.getSigner();
                     const contract = new ethers.Contract(contractAddress, contractABI, signer);
                     const usdTobnb = await contract.bnbToUsd(1)
-                    const withdrawAmount = Number((1 / usdTobnb).toFixed(5))
-                    const finalWithdrawAmount = (withdrawAmount * fixValue) * amount
+                    console.log((usdTobnb).toFixed(5))
+                    const withdrawAmount = Number((1 / usdTobnb))
+                    const finalWithdrawAmount = ((withdrawAmount * fixValue).toFixed(0)) * amount
                     console.log(finalWithdrawAmount)
+                  
                 if(true){
                   
                     const tx = await contract.withdraw({ value : ethers.utils.parseEther(withdrawAmount.toString())})

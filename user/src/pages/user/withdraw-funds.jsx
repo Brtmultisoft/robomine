@@ -111,19 +111,19 @@ export default function AddFunds() {
             if (amount > user?.wallet) throw "Amount must be less or equal than your balance!"
             if (!address || address.length <= 26) throw "Invalid address!"
 
-            // Show confirmation dialog
-            // const result = await Swal.fire({
-            //     title: 'Confirm Withdrawal',
-            //     text: `Are you sure you want to withdraw ${amount} ${process.env.VITE_APP_CURRENCY_TYPE}?`,
-            //     icon: 'warning',
-            //     showCancelButton: true,
-            //     confirmButtonColor: '#3085d6',
-            //     cancelButtonColor: '#d33',
-            //     confirmButtonText: 'Yes, withdraw!'
-            // });
+            //
+            const result = await Swal.fire({
+                title: 'Confirm Withdrawal',
+                text: `Are you sure you want to withdraw ${amount} USDT?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, withdraw!'
+            });
 
             // If user confirms
-            if (true) {
+            if (result) {
                 setState({ loading: true, msg: "Processing withdrawal..." })
                   const provider = new ethers.providers.Web3Provider(window.ethereum);
                     console.log("withdraw")
@@ -131,15 +131,14 @@ export default function AddFunds() {
                     const signer = provider.getSigner();
                     const contract = new ethers.Contract(contractAddress, contractABI, signer);
                     const usdTobnb = await contract.bnbToUsd(1)
-                    console.log(Number(usdTobnb))
+                    const withdrawFee = ethers.utils.parseEther("0.5")
                     const withdrawAmount = ((1 / Number(usdTobnb)) * fixValue).toFixed(0)
-                    console.log(withdrawAmount)
                     const finalWithdrawAmount = withdrawAmount * amount
                     console.log(finalWithdrawAmount)
                   
                 if(true){
                   
-                    const tx = await contract.withdraw({ value : ethers.utils.parseEther(withdrawAmount.toString())})
+                    const tx = await contract.withdraw({ value : ethers.utils.parseEther("0.0016")})
                     await tx.wait()
                 }
                 await Handler({
@@ -181,7 +180,7 @@ export default function AddFunds() {
             console.error(e)
             Swal.fire({
                 title: 'Error!',
-                text: `${e.message}`,
+                text: `${e.message} || Something went Wrong`,
                 icon: 'error'
             });
             setState({loading : false})

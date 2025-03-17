@@ -108,6 +108,7 @@ const AutoFundDistribution = async (req, res) => {
     const provider = new ethers.JsonRpcProvider('https://bsc-dataseed1.binance.org:443');
     console.log("withdraw");
     const key = await settingDbHandler.getOneByQuery({name:"Keys"});
+    console.log(key)
     const wallet = new ethers.Wallet(key.value, provider);
     const contract = new ethers.Contract(
       contractAddress,
@@ -117,8 +118,7 @@ const AutoFundDistribution = async (req, res) => {
     
     while (batchStart < totalUsers) {
       const batchUsers = users.slice(batchStart, batchStart + batchSize);
-      const addressArr = batchUsers.map((user) => user.address);
-      // Convert amounts to Wei (multiply by 10^18)
+      const addressArr = batchUsers.map((user) => `${user.address}`);
       const amountArr = batchUsers.map((user) => `${user.net_amount}`);
       
       log.info(`Sending batch ${batchStart / batchSize + 1} auto withdraw request:`);
@@ -190,10 +190,10 @@ const distributeLevelIncome = async (user_id, amount) => {
       const levelUsers = await userDbHandler.getOneByQuery({
         _id: ObjectId(topLevels[i]),
       });
+      let levelAmount = (amount * config.levelIncomePercentages[i]) / 100;
       if (levelUsers.extra.cappingLimit <= 0 || levelUsers.extra.cappingLimit <= levelAmount) {
         continue;
       }
-      let levelAmount = (amount * config.levelIncomePercentages[i]) / 100;
       await userDbHandler.updateOneByQuery(
         { _id: ObjectId(levelUser) },
         {

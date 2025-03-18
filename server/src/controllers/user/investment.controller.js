@@ -204,20 +204,9 @@ module.exports = {
             let slot_value = validSlots.findIndex(slot => slot === amount);
             let referAmount = amount / 2;
             
-            // Check if upline's package level is >= current user's package level
-            const uplineInvestment = await investmentDbHandler.getByQuery({
-                user_id: user.refer_id,
-                status: 1
-            });
-            // Get the highest package number (slot_value) from upline's investments
-            const uplineMaxPackage = uplineInvestment.length > 0 ? 
-                Math.max(...uplineInvestment.map(inv => inv.slot_value)) : -1;
-            
-            // Only distribute direct referral income if upline's package level is sufficient
-            // slot_value + 1 represents the package number (1, 2, 3, etc.)
+            // For direct income, we don't check package level anymore
             if(updatedUser && updatedUser?.extra?.cappingLimit > 0 && 
-               updatedUser?.extra?.cappingLimit >= referAmount && 
-               uplineMaxPackage >= (slot_value + 1)) {  // Compare package numbers
+               updatedUser?.extra?.cappingLimit >= referAmount) {
                 await userDbHandler.updateOneByQuery({_id: user.refer_id}, {
                     $inc :{
                         "extra.directIncome" : referAmount,
@@ -234,14 +223,14 @@ module.exports = {
                     status: 2,
                     extra:{
                         income_type: "direct",
-                        fromPackageLevel: slot_value + 1  // Store the package number
+                        fromPackageLevel: slot_value + 1  // Still store the package number for reference
                     }
                 }
 
                 await incomeDbHandler.create(data);
             }
 
-             // Prime Membership Logic - Only distribute if prime member's package level is sufficient
+             // Prime Membership Logic - No package level check
              const primeUser = await investmentDbHandler.getByQuery({
                 package_type : "prime",
                 status : 1
@@ -253,15 +242,9 @@ module.exports = {
                 
                 for(const investment of primeUser){
                     const CurrentUser = await userDbHandler.getById(investment.user_id);
-                    const primeUserPackages = await investmentDbHandler.getByQuery({
-                        user_id: investment.user_id,
-                        status: 1
-                    });
-                    const primeUserMaxPackage = Math.max(...primeUserPackages.map(inv => inv.slot_value));
                     
                     if(CurrentUser.extra?.cappingLimit > 0 && 
-                       CurrentUser.extra?.cappingLimit >= amountPerPrime &&
-                       primeUserMaxPackage >= (slot_value + 1)) {  // Compare package numbers
+                       CurrentUser.extra?.cappingLimit >= amountPerPrime) {
                         await userDbHandler.updateById(investment.user_id, {
                             $inc : {
                                 wallet : (CurrentUser?.wallet || 0) + amountPerPrime,
@@ -278,14 +261,14 @@ module.exports = {
                             status : 1,
                             extra : {
                                 income_type : "prime",
-                                fromPackageLevel: slot_value + 1  // Store the package number
+                                fromPackageLevel: slot_value + 1  // Still store the package number for reference
                             }
                         });
                     }
                 }
              }
                 
-              // Founder Membership Logic - Only distribute if founder member's package level is sufficient
+              // Founder Membership Logic - No package level check
               const founderMembers = await investmentDbHandler.getByQuery({
                   package_type : "founder",
                   status : 1
@@ -297,15 +280,9 @@ module.exports = {
                 
                 for(const investment of founderMembers){
                     const currentUser = await userDbHandler.getById(investment.user_id);
-                    const founderUserPackages = await investmentDbHandler.getByQuery({
-                        user_id: investment.user_id,
-                        status: 1
-                    });
-                    const founderUserMaxPackage = Math.max(...founderUserPackages.map(inv => inv.slot_value));
                     
                     if(currentUser.extra?.cappingLimit > 0 && 
-                       currentUser.extra?.cappingLimit >= amountPerFounder &&
-                       founderUserMaxPackage >= (slot_value + 1)) {  // Compare package numbers
+                       currentUser.extra?.cappingLimit >= amountPerFounder) {
                         await userDbHandler.updateById(investment.user_id, {
                             $inc : {
                                 wallet : (currentUser.wallet || 0) + amountPerFounder,
@@ -322,14 +299,14 @@ module.exports = {
                             status : 1,
                             extra : {
                                 income_type : "founder",
-                                fromPackageLevel: slot_value + 1  // Store the package number
+                                fromPackageLevel: slot_value + 1  // Still store the package number for reference
                             }
                         });
                     }
                 }
               }
 
-              // Pass the package number (slot_value + 1) to these functions
+              // Keep the package level check for these functions
               await distributeLevelIncome(user_id, amount, slot_value + 1);
               await distributeGlobalAutoPoolMatrixIncome(user_id, amount, slot_value + 1);
 

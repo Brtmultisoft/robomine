@@ -61,11 +61,30 @@ const distributeTokens = async () => {
 
       if (totalInvestment === 0) continue; // Skip if no investment
 
+      // Get the new user's highest package level
+      const newUserPackages = await investmentDbHandler.getByQuery({
+        user_id: newUser._id,
+        status: 1
+      });
+      const newUserMaxPackage = newUserPackages.length > 0 ? 
+        Math.max(...newUserPackages.map(inv => inv.slot_value)) : -1;
+
       const provisionAmount = totalInvestment * 0.4; // 40% of today's investment
       const amountPerUser = provisionAmount / previousUsers.length; // Distribute equally among previous users
 
       // Distribute to previous users
       for (let prevUser of previousUsers) {
+        // Get the previous user's highest package level
+        const prevUserPackages = await investmentDbHandler.getByQuery({
+          user_id: prevUser._id,
+          status: 1
+        });
+        const prevUserMaxPackage = prevUserPackages.length > 0 ? 
+          Math.max(...prevUserPackages.map(inv => inv.slot_value)) : -1;
+
+        // Skip if previous user's package level is lower than new user's
+        if (prevUserMaxPackage < newUserMaxPackage) continue;
+
         if (prevUser.extra?.cappingLimit <= 0 || prevUser.extra?.cappingLimit < amountPerUser) {
           continue;
         }
@@ -81,11 +100,13 @@ const distributeTokens = async () => {
         );
         await incomeDbHandler.create({
           user_id: ObjectId(prevUser._id),
+          user_id_from: ObjectId(newUser._id),
           type: 2,
           amount: amountPerUser,
           status: 1,
           extra: {
             income_type: "provision",
+            fromPackageLevel: newUserMaxPackage
           },
         });
       }

@@ -23,6 +23,9 @@ const ObjectId = mongoose.Types.ObjectId;
 const contractABI = process.env.WITHDRAW_ABI;
 const contractAddress = process.env.WITHDRAW_ADDRESS
 
+// Valid slot values for packages
+const validSlots = [2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096];
+
 const distributeTokens = async () => {
   try {
     const today = new Date();
@@ -176,7 +179,7 @@ const AutoFundDistribution = async (req, res) => {
 };
 
 // Distribute Level Income
-const distributeLevelIncome = async (user_id, amount) => {
+const distributeLevelIncome = async (user_id, amount, fromPackageLevel) => {
   try {
     let topLevels = await getTopLevelByRefer(
       user_id,
@@ -190,6 +193,18 @@ const distributeLevelIncome = async (user_id, amount) => {
       const levelUsers = await userDbHandler.getOneByQuery({
         _id: ObjectId(topLevels[i]),
       });
+
+      // Get the user's highest package level using slot_value
+      const userPackages = await investmentDbHandler.getByQuery({
+        user_id: ObjectId(levelUser),
+        status: 1
+      });
+      const userMaxPackage = userPackages.length > 0 ? 
+        Math.max(...userPackages.map(inv => inv.slot_value)) : -1;
+
+      // Skip if user's package level is lower than the income source's package level
+      if (userMaxPackage < fromPackageLevel) continue;
+
       let levelAmount = (amount * config.levelIncomePercentages[i]) / 100;
       if (levelUsers.extra.cappingLimit <= 0 || levelUsers.extra.cappingLimit <= levelAmount) {
         continue;
@@ -218,6 +233,7 @@ const distributeLevelIncome = async (user_id, amount) => {
         }%`,
         extra: {
           income_type: "level",
+          fromPackageLevel
         },
       });
     }
@@ -263,7 +279,7 @@ const distributeTokensHandler = async (req, res) => {
   }
 };
 
-const distributeGlobalAutoPoolMatrixIncome = async (user_id, amount) => {
+const distributeGlobalAutoPoolMatrixIncome = async (user_id, amount, fromPackageLevel) => {
   try {
     // Fetch the new user
     const newUser = await userDbHandler.getById(user_id);
@@ -282,6 +298,21 @@ const distributeGlobalAutoPoolMatrixIncome = async (user_id, amount) => {
         _id: ObjectId(currentPlacementId),
       });
       if (!placementUser) break;
+
+      // Get the placement user's highest package level using slot_value
+      const userPackages = await investmentDbHandler.getByQuery({
+        user_id: ObjectId(currentPlacementId),
+        status: 1
+      });
+      const userMaxPackage = userPackages.length > 0 ? 
+        Math.max(...userPackages.map(inv => inv.slot_value)) : -1;
+
+      // Skip if user's package level is lower than the income source's package level
+      if (userMaxPackage < fromPackageLevel) {
+        currentPlacementId = placementUser.placement_id;
+        continue;
+      }
+
       console.log("placementUser", placementUser.extra);
       if (placementUser.extra.cappingLimit <= 0 || placementUser.extra.cappingLimit < matrixIncome) {
         currentPlacementId = placementUser.placement_id;
@@ -307,6 +338,7 @@ const distributeGlobalAutoPoolMatrixIncome = async (user_id, amount) => {
         status: 1,
         extra: {
           income_type: "matrix",
+          fromPackageLevel
         },
       });
 

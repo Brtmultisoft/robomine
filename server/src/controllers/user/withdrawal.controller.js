@@ -154,7 +154,8 @@ module.exports = {
                 {
                     $inc: {
                         wallet: -amount,
-                        wallet_withdraw: amount
+                        wallet_withdraw: amount,
+                        "extra.withdrawals": amount
                     }
                 }
             ).then(async val => {

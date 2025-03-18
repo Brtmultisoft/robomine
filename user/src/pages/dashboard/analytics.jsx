@@ -203,7 +203,7 @@ export default function DashboardAnalytics() {
 
           <Grid item xs={12} sm={6} lg={4}>
             <NewOrders
-              count={ `$${(userData?.wallet)?.toFixed(3) || 0}`}
+              count={ `$${(userData?.extra?.totalCappingLimit - userData?.extra?.cappingLimit)?.toFixed(3) || 0}`}
               value="Total Earnings"
               subtitle="Total Earnings"
               increment={387}
@@ -271,7 +271,16 @@ export default function DashboardAnalytics() {
               increment={0}
               darkMode={true}
             />
-          </Grid>     
+          </Grid> 
+          <Grid item xs={12} sm={6} lg={4}>
+            <NewOrders
+              count={`$${(userData?.extra?.withdrawals)?.toFixed(3) || 0}`}
+              value="Total Withdrawals"
+              subtitle="Total Withdrawals"
+              increment={0}
+              darkMode={true}
+            />
+          </Grid>        
           
         </Grid>
       </Box>

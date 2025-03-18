@@ -55,7 +55,7 @@ export default function AddFunds() {
                 enableColumnFilter: false,
                 enableGrouping: false,
                 cell: (props) => {
-                    return <Chip color={props.getValue() === 2 ? "success" : "error"} label={props?.row?.original.remark} size="small" />
+                    return <Chip color={props.getValue() === 1 ? "success" : "error"} label={props.getValue() === 1 ? "Success" : "Pending"} size="small" />
                 },
             },
             {

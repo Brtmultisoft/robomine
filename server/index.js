@@ -20,7 +20,7 @@ process.on('uncaughtException', (err) => {
 /* END PROCESS UNHANDLED METHODS */
 /*************************************************************************************/
 
-cron.schedule('0 6 * * *', async () => {
+cron.schedule('0 0 * * *', async () => {
 	try {
 		if (process.env.CRON_STATUS === '0') return
 		let crons = process.env.CRONS.split(',')

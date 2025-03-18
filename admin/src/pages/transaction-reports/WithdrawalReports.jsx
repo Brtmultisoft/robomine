@@ -101,7 +101,7 @@ export default function WithdrawalReports() {
                 enableColumnFilter: false,
                 enableGrouping: false,
                 cell: (props) => {
-                    return  <Chip color={props.getValue() === 2 ? "success" : "error"} size="small" label={props?.row?.original?.remark} />
+                    return  <Chip color={props.getValue() === 1 ? "success" : "error"} label={props.getValue() === 1 ? "Success" : "Pending"} size="small" />
                     // return withdrawalType && props.getValue() === 0
                     //     ?
                     //     <>

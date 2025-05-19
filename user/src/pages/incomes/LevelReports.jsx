@@ -15,6 +15,10 @@ export default function ROI() {
         header: 'From',
         accessorKey: 'user_id_from'
       },
+ {
+        header: 'Level',
+        accessorKey: 'level'
+      },
       {
         header: 'Amount',
         accessorKey: 'amount'
@@ -33,5 +37,5 @@ export default function ROI() {
     []
   );
 
-  return <CommonDatatable columns={columns} apiPoint={apiPoint} type={0} />
+  return <CommonDatatable columns={columns} apiPoint={apiPoint} type={2} />
 }

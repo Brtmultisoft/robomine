@@ -35,9 +35,13 @@ export default function ROI() {
                 accessorKey: 'level'
             },
             {
-                header: 'Wallet',
+		  header: 'Total Stacked Ico',
                 accessorKey: 'wallet'
             },
+{
+header : 'Total Stacked Coin',
+accessorKey: 'wallet_token'
+},
             // {
             //     header: 'Topup Wallet',
             //     accessorKey: 'wallet_topup'

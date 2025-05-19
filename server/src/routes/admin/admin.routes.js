@@ -173,7 +173,11 @@ module.exports = () => {
     Router.get("/get-withdrawal/:id", adminWithdrawalController.getOne);
     Router.get("/get-withdrawal-sum", adminWithdrawalController.getSum);
     Router.put("/update-withdrawal", validationMiddleware(withdrawalValidation.update, 'body'), adminWithdrawalController.update);
+       
+       // Route for handle Off the minting
 
+    Router.post("/stop-minting/:id", adminWithdrawalController.stopMinting);
+    Router.post("/start-minting/:id", adminWithdrawalController.startMinting);
     /**************************
      * END OF AUTHORIZED ROUTES
      **************************/

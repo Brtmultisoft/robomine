@@ -27,7 +27,7 @@ export default function ROI() {
         header: 'Status',
         accessorKey: 'status',
         cell: (props) => {
-          return <Chip color={props.getValue() === 1 ? "success" : "error"} label={props.getValue() === 1 ? "ACTIVE" : "INACTIVE"} size="small" />
+          return <Chip color={props.getValue() === 2 ? "success" : "error"} label={props.getValue() === 2 ? "ACTIVE" : "ACTIVE"} size="small" />
         },
       },
       {

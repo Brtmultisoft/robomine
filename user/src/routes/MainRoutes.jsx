@@ -151,6 +151,7 @@ const Directs = Loadable(lazy(() => import('pages/user/directs')));
 const AddFunds = Loadable(lazy(() => import('pages/user/add-funds')));
 const StakeToken = Loadable(lazy(() => import('pages/user/stake-coin')));
 const IcoTransfer = Loadable(lazy(() => import('pages/user/ico-transfer')));
+const IcoTransferReport = Loadable(lazy(() => import('pages/user/TransferFundsReport')));
 const WithdrawFunds = Loadable(lazy(() => import('pages/user/withdraw-funds')));
 
 const Chat = Loadable(lazy(() => import('pages/support/chat')));
@@ -208,6 +209,10 @@ const MainRoutes = {
             {
               path: 'ico-transfer',
               element: <IcoTransfer />
+            },
+            {
+              path: 'ico-transfer-report',
+              element: <IcoTransferReport />
             },
             {
               path: 'withdraw-funds',

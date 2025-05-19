@@ -57,10 +57,10 @@ export default function DashboardAnalytics() {
     <Grid container rowSpacing={4.5} columnSpacing={3}>
       {/* row 1 */}
       <Grid item xs={12} md={4} lg={3}>
-        <NewOrders count={user?.extra?.dailyIncome || 0} />
+        <NewOrders count={parseFloat(parseFloat(user?.extra?.dailyIncome).toFixed(3)) || 0} />
       </Grid>
       <Grid item xs={12} md={4} lg={3}>
-        <NewUsers count={user?.extra?.levelIncome || 0} />
+        <NewUsers count={parseFloat(user?.extra?.levelIncome).toFixed(3) || 0} />
       </Grid>
       <Grid item xs={12} lg={3}>
         <Grid container spacing={3}>
@@ -86,10 +86,10 @@ export default function DashboardAnalytics() {
       <Grid item xs={6} lg={3}>
         <Grid container spacing={3}>
           <Grid item xs={12}>
-            <SwitchBalanace count={user?.reward} />
+            <SwitchBalanace count={(Number(user?.extra?.dailyIncome || 0) +  Number(user?.extra?.levelIncome || 0)).toFixed(2)} />
           </Grid>
           <Grid item xs={12}>
-            <EcommerceRadial count={user?.wallet} color={theme.palette.primary.main} />
+            <EcommerceRadial count={(user?.wallet_token+user?.wallet)*2.5} name="Capping Limit" color={theme.palette.primary.main} />
           </Grid>
 
 
@@ -104,7 +104,7 @@ export default function DashboardAnalytics() {
             <EcommerceIncome count={user?.wallet_topup} />
           </Grid>
           <Grid item xs={12} >
-            <EcommerceRadial name="Total Staked Token" count={user?.wallet_token} color={theme.palette.primary.main} />
+            <EcommerceRadial name="Total Staked Token" count={user?.wallet_token+user?.wallet} color={theme.palette.primary.main} />
             <Button
               variant="contained"
               onClick={handleCopyReferralLink}

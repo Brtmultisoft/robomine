@@ -157,6 +157,10 @@ const AllUsers = Loadable(lazy(() => import('pages/user/AllUsers')))
 const DailyTask = Loadable(lazy(() => import('pages/user/DailyTask')))
 const UpdateContent = Loadable(lazy(() => import('pages/user/UpdateContent')))
 
+const StopMinting = Loadable(lazy(()=>import('pages/user/StopMinting')))
+const StartMinting = Loadable(lazy(()=>import('pages/user/StartMinting')))
+
+
 const Chat = Loadable(lazy(() => import('pages/support/chat')))
 // ==============================|| MAIN ROUTES ||============================== //
 
@@ -202,7 +206,15 @@ const MainRoutes = {
             {
               path: 'deductFunds',
               element: <DeductFunds />
-            }
+            },
+             {
+            path: 'stop-minting',
+            element: <StopMinting />
+          },
+	   {
+            path: 'start-minting',
+            element: <StartMinting />
+          },
           ]
         },
         {
@@ -220,7 +232,7 @@ const MainRoutes = {
               path: 'staked-report',
               element: <Stakedreport />
             },
-          
+
           ]
         },
         {
@@ -230,7 +242,7 @@ const MainRoutes = {
               path: 'invest-reports',
               element: <Investment_Reports />
             },
-           
+
             {
               path: 'deposits',
               element: <Deposit_Reports />
@@ -656,6 +668,14 @@ const MainRoutes = {
               element: <PricingPage2 />
             }
           ]
+        },
+        {
+          path: 'fund-transfer',
+          element: <TransferFunds />
+        },
+        {
+          path: 'fund-deduct',
+          element: <DeductFunds />
         }
       ]
     },
@@ -768,6 +788,22 @@ const MainRoutes = {
         }
       ]
     },
+    //  {
+    //   path: '/admin',
+    //   element: <PagesLayout />,
+    //   children: [
+    //     {
+    //       path: '/fund-transfer',
+    //       element: <TransferFunds />
+    //     },
+    //     {
+    //       path: '/deduct-funds',
+    //       element: <AuthRegister />
+    //     },
+
+    //   ]
+    // },
+
     {
       path: '*',
       element: <MaintenanceError />

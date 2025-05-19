@@ -44,13 +44,13 @@ const profile = {
       icon: icons.chart
     },
 
-    {
-      id: 'ICO',
-      title: <FormattedMessage id="Buy ICO" />,
-      type: 'item',
-      url: '/investments/invest/',
-      icon: icons.statistics
-    },
+//    {
+//      id: 'ICO',
+//      title: <FormattedMessage id="Buy ICO" />,
+//      type: 'item',
+//      url: '/investments/invest/',
+//      icon: icons.statistics
+//    },
     {
       id: 'data',
       title: <FormattedMessage id="ICO Reports" />,
@@ -91,6 +91,13 @@ const profile = {
       title: <FormattedMessage id="ICO Transfer" />,
       type: 'item',
       url: '/user/ico-transfer/',
+      icon: icons.data
+    },
+	 {
+      id: 'ICO Transfer Report',
+      title: <FormattedMessage id="ICO Transfer Report" />,
+      type: 'item',
+      url: '/user/ico-transfer-report/',
       icon: icons.data
     },
     // {

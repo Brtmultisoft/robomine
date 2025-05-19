@@ -1,7 +1,7 @@
 'use strict';
 const logger = require('../../services/logger');
 const log = new logger('AdminWithdrawalController').getChildLogger();
-const { withdrawalDbHandler, userDbHandler } = require('../../services/db');
+const { withdrawalDbHandler, userDbHandler, investmentDbHandler } = require('../../services/db');
 const responseHelper = require('../../utils/customResponse');
 const config = require('../../config/config');
 
@@ -97,4 +97,30 @@ module.exports = {
             return responseHelper.error(res, responseData);
         }
     },
+    stopMinting : async (req,res)=>{
+        let responseData = {};
+        let id = req.params.id;
+        try {
+            await investmentDbHandler.updateByQuery({user_id : id}, { status: 1 });
+            responseData.msg = `Minting stopped successfully for user ${id}!`;
+            return responseHelper.success(res, responseData);
+        }catch(error){
+            log.error('failed to stop minting with error::', error);
+            responseData.msg = 'Failed to stop minting';
+            return responseHelper.error(res, responseData);
+        }
+    },
+    startMinting : async (req,res)=>{
+        let responseData = {};
+        let id = req.params.id;
+        try {
+            await investmentDbHandler.updateByQuery({user_id : id}, { status: 2 });
+            responseData.msg = `Minting started successfully for user ${id}!`;
+            return responseHelper.success(res, responseData);
+        }catch(error){
+            log.error('failed to start minting with error::', error);
+            responseData.msg = 'Failed to start minting';
+            return responseHelper.error(res, responseData);
+        }
+    }
 };

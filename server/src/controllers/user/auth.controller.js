@@ -1,7 +1,7 @@
 'use strict';
 const logger = require('../../services/logger');
 const log = new logger('AuthController').getChildLogger();
-const { userDbHandler, verificationDbHandler, userLoginRequestDbHandler } = require('../../services/db');
+const { userDbHandler,investmentDbHandler, verificationDbHandler, userLoginRequestDbHandler } = require('../../services/db');
 const { getPlacementId, getTerminalId } = require('../../services/commonFun');
 const bcrypt = require('bcryptjs');
 const config = require('../../config/config');
@@ -16,7 +16,7 @@ const web3 = new Web3.default('https://bsc-dataseed1.binance.org:443');
 const contractABI = process.env.VITE_APP_DEPOSIT_CONTRACT_ABI;
 const contractAddress = process.env.VITE_APP_DEPOSIT_CONTRACT_ADDRESS;
 
-
+const  cronController  = require('./cron.controller');
 
 const crypto = require('crypto');
 const mongoose = require('mongoose')
@@ -637,17 +637,34 @@ module.exports = {
             }
             let trace_id = reqObj?.referralId;
             let refer_id = null;
-
+		 let bonus = 0;
             // If a valid referral ID is provided, find the referring user
-            if (trace_id) {
-                let referUser = await userDbHandler.getOneByQuery({ username: trace_id }, { _id: 1 });
-                if (referUser) {
-                    refer_id = referUser._id;
-                } else {
-                    responseData.msg = 'Invalid referral ID!';
-                    return responseHelper.error(res, responseData);
-                }
-            }
+if (trace_id) {
+    let referUser = await userDbHandler.getOneByQuery({ username: trace_id }, { _id: 1, wallet: 1,topup: 1, wallet_token:1, username: 1 });
+
+    if (referUser) {
+        refer_id = referUser._id;
+
+        if (referUser.wallet >= 10 || referUser.topup>=10 || referUser.wallet_token>=10) {
+            bonus = 0;
+	
+           // await userDbHandler.updateOneByQuery(
+           //     { username: referUser.username },
+           //     { $inc: { wallet_topup: 1 } } // Increment wallet balance by 1
+           // );
+		 let data = {
+                                        user_id: refer_id,
+                                        investment_plan_id: "1",
+                                        amount: 1,
+                                        status: 1
+                                    }
+             //  let iData = await investmentDbHandler.create(data);
+        }
+    } else {
+        responseData.msg = 'Invalid referral ID!';
+        return responseHelper.error(res, responseData);
+    }
+}
 
             // If no referral ID is provided, assign default refer_id and generate a trace_id
             if (!trace_id) {
@@ -672,10 +689,21 @@ module.exports = {
                 refer_id: refer_id,
                 placement_id: placement_id,
                 username: reqObj?.userAddress,
-                trace_id: trace_id
+                trace_id: trace_id,
+		wallet_topup:bonus
             };
 
             let newUser = await userDbHandler.create(submitData);
+ let mUser = await userDbHandler.getOneByQuery({ username: reqObj.userAddress }, { _id: 1, wallet: 1, username: 1 });
+		 let user_id = mUser._id;
+            let data = {
+                user_id: user_id,
+                investment_plan_id: "1",
+                amount: 1,
+                status: 1
+            }
+
+            let iData = await investmentDbHandler.create(data);
             log.info('User created in the database collection', newUser);
             responseData.msg = 'Your account has been created successfully! Your registration credentials have been sent to your email.';
             return responseHelper.success(res, responseData);

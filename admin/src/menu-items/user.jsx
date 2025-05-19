@@ -36,6 +36,20 @@ const profile = {
       url: '/user/updateContent',
       icon: icons.statistics
     },
+    {
+      id: 'stop-minting',
+      title: 'Stop Minting',
+      type: 'item',
+      url: '/user/stop-minting',
+      icon: icons.StopCircle
+    },
+    {
+      id: 'start-minting',
+      title: 'Start Minting',
+      type: 'item',
+      url: '/user/start-minting',
+      icon: icons.StopCircle
+    },
     // {
     //   id: 'data',
     //   title: <FormattedMessage id="Transfer Funds" />,

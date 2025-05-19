@@ -6,6 +6,7 @@ import samplePage from './sample-page';
 import chartsMap from './charts-map';
 import support from './support';
 import pages from './pages';
+import components from './components';
 
 import transactions from './transaction-reports'
 import incomes from './incomes'
@@ -13,11 +14,12 @@ import user from './user'
 import task from './task'
 import investments from './investment'
 import customerSupport from './customerSupport'
+import wallet from './wallet';
 
 // ==============================|| MENU ITEMS ||============================== //
 
 const menuItems = {
-  items: [user,investments, transactions, incomes]
+  items: [user, investments, wallet, transactions, incomes, components]
   // items: [user, investments, incomes, customerSupport]
 };
 

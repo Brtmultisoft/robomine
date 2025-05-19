@@ -36,6 +36,6 @@ export default function ROI() {
 
   return <>
   <ExportCSV type="income-type-1" />
-  <CommonDatatable columns={columns} apiPoint={apiPoint} type={0} />
+  <CommonDatatable columns={columns} apiPoint={apiPoint} type={2} />
   </>
 }

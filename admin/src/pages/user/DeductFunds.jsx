@@ -40,7 +40,7 @@ export default function DeductFunds() {
 
             try {
                 // triggering
-                const response = await axios.post('/add-fund-deduct/', data);
+                const response = await axios.post('/add-fund-deduct', data);
                 if (response.status === 200)
                     openSnackbar({
                         open: true,
@@ -143,7 +143,7 @@ export default function DeductFunds() {
                         <Stack direction="row" justifyContent="flex-end">
                             <AnimateButton>
                                 <Button variant="contained" type="submit">
-                                    Transfer Fund
+                                    Deduct Fund
                                 </Button>
                             </AnimateButton>
                         </Stack>

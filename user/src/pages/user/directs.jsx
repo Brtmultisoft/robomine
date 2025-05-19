@@ -20,8 +20,8 @@ export default function ROI() {
                 accessorKey: 'name'
             },
             {
-                header: 'Mobile Number',
-                accessorKey: 'phone_number'
+                header: 'Total Stacked',
+                accessorKey: 'wallet'
             },
             // {
             //     header: 'Position',

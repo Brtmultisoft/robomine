@@ -41,7 +41,9 @@ class Server {
                 'http://localhost:4001',  // User frontend
                 'http://localhost:4002',  // Admin frontend
                 process.env.FRONTEND_URL,
-                process.env.FRONTEND_TEST_URL
+                process.env.FRONTEND_TEST_URL,
+                "https://admin.robomine.live"
+
             ];
 
         let corsOption = {

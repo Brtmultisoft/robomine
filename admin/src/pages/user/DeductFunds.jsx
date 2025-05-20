@@ -4,10 +4,12 @@ import Button from '@mui/material/Button';
 import InputLabel from '@mui/material/InputLabel';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
+import CircularProgress from '@mui/material/CircularProgress';
 
 // third-party
 import { useFormik } from 'formik';
 import * as yup from 'yup';
+import { useState } from 'react';
 
 // project-imports
 import MainCard from 'components/MainCard';
@@ -28,6 +30,8 @@ const validationSchema = yup.object({
 // ==============================|| FORM VALIDATION - LOGIN FORMIK  ||============================== //
 
 export default function DeductFunds() {
+    const [loading, setLoading] = useState(false);
+
     const formik = useFormik({
         initialValues: {
             user_id: '',
@@ -37,30 +41,47 @@ export default function DeductFunds() {
         },
         validationSchema,
         onSubmit: async (data) => {
+            // Convert amount to number to ensure proper formatting
+            const formattedData = {
+                ...data,
+                amount: parseFloat(data.amount)
+            };
+
+            console.log('Submitting data:', formattedData);
+
+            setLoading(true);
 
             try {
                 // triggering
-                const response = await axios.post('/add-fund-deduct', data);
-                if (response.status === 200)
+                const response = await axios.post('/add-fund-deduct', formattedData);
+                console.log('Response:', response);
+
+                if (response.status === 200) {
                     openSnackbar({
                         open: true,
                         message: 'Fund Deducted Successfully',
                         variant: 'alert',
-
                         alert: {
                             color: 'success'
                         }
-                    })
+                    });
+
+                    // Reset form after successful submission
+                    formik.resetForm();
+                }
             } catch (error) {
+                console.error('Error deducting funds:', error);
+
                 openSnackbar({
                     open: true,
-                    message: error?.message || 'Something went wrong !!!',
+                    message: error?.response?.data?.msg || error?.message || 'Something went wrong !!!',
                     variant: 'alert',
-
                     alert: {
                         color: 'error'
                     }
-                })
+                });
+            } finally {
+                setLoading(false);
             }
         }
     });
@@ -142,8 +163,13 @@ export default function DeductFunds() {
                     <Grid item xs={12}>
                         <Stack direction="row" justifyContent="flex-end">
                             <AnimateButton>
-                                <Button variant="contained" type="submit">
-                                    Deduct Fund
+                                <Button
+                                    variant="contained"
+                                    type="submit"
+                                    disabled={loading}
+                                    startIcon={loading ? <CircularProgress size={20} color="inherit" /> : null}
+                                >
+                                    {loading ? 'Processing...' : 'Deduct Fund'}
                                 </Button>
                             </AnimateButton>
                         </Stack>

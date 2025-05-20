@@ -19,7 +19,7 @@ import wallet from './wallet';
 // ==============================|| MENU ITEMS ||============================== //
 
 const menuItems = {
-  items: [user, investments, wallet, transactions, incomes, components]
+  items: [user, investments, wallet, transactions, incomes]
   // items: [user, investments, incomes, customerSupport]
 };
 

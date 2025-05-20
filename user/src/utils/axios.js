@@ -2,7 +2,10 @@ import axios from 'axios';
 
 let baseURL = import.meta.env.VITE_APP_TEST === '1' ? import.meta.env.VITE_APP_TEST_API_URL : import.meta.env.VITE_APP_PROD_API_URL
 baseURL = baseURL + import.meta.env.VITE_APP_MAIN_PATH
-const axiosServices = axios.create({ baseURL });
+const axiosServices = axios.create({
+  baseURL,
+  withCredentials: true // Enable sending cookies with cross-origin requests
+});
 
 // ==============================|| AXIOS - FOR MOCK SERVICES ||============================== //
 

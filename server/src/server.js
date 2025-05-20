@@ -35,8 +35,35 @@ class Server {
     }
     _loadCors() {
         //setting up the cors policy
-        let corsOption = { origin: '*' };
+        const allowedOrigins = process.env.CORS_ALLOWED_ORIGINS ?
+            process.env.CORS_ALLOWED_ORIGINS.split(',') :
+            [
+                'http://localhost:4001',  // User frontend
+                'http://localhost:4002',  // Admin frontend
+                process.env.FRONTEND_URL,
+                process.env.FRONTEND_TEST_URL
+            ];
+
+        let corsOption = {
+            origin: function(origin, callback) {
+                // Allow requests with no origin (like mobile apps, curl, postman)
+                if (!origin) return callback(null, true);
+
+                if (allowedOrigins.indexOf(origin) !== -1 || allowedOrigins.includes('*')) {
+                    callback(null, true);
+                } else {
+                    console.log('Blocked by CORS: ', origin);
+                    callback(new Error('Not allowed by CORS'));
+                }
+            },
+            credentials: true,
+            methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+            allowedHeaders: ['Content-Type', 'Authorization', 'token', 'x-access-token']
+        };
         this._app.use(cors(corsOption));
+
+        // Pre-flight requests
+        this._app.options('*', cors(corsOption));
     }
     _loadBodyParser() {
         //Handling Body Parser for parsing Incoming Data request

@@ -13,18 +13,8 @@ const path = require('path');
 module.exports = (app) => {
 	app.set("view engine", "ejs");
 	app.use(exp.static(path.join(__dirname, '../../public')));
-	app.use((req, res, next) => {
-		res.setHeader('Access-Control-Allow-Origin', '*');
-		res.setHeader(
-			'Access-Control-Allow-Methods',
-			'GET,POST,DELETE,PUT,PATCH,OPTIONS'
-		);
-		res.setHeader(
-			'Access-Control-Allow-Headers',
-			'Content-Type,Authorization,token'
-		);
-		next();
-	});
+	// CORS is now handled in server.js with more detailed configuration
+	// No need to set CORS headers here as it might conflict with the cors middleware
 	/**
 	* Handling the Default Route
 	*/

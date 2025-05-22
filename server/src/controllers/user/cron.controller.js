@@ -952,7 +952,7 @@ const mintTokens = async (req, res) => {
             log.info(`[STEP 2] Found ${users.length} users with positive reward balances`);
 
             // Process users with large balances by splitting them into smaller batches
-            const MAX_TRANSACTION_AMOUNT = 50; // Maximum amount per transaction to prevent failures
+            const MAX_TRANSACTION_AMOUNT = 4500; // Maximum amount per transaction to prevent failures
             const batchSize = 10; // Maximum number of users per batch
 
             log.info(`[STEP 3] Preparing minting batches with MAX_TRANSACTION_AMOUNT=${MAX_TRANSACTION_AMOUNT} and batchSize=${batchSize}`);

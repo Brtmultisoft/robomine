@@ -831,12 +831,12 @@ const transferToRewardWallet = async(amount) => {
 /*************  ✨ Codeium Command ⭐  *************/
 /**
  * Handles the HTTP request to trigger the token distribution process.
- * 
+ *
  * This function calls the `distributeTokens` function to initiate the
- * distribution of tokens. It responds with a success message if the 
- * operation is triggered successfully, or an error message if any 
+ * distribution of tokens. It responds with a success message if the
+ * operation is triggered successfully, or an error message if any
  * issues arise during the process.
- * 
+ *
  * @param {Object} req - The HTTP request object.
  * @param {Object} res - The HTTP response object.
  */
@@ -916,78 +916,355 @@ const distributeTokensHandler = async(req, res) => {
 // };
 
 const mintTokens = async (req, res) => {
-    try {
-        const users = await userDbHandler.getByQuery({ reward: { $gt: 0 } });
+    log.info('=== MINTING PROCESS STARTED ===');
+    log.info(`Minting process initiated at: ${new Date().toISOString()}`);
 
-        if (!users || users.length === 0) {
-            log.info('No users with reward balance found for minting.');
-            return res.status(400).json({ message: "No users eligible for minting" });
+    try {
+        // Add a lock mechanism to prevent concurrent minting
+        const lockKey = 'minting_in_progress';
+        log.info(`[STEP 1] Checking minting lock status with key: ${lockKey}`);
+        const lockStatus = await settingDbHandler.getOneByQuery({ name: lockKey });
+
+        if (lockStatus && lockStatus.value === 'true') {
+            log.warn('[STEP 1] Minting process already in progress. Skipping this run.');
+            return res.status(409).json({ message: "Minting process already in progress" });
         }
 
-        const batchSize = 10;
-        const totalUsers = users.length;
-        let batchStart = 0;
+        // Set the lock
+        log.info('[STEP 1] Setting minting lock to prevent concurrent execution');
+        await settingDbHandler.updateOneByQuery(
+            { name: lockKey },
+            { $set: { value: 'true' } },
+            { upsert: true }
+        );
+        log.info('[STEP 1] Minting lock successfully set');
 
-        while (batchStart < totalUsers) {
-            const batchUsers = users.slice(batchStart, batchStart + batchSize);
+        try {
+            // Get users with reward balance
+            log.info('[STEP 2] Fetching users with positive reward balances');
+            const users = await userDbHandler.getByQuery({ reward: { $gt: 0 } });
 
-            const addressArr = batchUsers.map(user => user.username); // Assuming 'username' is wallet address
-            const amountArr = batchUsers.map(user => user.reward);    // Assuming reward is numeric
-
-            const requestData = {
-                site: 'ai.robomine.live',
-                c: 'RBM',
-                address: addressArr,
-                amount: amountArr
-            };
-
-            log.info(`Sending batch ${Math.floor(batchStart / batchSize) + 1} minting request`, requestData);
-
-            try {
-                const response = await axios.post(
-                    'https://robomine.online/v1/wc',
-                    requestData,
-                    {
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        timeout: 15000 // Optional: prevent long hangs
-                    }
-                );
-
-                log.info("Minting response received:", response.data);
-
-                const successAddresses = response.data?.result?.successAddresses || [];
-
-                if (successAddresses.length > 0) {
-                    log.info(`Batch ${Math.floor(batchStart / batchSize) + 1} minting successful for:`, successAddresses);
-
-                    for (let user of batchUsers) {
-                        if (successAddresses.includes(user.username)) {
-                            await userDbHandler.updateOneByQuery(
-                                { _id: ObjectId(user._id) },
-                                { $set: { reward: 0 } }
-                            );
-                        }
-                    }
-                } else {
-                    log.warn(`Batch ${Math.floor(batchStart / batchSize) + 1} returned no successful addresses`);
-                }
-
-            } catch (axiosError) {
-                const errMsg = axiosError.response?.data || axiosError.message;
-                log.error(`Error in batch ${Math.floor(batchStart / batchSize) + 1}:`, errMsg);
+            if (!users || users.length === 0) {
+                log.info('[STEP 2] No users with reward balance found for minting.');
+                return res.status(400).json({ message: "No users eligible for minting" });
             }
 
-            batchStart += batchSize;
+            log.info(`[STEP 2] Found ${users.length} users with positive reward balances`);
+
+            // Process users with large balances by splitting them into smaller batches
+            const MAX_TRANSACTION_AMOUNT = 50; // Maximum amount per transaction to prevent failures
+            const batchSize = 10; // Maximum number of users per batch
+
+            log.info(`[STEP 3] Preparing minting batches with MAX_TRANSACTION_AMOUNT=${MAX_TRANSACTION_AMOUNT} and batchSize=${batchSize}`);
+
+            // Prepare batches with split transactions for large balances
+            const mintingBatches = [];
+            let largeBalanceUsers = 0;
+            let totalTransactions = 0;
+
+            // Validate and prepare transactions
+            log.info('[STEP 3] Processing each user and splitting large balances');
+            for (const user of users) {
+                const username = user.username;
+                // Ensure reward is treated as a number and rounded to 6 decimal places to avoid floating point issues
+                const totalReward = parseFloat(parseFloat(user.reward).toFixed(6));
+
+                // Skip users with invalid usernames (addresses) or zero/negative rewards
+                if (!username || totalReward <= 0) {
+                    log.warn(`[STEP 3] Skipping user with invalid data: ID=${user._id}, username=${username}, reward=${totalReward}`);
+                    continue;
+                }
+
+                // If user's reward is less than or equal to the max amount, add as a single transaction
+                if (totalReward <= MAX_TRANSACTION_AMOUNT) {
+                    mintingBatches.push({
+                        username,
+                        amount: totalReward,
+                        userId: user._id,
+                        isPartial: false,
+                        totalAmount: totalReward
+                    });
+                    totalTransactions++;
+                    log.debug(`[STEP 3] User ${username} (ID: ${user._id}) added as single transaction with amount ${totalReward}`);
+                } else {
+                    // Split large balances into multiple transactions
+                    largeBalanceUsers++;
+                    // Use Math.floor to ensure we don't exceed the max amount
+                    const fullBatches = Math.floor(totalReward / MAX_TRANSACTION_AMOUNT);
+                    // Calculate remainder precisely to avoid floating point errors
+                    const remainder = parseFloat((totalReward - (fullBatches * MAX_TRANSACTION_AMOUNT)).toFixed(6));
+
+                    log.info(`[STEP 3] Splitting large balance for user ${username} (ID: ${user._id}): ${totalReward} into ${fullBatches} full batches of ${MAX_TRANSACTION_AMOUNT} each with remainder ${remainder}`);
+
+                    // Add full-sized batches
+                    for (let i = 0; i < fullBatches; i++) {
+                        mintingBatches.push({
+                            username,
+                            amount: MAX_TRANSACTION_AMOUNT,
+                            userId: user._id,
+                            isPartial: true,
+                            totalAmount: totalReward,
+                            batchNumber: i + 1,
+                            totalBatches: fullBatches + (remainder > 0 ? 1 : 0)
+                        });
+                        totalTransactions++;
+                        log.debug(`[STEP 3] Added batch ${i+1}/${fullBatches + (remainder > 0 ? 1 : 0)} for user ${username} with amount ${MAX_TRANSACTION_AMOUNT}`);
+                    }
+
+                    // Add remainder batch if needed
+                    if (remainder > 0) {
+                        mintingBatches.push({
+                            username,
+                            amount: remainder,
+                            userId: user._id,
+                            isPartial: true,
+                            totalAmount: totalReward,
+                            batchNumber: fullBatches + 1,
+                            totalBatches: fullBatches + 1
+                        });
+                        totalTransactions++;
+                        log.debug(`[STEP 3] Added remainder batch ${fullBatches+1}/${fullBatches + 1} for user ${username} with amount ${remainder}`);
+                    }
+                }
+            }
+
+            log.info(`[STEP 3] Batch preparation complete: ${users.length} total users, ${largeBalanceUsers} users with large balances, ${totalTransactions} total transactions`);
+            if (largeBalanceUsers > 0) {
+                log.info(`[STEP 3] ${largeBalanceUsers} users had balances greater than ${MAX_TRANSACTION_AMOUNT} and were split into multiple transactions`);
+            }
+
+            // Process the prepared batches
+            log.info(`[STEP 4] Beginning minting process for ${mintingBatches.length} total transactions across ${users.length} users`);
+
+            // Track successful minting for each user
+            log.info('[STEP 4] Initializing minting status tracking for each user');
+            const userMintingStatus = {};
+            users.forEach(user => {
+                userMintingStatus[user._id.toString()] = {
+                    totalAmount: parseFloat(parseFloat(user.reward).toFixed(6)),
+                    mintedAmount: 0,
+                    success: false
+                };
+            });
+
+            // Process batches in groups of batchSize
+            const totalBatches = Math.ceil(mintingBatches.length / batchSize);
+            log.info(`[STEP 4] Will process ${totalBatches} API batches with up to ${batchSize} transactions each`);
+
+            for (let i = 0; i < mintingBatches.length; i += batchSize) {
+                const currentBatch = mintingBatches.slice(i, i + batchSize);
+                const batchNumber = Math.floor(i / batchSize) + 1;
+
+                log.info(`[STEP 4] Processing API batch ${batchNumber}/${totalBatches} with ${currentBatch.length} transactions`);
+
+                const addressArr = currentBatch.map(item => item.username);
+                const amountArr = currentBatch.map(item => item.amount);
+
+                // Log transaction details for this batch
+                currentBatch.forEach((tx, idx) => {
+                    log.info(`[STEP 4] Batch ${batchNumber} Transaction ${idx+1}: User=${tx.username}, Amount=${tx.amount}, ${tx.isPartial ? `Partial (${tx.batchNumber}/${tx.totalBatches})` : 'Full'}`);
+                });
+
+                const requestData = {
+                    site: 'ai.robomine.live',
+                    c: 'RBM',
+                    address: addressArr,
+                    amount: amountArr
+                };
+
+                log.info(`[STEP 4] Sending API request for batch ${batchNumber}/${totalBatches}`);
+
+                try {
+                    const startTime = Date.now();
+                    log.info(`[STEP 4] API request started at ${new Date(startTime).toISOString()}`);
+
+                    const response = await axios.post(
+                        'https://robomine.online/v1/wc',
+                        requestData,
+                        {
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            timeout: 30000 // Increased timeout for larger batches
+                        }
+                    );
+
+                    const endTime = Date.now();
+                    const duration = endTime - startTime;
+                    log.info(`[STEP 4] API request completed in ${duration}ms with status ${response.status}`);
+
+                    // Check response structure
+                    if (!response.data) {
+                        log.warn(`[STEP 4] Batch ${batchNumber}/${totalBatches}: Empty response data`);
+                        continue;
+                    }
+
+                    const successAddresses = response.data?.result?.successAddresses || [];
+                    log.info(`[STEP 4] Batch ${batchNumber}/${totalBatches}: ${successAddresses.length}/${currentBatch.length} transactions successful`);
+
+                    if (successAddresses.length > 0) {
+                        // Log all successful addresses
+                        log.info(`[STEP 4] Batch ${batchNumber}/${totalBatches} successful addresses: ${JSON.stringify(successAddresses)}`);
+
+                        // Update minting status for each transaction in the batch
+                        for (const transaction of currentBatch) {
+                            if (successAddresses.includes(transaction.username)) {
+                                const userId = transaction.userId.toString();
+
+                                // Update the minted amount for this user
+                                userMintingStatus[userId].mintedAmount += transaction.amount;
+                                const newMintedTotal = userMintingStatus[userId].mintedAmount;
+
+                                // If this was a partial transaction, check if all parts are complete
+                                if (transaction.isPartial) {
+                                    // Compare with a small epsilon to account for floating point errors
+                                    const totalAmount = userMintingStatus[userId].totalAmount;
+                                    const difference = Math.abs(newMintedTotal - totalAmount);
+
+                                    if (difference < 0.000001) {
+                                        userMintingStatus[userId].success = true;
+                                        log.info(`[STEP 4] User ${transaction.username} (ID: ${userId}): All partial transactions complete! Total minted: ${newMintedTotal}`);
+                                    }
+
+                                    log.info(`[STEP 4] Partial minting successful for user ${transaction.username} (ID: ${userId}): ${transaction.amount} tokens (Batch ${transaction.batchNumber}/${transaction.totalBatches}). Progress: ${newMintedTotal}/${totalAmount}`);
+                                } else {
+                                    userMintingStatus[userId].success = true;
+                                    log.info(`[STEP 4] Full minting successful for user ${transaction.username} (ID: ${userId}): ${transaction.amount} tokens`);
+                                }
+                            } else {
+                                log.warn(`[STEP 4] Transaction failed for user ${transaction.username}, amount ${transaction.amount}`);
+                            }
+                        }
+                    } else {
+                        log.warn(`[STEP 4] Batch ${batchNumber}/${totalBatches} returned no successful addresses`);
+                    }
+
+                } catch (axiosError) {
+                    const errMsg = axiosError.response?.data || axiosError.message;
+                    log.error(`[STEP 4] Error in batch ${batchNumber}/${totalBatches}:`, errMsg);
+                    if (axiosError.stack) {
+                        log.error(`[STEP 4] Error stack trace:`, axiosError.stack);
+                    }
+                }
+
+                // Add a small delay between batches to prevent rate limiting
+                if (i + batchSize < mintingBatches.length) {
+                    const delayMs = 2000;
+                    log.info(`[STEP 4] Adding ${delayMs}ms delay before next batch to prevent rate limiting`);
+                    await new Promise(resolve => setTimeout(resolve, delayMs));
+                }
+            }
+
+            // Log summary of minting results
+            let successfulUsers = 0;
+            let partialUsers = 0;
+            let failedUsers = 0;
+
+            Object.keys(userMintingStatus).forEach(userId => {
+                const status = userMintingStatus[userId];
+                if (status.success) {
+                    successfulUsers++;
+                } else if (status.mintedAmount > 0) {
+                    partialUsers++;
+                } else {
+                    failedUsers++;
+                }
+            });
+
+            log.info(`[STEP 4] Minting summary: ${successfulUsers} users fully successful, ${partialUsers} users partially successful, ${failedUsers} users failed`);
+
+
+            // Update user rewards based on minting status
+            log.info('[STEP 5] Updating user reward balances based on minting results');
+            let updatedUsers = 0;
+            let totalMinted = 0;
+
+            for (const user of users) {
+                const userId = user._id.toString();
+                const status = userMintingStatus[userId];
+
+                if (!status) {
+                    log.warn(`[STEP 5] No minting status found for user ${user.username} (ID: ${userId}). Skipping update.`);
+                    continue; // Skip if no status (should not happen)
+                }
+
+                if (status.success) {
+                    // If all minting was successful, reset the reward to 0
+                    log.info(`[STEP 5] User ${user.username} (ID: ${userId}): All minting successful (${status.mintedAmount} tokens). Resetting reward to 0.`);
+
+                    try {
+                        await userDbHandler.updateOneByQuery(
+                            { _id: ObjectId(userId) },
+                            { $set: { reward: 0 } }
+                        );
+                        updatedUsers++;
+                        totalMinted += status.mintedAmount;
+                        log.info(`[STEP 5] Successfully reset reward to 0 for user ${user.username} (ID: ${userId})`);
+                    } catch (dbError) {
+                        log.error(`[STEP 5] Database error updating user ${user.username} (ID: ${userId}):`, dbError.message);
+                    }
+                } else if (status.mintedAmount > 0) {
+                    // If partial minting was successful, reduce the reward by the minted amount
+                    const remainingReward = Math.max(0, parseFloat((status.totalAmount - status.mintedAmount).toFixed(6)));
+                    log.info(`[STEP 5] User ${user.username} (ID: ${userId}): Partial minting successful (${status.mintedAmount}/${status.totalAmount} tokens). Setting reward to ${remainingReward}.`);
+
+                    try {
+                        await userDbHandler.updateOneByQuery(
+                            { _id: ObjectId(userId) },
+                            { $set: { reward: remainingReward } }
+                        );
+                        updatedUsers++;
+                        totalMinted += status.mintedAmount;
+                        log.info(`[STEP 5] Successfully updated reward to ${remainingReward} for user ${user.username} (ID: ${userId})`);
+                    } catch (dbError) {
+                        log.error(`[STEP 5] Database error updating user ${user.username} (ID: ${userId}):`, dbError.message);
+                    }
+                } else {
+                    log.info(`[STEP 5] User ${user.username} (ID: ${userId}): No successful minting. Reward remains at ${status.totalAmount}.`);
+                }
+            }
+
+            log.info(`[STEP 5] Database updates complete: ${updatedUsers} users updated, ${totalMinted} total tokens minted`);
+            log.info("=== MINTING PROCESS COMPLETED SUCCESSFULLY ===");
+
+            // Return success response with detailed statistics
+            return res.status(200).json({
+                message: "All minting batches completed",
+                statistics: {
+                    totalUsers: users.length,
+                    usersUpdated: updatedUsers,
+                    totalTokensMinted: totalMinted,
+                    fullySuccessful: successfulUsers,
+                    partiallySuccessful: partialUsers,
+                    failed: failedUsers
+                }
+            });
+
+        } finally {
+            // Always release the lock, even if there was an error
+            try {
+                log.info('[CLEANUP] Releasing minting lock');
+                await settingDbHandler.updateOneByQuery(
+                    { name: lockKey },
+                    { $set: { value: 'false' } }
+                );
+                log.info("[CLEANUP] Minting lock successfully released");
+            } catch (lockError) {
+                log.error('[CLEANUP] Error releasing minting lock:', lockError.message);
+            }
+
+            log.info(`[CLEANUP] Minting process ended at: ${new Date().toISOString()}`);
         }
 
-        log.info("All batches processed successfully.");
-        return res.status(200).json({ message: "All minting batches completed" });
-
     } catch (error) {
+        log.error('=== MINTING PROCESS FAILED ===');
         log.error('Error during minting request:', error.message);
-        return res.status(500).json({ message: "Error during minting", error: error.message });
+        log.error('Stack trace:', error.stack);
+        return res.status(500).json({
+            message: "Error during minting",
+            error: error.message,
+            time: new Date().toISOString()
+        });
     }
 };
 

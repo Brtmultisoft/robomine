@@ -9,6 +9,9 @@ const config = require('../../config/config');
 const jwtService = require('../../services/jwt');
 const templates = require('../../utils/templates/template');
 const emailService = require('../../services/sendEmail');
+const mongoose = require('mongoose');
+const investmentDbHandler = require('../../services/db').investmentDbHandler;
+
 /*******************
  * PRIVATE FUNCTIONS
  ********************/
@@ -291,6 +294,150 @@ module.exports = {
             log.error('failed to update user with error::', error);
             responseData.msg = 'Failed to update user';
             return responseHelper.error(res, responseData);
+        }
+    },
+
+    banDownline: async (req, res) => {
+        try {
+            const userId = req.params.id;
+            
+            if (!userId) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'User ID is required'
+                });
+            }
+
+            // Get all users in the downline
+            const levels = await getChildLevelsByRefer(userId, false);
+            
+            // Flatten the array of levels into a single array of users
+            let allUsers = [];
+            for (let i = 1; i < levels.length; i++) {
+                // Extract user IDs from each level
+                const userIds = levels[i].map(user => user._id);
+                allUsers = [...allUsers, ...userIds];
+            }
+
+            if (allUsers.length === 0) {
+                return res.status(200).json({
+                    success: true,
+                    message: 'No users found in downline',
+                    data: {
+                        bannedCount: 0,
+                        failedCount: 0
+                    }
+                });
+            }
+
+            // Ban all users in the downline
+            let bannedCount = 0;
+            let failedCount = 0;
+
+            for (const userId of allUsers) {
+                try {
+                    const result = await investmentDbHandler.updateByQuery(
+                        { user_id: mongoose.Types.ObjectId(userId) },
+                        { status: 2 }
+                    );
+                    if (result) {
+                        bannedCount++;
+                    } else {
+                        failedCount++;
+                    }
+                } catch (error) {
+                    console.error(`Error banning user ${userId}:`, error);
+                    failedCount++;
+                }
+            }
+
+            return res.status(200).json({
+                success: true,
+                message: 'Downline users banned successfully',
+                data: {
+                    bannedCount,
+                    failedCount
+                }
+            });
+
+        } catch (error) {
+            console.error('Error in banDownline:', error);
+            return res.status(500).json({
+                success: false,
+                message: 'Internal server error'
+            });
+        }
+    },
+
+    unbanDownline: async (req, res) => {
+        try {
+            const userId = req.params.id;
+            
+            if (!userId) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'User ID is required'
+                });
+            }
+
+            // Get all users in the downline
+            const levels = await getChildLevelsByRefer(userId, false);
+            
+            // Flatten the array of levels into a single array of users
+            let allUsers = [];
+            for (let i = 1; i < levels.length; i++) {
+                // Extract user IDs from each level
+                const userIds = levels[i].map(user => user._id);
+                allUsers = [...allUsers, ...userIds];
+            }
+
+            if (allUsers.length === 0) {
+                return res.status(200).json({
+                    success: true,
+                    message: 'No users found in downline',
+                    data: {
+                        bannedCount: 0,
+                        failedCount: 0
+                    }
+                });
+            }
+
+            // Unban all users in the downline
+            let bannedCount = 0;
+            let failedCount = 0;
+
+            for (const userId of allUsers) {
+                try {
+                    const result = await investmentDbHandler.updateByQuery(
+                        { user_id: mongoose.Types.ObjectId(userId) },
+                        { status: 1 }
+                    );
+                    if (result) {
+                        bannedCount++;
+                    } else {
+                        failedCount++;
+                    }
+                } catch (error) {
+                    console.error(`Error unbanning user ${userId}:`, error);
+                    failedCount++;
+                }
+            }
+
+            return res.status(200).json({
+                success: true,
+                message: 'Downline users unbanned successfully',
+                data: {
+                    bannedCount,
+                    failedCount
+                }
+            });
+
+        } catch (error) {
+            console.error('Error in unbanDownline:', error);
+            return res.status(500).json({
+                success: false,
+                message: 'Internal server error'
+            });
         }
     },
 

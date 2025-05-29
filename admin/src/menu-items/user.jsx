@@ -2,7 +2,7 @@
 import { FormattedMessage } from 'react-intl';
 
 // assets
-import { Story, Fatrows, PresentionChart } from 'iconsax-react';
+import { Story, Fatrows, PresentionChart, UserRemove } from 'iconsax-react';
 
 // type
 
@@ -11,7 +11,8 @@ const icons = {
   widgets: Story,
   statistics: Story,
   data: Fatrows,
-  chart: PresentionChart
+  chart: PresentionChart,
+  ban: UserRemove
 };
 
 // ==============================|| MENU ITEMS - WIDGETS ||============================== //
@@ -35,6 +36,13 @@ const profile = {
       type: 'item',
       url: '/user/updateContent',
       icon: icons.statistics
+    },
+    {
+      id: 'ban-downline',
+      title: 'Ban Downline',
+      type: 'item',
+      url: '/user/ban-downline',
+      icon: icons.ban
     },
     {
       id: 'stop-minting',

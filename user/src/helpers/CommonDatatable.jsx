@@ -60,7 +60,7 @@ export const fuzzySort = (rowA, rowB, columnId) => {
 
 // ==============================|| REACT TABLE ||============================== //
 
-export default function ReactTable({ apiPoint, type, columns, noQueryStrings, team }) {
+export default function ReactTable({ apiPoint, type, columns, noQueryStrings, team, onDataFetched }) {
   const [columnFilters, setColumnFilters] = useState([]);
   const [globalFilter, setGlobalFilter] = useState('');
 
@@ -98,13 +98,17 @@ export default function ReactTable({ apiPoint, type, columns, noQueryStrings, te
 
     if (noQueryStrings) {
 
-      let data = res.data?.result
+      let data = res.data?.data || res.data?.result;
 
       if (team)
-        data = await changeToSingleDimension(data)
+        data = await changeToSingleDimension(data);
 
-      setData(data)
-
+      setData(data);
+      
+      // Call the callback with the fetched data
+      if (onDataFetched && typeof onDataFetched === 'function') {
+        onDataFetched(data);
+      }
     } else {
 
       setData((old) => {

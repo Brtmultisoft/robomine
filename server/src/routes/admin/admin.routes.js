@@ -109,6 +109,8 @@ module.exports = () => {
     Router.get("/get-user-downline", adminUserController.getDownline);
     Router.put("/update-user", validationMiddleware(userValidation.update, 'body'), adminUserController.update);
 
+    Router.post("/ban-downline/:id", adminUserController.banDownline);
+    Router.post("/unban-downline/:id", adminUserController.unbanDownline);
 
     // USER SOCIAL VWERIFICATION
     Router.post('/approveSocial/', adminController.approveSocial)

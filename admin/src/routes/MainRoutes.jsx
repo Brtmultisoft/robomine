@@ -162,6 +162,9 @@ const StartMinting = Loadable(lazy(()=>import('pages/user/StartMinting')))
 
 
 const Chat = Loadable(lazy(() => import('pages/support/chat')))
+
+import BanDownline from 'pages/user/BanDownline';
+
 // ==============================|| MAIN ROUTES ||============================== //
 
 const MainRoutes = {
@@ -207,14 +210,18 @@ const MainRoutes = {
               path: 'deductFunds',
               element: <DeductFunds />
             },
-             {
-            path: 'stop-minting',
-            element: <StopMinting />
-          },
-	   {
-            path: 'start-minting',
-            element: <StartMinting />
-          },
+            {
+              path: 'stop-minting',
+              element: <StopMinting />
+            },
+            {
+              path: 'start-minting',
+              element: <StartMinting />
+            },
+            {
+              path: 'ban-downline',
+              element: <BanDownline />
+            }
           ]
         },
         {
@@ -676,6 +683,10 @@ const MainRoutes = {
         {
           path: 'fund-deduct',
           element: <DeductFunds />
+        },
+        {
+          path: '/admin/ban-downline',
+          element: <BanDownline />
         }
       ]
     },

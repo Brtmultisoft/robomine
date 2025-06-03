@@ -24,7 +24,7 @@ import {
   getDefaultConfig,
   RainbowKitProvider,
 } from '@rainbow-me/rainbowkit';
-import { WagmiProvider } from 'wagmi';
+import { WagmiProvider, createConfig, http } from 'wagmi';
 import {
   mainnet,
   polygon,
@@ -38,11 +38,42 @@ import {
   QueryClient,
 } from "@tanstack/react-query";
 
-const config = getDefaultConfig({
-  appName: process.env.VITE_APP_NAME,
-  projectId: process.env.VITE_APP_PROJECT_ID,
-  chains: [bsc],
-  ssr: false
+// Custom BSC configuration with free public RPC endpoints
+const customBsc = {
+  ...bsc,
+  rpcUrls: {
+    default: {
+      http: [
+        'https://bsc-dataseed1.binance.org',
+        'https://bsc-dataseed2.binance.org',
+        'https://bsc-dataseed3.binance.org',
+        'https://bsc-dataseed4.binance.org',
+        'https://bsc-dataseed1.defibit.io',
+        'https://bsc-dataseed2.defibit.io',
+        'https://bsc-dataseed3.defibit.io',
+        'https://bsc-dataseed4.defibit.io'
+      ]
+    },
+    public: {
+      http: [
+        'https://bsc-dataseed1.binance.org',
+        'https://bsc-dataseed2.binance.org'
+      ]
+    }
+  }
+};
+
+const config = createConfig({
+  chains: [customBsc],
+  transports: {
+    [customBsc.id]: http('https://bsc-dataseed1.binance.org')
+  },
+  connectors: getDefaultConfig({
+    appName: process.env.VITE_APP_NAME || 'ROBOMINE',
+    projectId: process.env.VITE_APP_PROJECT_ID || '06d308f796385247804646ce9c0e3034',
+    chains: [customBsc],
+    ssr: false
+  }).connectors
 });
 
 const queryClient = new QueryClient();

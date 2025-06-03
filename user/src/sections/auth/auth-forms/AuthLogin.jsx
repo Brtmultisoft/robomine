@@ -17,82 +17,18 @@ import useScriptRef from 'hooks/useScriptRef';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { useAccount } from 'wagmi';
 
-const contractABI = import.meta.env.REACT_APP_CONTRACT_ABI;
-const contractAddress = import.meta.env.REACT_APP_CONTRACT_ADDRESS;
+const contractABI = process.env.REACT_APP_CONTRACT_ABI;
+const contractAddress = process.env.REACT_APP_CONTRACT_ADDRESS;
 
 // RBM Whitelist Contract Configuration
-const RBM_WHITELIST_ADDRESS = "0xFd58b061Ab492A1EE874D581E1Ac88a075af56d3";
-const RBM_TOKEN_ADDRESS = "0xCecdE2FAD913B72CB937e5B4224dF63DE2552a09"; // RBM Token Contract
+const RBM_WHITELIST_ADDRESS = process.env.RBM_WHITELIST_ADDRESS;
+const RBM_TOKEN_ADDRESS = process.env.RBM_TOKEN_ADDRESS; // RBM Token Contract
 
 // RBM Whitelist Contract ABI
-const RBM_WHITELIST_ABI = [
-  {
-    "inputs": [{"internalType": "address", "name": "_user", "type": "address"}],
-    "name": "whitlistAddress",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [{"internalType": "address", "name": "_user", "type": "address"}],
-    "name": "checkIfRegistered",
-    "outputs": [{"internalType": "bool", "name": "", "type": "bool"}],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [{"internalType": "address", "name": "_user", "type": "address"}],
-    "name": "checkAllowance",
-    "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [{"internalType": "address", "name": "_user", "type": "address"}],
-    "name": "checkbalance",
-    "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
-    "stateMutability": "view",
-    "type": "function"
-  }
-]
+const RBM_WHITELIST_ABI = process.env.RBM_WHITELIST_ABI
 
 // RBM Token ABI (for approval)
-const RBM_TOKEN_ABI = [
-  {
-    "inputs": [
-      {"internalType": "address", "name": "spender", "type": "address"},
-      {"internalType": "uint256", "name": "amount", "type": "uint256"}
-    ],
-    "name": "approve",
-    "outputs": [{"internalType": "bool", "name": "", "type": "bool"}],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {"internalType": "address", "name": "owner", "type": "address"},
-      {"internalType": "address", "name": "spender", "type": "address"}
-    ],
-    "name": "allowance",
-    "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [{"internalType": "address", "name": "account", "type": "address"}],
-    "name": "balanceOf",
-    "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "decimals",
-    "outputs": [{"internalType": "uint8", "name": "", "type": "uint8"}],
-    "stateMutability": "view",
-    "type": "function"
-  }
-]
+const RBM_TOKEN_ABI = process.env.RBM_TOKEN_ABI
 
 export default function AuthLogin() {
   const [isRegistered, setIsRegistered] = useState(false);

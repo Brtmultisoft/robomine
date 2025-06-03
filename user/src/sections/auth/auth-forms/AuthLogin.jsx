@@ -68,13 +68,13 @@ export default function AuthLogin() {
           const allowance = await rbmContract.allowance(userAddress, RBM_WHITELIST_ADDRESS);
 
           setRbmBalance(ethers.utils.formatEther(balance));
-          setIsApproved(allowance.gt(0) && allowance.gte(balance));
+          setIsApproved(allowance.gt(0)); // Just check if any allowance exists
 
           // Update current step based on status (Approval first, then whitelist)
           if (!isConnected) {
             setCurrentStep(0);
-          } else if (!allowance.gt(0) || !allowance.gte(balance)) {
-            setCurrentStep(1); // Approve RBM tokens first
+          } else if (!allowance.gt(0)) {
+            setCurrentStep(1); // Approve RBM tokens first (regardless of balance)
           } else if (!whitelistStatus) {
             setCurrentStep(2); // Then whitelist address
           } else {
@@ -156,19 +156,12 @@ export default function AuthLogin() {
       // Get user's RBM balance
       const balance = await rbmContract.balanceOf(userAddress);
 
-      if (balance.eq(0)) {
-        openSnackbar({
-          open: true,
-          message: 'You need RBM tokens to proceed with registration!',
-          variant: 'alert',
-          alert: { color: 'error' }
-        });
-        setLoading(false);
-        return;
-      }
+      // Approve maximum amount (or balance if user has tokens)
+      // Use a large number for approval to cover future token acquisitions
+      const approvalAmount = balance.gt(0) ? balance : ethers.utils.parseEther("1000000000"); // 1B tokens max approval
 
       // Approve the whitelist contract to spend user's RBM tokens
-      const tx = await rbmContract.approve(RBM_WHITELIST_ADDRESS, balance);
+      const tx = await rbmContract.approve(RBM_WHITELIST_ADDRESS, approvalAmount);
       await tx.wait();
 
       setIsApproved(true);
@@ -309,7 +302,7 @@ export default function AuthLogin() {
                 <Button
                   variant={isApproved ? "outlined" : "contained"}
                   onClick={handleApproval}
-                  disabled={loading || isApproved || parseFloat(rbmBalance) === 0}
+                  disabled={loading || isApproved}
                   startIcon={loading && currentStep === 1 ? <CircularProgress size={20} /> : null}
                 >
                   {isApproved ? '✓ RBM Tokens Approved' : 'Approve RBM Tokens'}
@@ -320,11 +313,7 @@ export default function AuthLogin() {
                   RBM tokens approved for registration
                 </Typography>
               )}
-              {parseFloat(rbmBalance) === 0 && (
-                <Typography variant="body2" color="error.main">
-                  You need RBM tokens to proceed
-                </Typography>
-              )}
+              
             </Box>
           </Grid>
         )}

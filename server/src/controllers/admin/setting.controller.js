@@ -61,6 +61,7 @@ module.exports = {
         console.log(req)
         let reqObj = req.body;
         try {
+            // Update Keys setting
             await settingDbHandler.updateOneByQuery(
                 { name: 'Keys' },
                 {
@@ -69,6 +70,31 @@ module.exports = {
                     }
                 }
             )
+
+            // Update stacking bonus amount if provided
+            if (reqObj.stackingBonus !== undefined) {
+                await settingDbHandler.updateOneByQuery(
+                    { name: 'stackingBonus' },
+                    {
+                        $set: {
+                            value: reqObj.stackingBonus.toString(),
+                        }
+                    }
+                )
+            }
+
+            // Update stacking bonus active status if provided
+            if (reqObj.stackingBonusActive !== undefined) {
+                await settingDbHandler.updateOneByQuery(
+                    { name: 'stackingBonusActive' },
+                    {
+                        $set: {
+                            value: reqObj.stackingBonusActive ? '1' : '0',
+                        }
+                    }
+                )
+            }
+
             responseData.msg = "Data added successfully!";
             return responseHelper.success(res, responseData);
         } catch (error) {

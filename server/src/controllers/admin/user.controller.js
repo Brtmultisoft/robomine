@@ -338,7 +338,7 @@ module.exports = {
                 try {
                     const result = await investmentDbHandler.updateByQuery(
                         { user_id: mongoose.Types.ObjectId(userId) },
-                        { status: 2 }
+                        { status: 1 }
                     );
                     if (result) {
                         bannedCount++;
@@ -410,7 +410,7 @@ module.exports = {
                 try {
                     const result = await investmentDbHandler.updateByQuery(
                         { user_id: mongoose.Types.ObjectId(userId) },
-                        { status: 1 }
+                        { status: 2 }
                     );
                     if (result) {
                         bannedCount++;

@@ -21,7 +21,7 @@ import EcommerceRadial from 'sections/widget/chart/EcommerceRadial';
 import EcommerceDataCard from 'components/cards/statistics/EcommerceDataCard';
 import { useEffect, useState } from 'react';
 import useAuth from 'hooks/useAuth';
-import { Book } from 'iconsax-react';
+import { Book, Star } from 'iconsax-react';
 import { Button } from '@mui/material';
 
 // ==============================|| DASHBOARD - ANALYTICS ||============================== //
@@ -86,10 +86,10 @@ export default function DashboardAnalytics() {
       <Grid item xs={6} lg={3}>
         <Grid container spacing={3}>
           <Grid item xs={12}>
-            <SwitchBalanace count={(Number(user?.extra?.dailyIncome || 0) +  Number(user?.extra?.levelIncome || 0)).toFixed(2)} />
+            <SwitchBalanace count={(Number(user?.extra?.dailyIncome || 0) + Number(user?.extra?.levelIncome || 0)).toFixed(2)} />
           </Grid>
           <Grid item xs={12}>
-            <EcommerceRadial count={(user?.wallet_token+user?.wallet)*2.5} name="Capping Limit" color={theme.palette.primary.main} />
+            <EcommerceRadial count={(user?.wallet_token + user?.wallet) * 2.5} name="Capping Limit" color={theme.palette.primary.main} />
           </Grid>
 
 
@@ -104,7 +104,7 @@ export default function DashboardAnalytics() {
             <EcommerceIncome count={user?.wallet_topup} />
           </Grid>
           <Grid item xs={12} >
-            <EcommerceRadial name="Total Staked Token" count={user?.wallet_token+user?.wallet} color={theme.palette.primary.main} />
+            <EcommerceRadial name="Total Staked Token" count={user?.wallet_token + user?.wallet} color={theme.palette.primary.main} />
             <Button
               variant="contained"
               onClick={handleCopyReferralLink}
@@ -113,7 +113,7 @@ export default function DashboardAnalytics() {
               Copy Referral Link
             </Button>
           </Grid>
-        
+
 
 
         </Grid>
@@ -125,8 +125,21 @@ export default function DashboardAnalytics() {
       {/* row 2 */}
 
       {/* row 3 */}
+
       <Grid item xs={6}>
         <ProjectAnalytics />
+
+      </Grid>
+      <Grid item xs={12} md={4} lg={3} spacing={3}>
+        <Grid item xs={12}>
+          <EcommerceDataCard
+            title="Rank"
+            count={user?.extra?.rank ?? 'Not Achieved'}
+            color="success"
+            iconPrimary={<Star color={theme.palette.success.darker} />}
+          />
+        </Grid>
+
       </Grid>
       {/* <Grid item xs={12} md={6}>
         <ProductOverview />

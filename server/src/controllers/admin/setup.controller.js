@@ -16,7 +16,19 @@ let settings = [
         "extra": {
             "minWithdrawal": 10
         }
+    },
+    {
+        "name": "stackingBonus",
+        "value": "0"
+    },
+    {
+        "name": "stackingBonusActive",
+        "value": "0"
     }
+    // {
+    //     "name": "Keys",
+    //     "value": ""
+    // }
 ]
 
 const update = async (model, data, handler) => {

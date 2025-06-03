@@ -110,6 +110,11 @@ export default function AllUsers() {
         accessorKey: 'topup',
       },
       {
+        header: 'Rank Achieved',
+       accessorKey: 'extra.rank',
+        cell: (props) => props.getValue() ?? 'Not Achieved',
+      },
+      {
         header: 'Date',
         accessorKey: 'created_at',
         cell: (props) => new Date(props.getValue()).toLocaleString(),

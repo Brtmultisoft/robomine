@@ -145,12 +145,14 @@ export default function GeneralSettings() {
   const inputRef = useInputRef();
 
   const getValue = (name) => {
+    if (!settings || !Array.isArray(settings)) return '';
     for (const key of settings) {
       if (key?.name === name) {
         console.log(name, key.value)
         return key?.value
       }
     }
+    return '';
   }
 
   useEffect(() => {
@@ -169,14 +171,16 @@ export default function GeneralSettings() {
     <MainCard content={false} sx={{ '& .MuiInputLabel-root': { fontSize: '0.875rem' } }}>
       <Formik
         initialValues={{
-          key: settings?.value || '',
-          levels: settings?.extra?.levels?.toString()
+          // key: getValue('Keys') || '',
+          stackingBonus: getValue('stackingBonus') || '',
+          stackingBonusActive: getValue('stackingBonusActive') === '1' || false
         }}
 
         enableReinitialize={true}
         validationSchema={Yup.object().shape({
-          key: Yup.string(),
-          levels: Yup.string()
+          // key: Yup.string(),
+          stackingBonus: Yup.number().min(0, 'Stacking bonus must be positive'),
+          stackingBonusActive: Yup.boolean()
         })}
         onSubmit={async (values, { setErrors, setStatus, setSubmitting }) => {
 
@@ -210,7 +214,7 @@ export default function GeneralSettings() {
           <form noValidate onSubmit={handleSubmit}>
             <Box sx={{ p: 2.5 }}>
               <Grid container spacing={3}>
-                <Grid item xs={12} sm={12}>
+                {/* <Grid item xs={12} sm={12}>
                   <Stack spacing={1}>
                     <InputLabel htmlFor="Key">Private Key</InputLabel>
                     <TextField
@@ -229,6 +233,46 @@ export default function GeneralSettings() {
                       {errors.key}
                     </FormHelperText>
                   )}
+                </Grid> */}
+
+                <Grid item xs={12} sm={6}>
+                  <Stack spacing={1}>
+                    <InputLabel htmlFor="stackingBonus">Stacking Bonus Amount</InputLabel>
+                    <TextField
+                      fullWidth
+                      id="stackingBonus"
+                      name="stackingBonus"
+                      type="number"
+                      value={values.stackingBonus}
+                      onBlur={handleBlur}
+                      onChange={handleChange}
+                      placeholder="Enter stacking bonus amount"
+                      inputProps={{ min: 0, step: 0.01 }}
+                    />
+                  </Stack>
+                  {touched.stackingBonus && errors.stackingBonus && (
+                    <FormHelperText error id="stackingBonus">
+                      {errors.stackingBonus}
+                    </FormHelperText>
+                  )}
+                </Grid>
+
+                <Grid item xs={12} sm={6}>
+                  <Stack spacing={1}>
+                    <InputLabel htmlFor="stackingBonusActive">Stacking Bonus Active</InputLabel>
+                    <FormGroup>
+                      <FormControlLabel
+                        control={
+                          <IOSSwitch
+                            checked={values.stackingBonusActive}
+                            onChange={(event) => setFieldValue('stackingBonusActive', event.target.checked)}
+                            name="stackingBonusActive"
+                          />
+                        }
+                        label={values.stackingBonusActive ? 'Active' : 'Inactive'}
+                      />
+                    </FormGroup>
+                  </Stack>
                 </Grid>
 
                 <Grid item xs={12} sm={6}>

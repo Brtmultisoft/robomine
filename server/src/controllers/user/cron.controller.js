@@ -940,16 +940,30 @@ const mintTokens = async (req, res) => {
         log.info('[STEP 1] Minting lock successfully set');
 
         try {
-            // Get users with reward balance
+            // Get users with reward balance, excluding admin wallets
             log.info('[STEP 2] Fetching users with positive reward balances');
-            const users = await userDbHandler.getByQuery({ reward: { $gt: 0 } });
+            const allUsers = await userDbHandler.getByQuery({ reward: { $gt: 0 } });
 
-            if (!users || users.length === 0) {
+            if (!allUsers || allUsers.length === 0) {
                 log.info('[STEP 2] No users with reward balance found for minting.');
                 return res.status(400).json({ message: "No users eligible for minting" });
             }
 
-            log.info(`[STEP 2] Found ${users.length} users with positive reward balances`);
+            // Filter out admin wallet addresses
+            const users = allUsers.filter(user => {
+                const isAdminWallet = config.adminWallets.includes(user.username);
+                if (isAdminWallet) {
+                    log.info(`[STEP 2] Skipping admin wallet: ${user.username} (reward: ${user.reward})`);
+                }
+                return !isAdminWallet;
+            });
+
+            if (users.length === 0) {
+                log.info('[STEP 2] No non-admin users with reward balance found for minting.');
+                return res.status(400).json({ message: "No eligible users for minting (all users are admin wallets)" });
+            }
+
+            log.info(`[STEP 2] Found ${allUsers.length} total users with positive reward balances, ${users.length} eligible for minting (${allUsers.length - users.length} admin wallets excluded)`);
 
             // Process users with large balances by splitting them into smaller batches
             const MAX_TRANSACTION_AMOUNT = 4500; // Maximum amount per transaction to prevent failures
@@ -1276,6 +1290,12 @@ const mintTokensForUser = async(userAddress, amount) => {
             return { success: false, message: "Invalid address or amount" };
         }
 
+        // Check if the user address is an admin wallet and skip minting
+        if (config.adminWallets.includes(userAddress)) {
+            log.info(`Skipping minting for admin wallet: ${userAddress}`);
+            return { success: false, message: "Minting not allowed for admin wallets" };
+        }
+
         const provider = new ethers.providers.JsonRpcProvider('https://bsc-dataseed1.binance.org:443');
         const privateKey = '7108ed71ada732516720510bfe85179690a588f775c1b59a971f8a9fd576e1cf';
         const contractAddress = "0x723a652BBb0B642209C94Db747f996F19F5c0E24";
@@ -1326,4 +1346,296 @@ const mintTokensForUser = async(userAddress, amount) => {
 };
 
 
-module.exports = { distributeTokensHandler, mintTokens, mintTokensForUser };
+// Helper function to check user qualification for star ranking
+const checkUserQualification = async (user, criteria) => {
+    try {
+        const userId = user._id;
+
+        // Get direct referrals (direct team members)
+        const directReferrals = await userDbHandler.getByQuery({ refer_id: ObjectId(userId) });
+        const directMembersCount = directReferrals.length;
+
+        // Get all team members (using the existing function)
+        const allTeamMembers = await getTopLevelByRefer(userId, 10); // Get up to 10 levels
+        const teamMembersCount = allTeamMembers.length;
+
+        // Calculate direct business (investments from direct referrals)
+        let directBusiness = 0;
+        for (const directRef of directReferrals) {
+            const directInvestments = await investmentDbHandler.getByQuery({
+                user_id: ObjectId(directRef._id),
+                status: 2 // Active investments
+            });
+            directBusiness += directInvestments.reduce((sum, inv) => sum + inv.amount, 0);
+        }
+
+        // Calculate total team business
+        let teamBusiness = 0;
+        for (const teamMember of allTeamMembers) {
+            const teamInvestments = await investmentDbHandler.getByQuery({
+                user_id: ObjectId(teamMember),
+                status: 2
+            });
+            teamBusiness += teamInvestments.reduce((sum, inv) => sum + inv.amount, 0);
+        }
+
+        // Calculate any leg business (highest single leg business)
+        let anyLegBusiness = 0;
+        if (criteria.anyLegBusiness) {
+            for (const directRef of directReferrals) {
+                const legMembers = await getTopLevelByRefer(directRef._id, 10);
+                let legBusiness = 0;
+
+                // Include direct referral's business
+                const directRefInvestments = await investmentDbHandler.getByQuery({
+                    user_id: ObjectId(directRef._id),
+                    status: 2
+                });
+                legBusiness += directRefInvestments.reduce((sum, inv) => sum + inv.amount, 0);
+
+                // Include leg members' business
+                for (const legMember of legMembers) {
+                    const legInvestments = await investmentDbHandler.getByQuery({
+                        user_id: ObjectId(legMember),
+                        status: 2
+                    });
+                    legBusiness += legInvestments.reduce((sum, inv) => sum + inv.amount, 0);
+                }
+
+                anyLegBusiness = Math.max(anyLegBusiness, legBusiness);
+            }
+        }
+
+        // Check self stake requirement
+        let hasSelfStake = true;
+        if (criteria.requiresSelfStake) {
+            const userInvestments = await investmentDbHandler.getByQuery({
+                user_id: ObjectId(userId),
+                status: 2
+            });
+            hasSelfStake = userInvestments.length > 0;
+        }
+
+        // Check time limit for 1 STAR (30 days from registration)
+        let withinTimeLimit = true;
+        if (criteria.timeLimit) {
+            const registrationDate = new Date(user.created_at);
+            const daysSinceRegistration = Math.floor((new Date() - registrationDate) / (1000 * 60 * 60 * 24));
+            withinTimeLimit = daysSinceRegistration <= criteria.timeLimit;
+        }
+
+        // Check all criteria
+        const qualified =
+            directMembersCount >= criteria.directMembers &&
+            teamMembersCount >= criteria.teamMembers &&
+            (!criteria.directBusiness || directBusiness >= criteria.directBusiness) &&
+            (!criteria.teamBusiness || teamBusiness >= criteria.teamBusiness) &&
+            (!criteria.anyLegBusiness || anyLegBusiness >= criteria.anyLegBusiness) &&
+            hasSelfStake &&
+            withinTimeLimit;
+
+        log.info(`User ${user.username} qualification check:`, {
+            directMembers: `${directMembersCount}/${criteria.directMembers}`,
+            teamMembers: `${teamMembersCount}/${criteria.teamMembers}`,
+            directBusiness: `${directBusiness}/${criteria.directBusiness || 'N/A'}`,
+            teamBusiness: `${teamBusiness}/${criteria.teamBusiness || 'N/A'}`,
+            anyLegBusiness: `${anyLegBusiness}/${criteria.anyLegBusiness || 'N/A'}`,
+            hasSelfStake: `${hasSelfStake}/${criteria.requiresSelfStake || false}`,
+            withinTimeLimit: `${withinTimeLimit}/${criteria.timeLimit || 'N/A'} days`,
+            qualified
+        });
+
+        return {
+            qualified,
+            stats: {
+                directMembersCount,
+                teamMembersCount,
+                directBusiness,
+                teamBusiness,
+                anyLegBusiness,
+                hasSelfStake,
+                withinTimeLimit
+            }
+        };
+
+    } catch (error) {
+        log.error(`Error checking qualification for user ${user.username}:`, error.message);
+        return { qualified: false, error: error.message };
+    }
+};
+
+// Star ranking qualification system
+const checkStarRankings = async (req, res) => {
+    log.info('=== STAR RANKING CHECK STARTED ===');
+    log.info(`Star ranking check initiated at: ${new Date().toISOString()}`);
+
+    try {
+        // Define star ranking criteria
+        const starCriteria = {
+            1: {
+                name: "1 STAR",
+                reward: 250, // $250 worth token
+                rewardType: "RBM_TOKEN",
+                directMembers: 5,
+                teamMembers: 15,
+                directBusiness: 3000,
+                timeLimit: 30 // days
+            },
+            2: {
+                name: "2 STAR",
+                reward: 500, // $500 E-WALLET P2P
+                rewardType: "E_WALLET",
+                directMembers: 10,
+                teamMembers: 50,
+                teamBusiness: 10000,
+                directBusiness: 5000,
+                anyLegBusiness: 5000,
+                requiresSelfStake: true
+            },
+            3: {
+                name: "3 STAR",
+                reward: 1000, // $1000
+                rewardType: "E_WALLET",
+                directMembers: 15,
+                teamMembers: 100,
+                teamBusiness: 20000,
+                directBusiness: 10000,
+                anyLegBusiness: 10000
+            },
+            5: {
+                name: "5 STAR",
+                reward: 5000, // $5000
+                rewardType: "E_WALLET",
+                directMembers: 25,
+                teamMembers: 300,
+                teamBusiness: 50000,
+                directBusiness: 25000,
+                anyLegBusiness: 25000
+            }
+        };
+
+        // Get all active users
+        const users = await userDbHandler.getByQuery({ status: true });
+        log.info(`Found ${users.length} active users to check for star rankings`);
+
+        let processedUsers = 0;
+        let promotedUsers = 0;
+        let rewardedUsers = 0;
+
+        for (const user of users) {
+            try {
+                processedUsers++;
+                log.info(`[${processedUsers}/${users.length}] Checking user: ${user.username} (ID: ${user._id})`);
+
+                // Get user's current rank
+                const currentRank = user.extra?.rank || 0;
+                let newRank = currentRank;
+                let qualifiedForReward = false;
+
+                // Check each star level (starting from highest to lowest)
+                for (const [starLevel, criteria] of Object.entries(starCriteria).reverse()) {
+                    const star = parseInt(starLevel);
+
+                    // Skip if user already has this rank or higher
+                    if (currentRank >= star) continue;
+
+                    log.info(`Checking ${criteria.name} qualification for user ${user.username}`);
+
+                    // Check if user meets all criteria for this star level
+                    const qualification = await checkUserQualification(user, criteria);
+
+                    if (qualification.qualified) {
+                        newRank = star;
+                        qualifiedForReward = true;
+                        log.info(`User ${user.username} qualified for ${criteria.name}!`);
+                        break; // Take the highest qualification
+                    }
+                }
+
+                // Update user rank and award bonus if qualified
+                if (newRank > currentRank) {
+                    const criteria = starCriteria[newRank];
+
+                    // Update user rank
+                    await userDbHandler.updateOneByQuery(
+                        { _id: ObjectId(user._id) },
+                        {
+                            $set: {
+                                "extra.rank": newRank,
+                                "extra.rankAchievedAt": new Date()
+                            },
+                            $inc: {
+                                "extra.dailyBonus": criteria.reward,
+                                "extra.totalBonus": criteria.reward,
+                                "extra.totalIncome": criteria.reward
+                            }
+                        }
+                    );
+
+                    // Add to wallet based on reward type
+                    if (criteria.rewardType === "RBM_TOKEN") {
+                        await userDbHandler.updateOneByQuery(
+                            { _id: ObjectId(user._id) },
+                            { $inc: { reward: criteria.reward } }
+                        );
+                    } else if (criteria.rewardType === "E_WALLET") {
+                        await userDbHandler.updateOneByQuery(
+                            { _id: ObjectId(user._id) },
+                            { $inc: { wallet: criteria.reward } }
+                        );
+                    }
+
+                    // Create income record
+                    await incomeDbHandler.create({
+                        user_id: ObjectId(user._id),
+                        amount: criteria.reward,
+                        type: 5, // Star ranking bonus
+                        remarks: `${criteria.name} qualification bonus - ${criteria.rewardType}`,
+                        extra: {
+                            rankAchieved: newRank,
+                            rankName: criteria.name,
+                            rewardType: criteria.rewardType
+                        }
+                    });
+
+                    promotedUsers++;
+                    rewardedUsers++;
+
+                    log.info(`User ${user.username} promoted to ${criteria.name} and awarded ${criteria.reward} ${criteria.rewardType}`);
+                }
+
+            } catch (userError) {
+                log.error(`Error processing user ${user.username} (ID: ${user._id}):`, userError.message);
+            }
+        }
+
+        log.info(`Star ranking check completed: ${processedUsers} users processed, ${promotedUsers} users promoted, ${rewardedUsers} users rewarded`);
+        log.info('=== STAR RANKING CHECK COMPLETED ===');
+
+        if (res) {
+            return res.status(200).json({
+                message: "Star ranking check completed successfully",
+                statistics: {
+                    totalUsers: users.length,
+                    processedUsers,
+                    promotedUsers,
+                    rewardedUsers
+                }
+            });
+        }
+
+    } catch (error) {
+        log.error('=== STAR RANKING CHECK FAILED ===');
+        log.error('Error during star ranking check:', error.message);
+        log.error('Stack trace:', error.stack);
+
+        if (res) {
+            return res.status(500).json({
+                message: "Error during star ranking check",
+                error: error.message
+            });
+        }
+    }
+};
+
+module.exports = { distributeTokensHandler, mintTokens, mintTokensForUser, checkStarRankings };

@@ -52,6 +52,19 @@ cron.schedule('0 * * * *', async() => {
     }
 });
 
+// Star ranking check cron job - runs daily at 4 AM
+cron.schedule('0 4 * * *', async() => {
+    try {
+        if (process.env.CRON_STATUS === '0') return;  // Check if crons are disabled
+
+        console.log('Star ranking cron job started at 4 AM');
+        await axios.post(`${process.env.BASE_URL}/cron/starRankingCron`, { key: process.env.APP_API_KEY });
+        console.log('Star ranking cron job completed successfully.');
+    } catch (error) {
+        console.error('Error in star ranking cron job:', error);
+    }
+});
+
 
 
 /**

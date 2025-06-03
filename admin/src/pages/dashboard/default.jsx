@@ -143,11 +143,14 @@ export default function DashboardDefault() {
       {/* <Grid item xs={12}>
         {
           crons && crons.map((cron, i) => {
-            return <LoadingButton style={{ margin: "2px" }} loading={loading[`${cron.url}`]} variant="outlined" loadingPosition="start" startIcon={<Home3 />} onClick={() => runCron(cron.url)}>
+            return <LoadingButton key={i} style={{ margin: "2px" }} loading={loading[`${cron.url}`]} variant="outlined" loadingPosition="start" startIcon={<Home3 />} onClick={() => runCron(cron.url)}>
               {cron.title}
             </LoadingButton>
           })
         }
+        <LoadingButton style={{ margin: "2px" }} loading={loading['starRankingCron']} variant="outlined" loadingPosition="start" startIcon={<Home3 />} onClick={() => runCron('starRankingCron')}>
+          Check Star Rankings
+        </LoadingButton>
       </Grid> */}
 
       <Grid item xs={12} sm={6} lg={3}>

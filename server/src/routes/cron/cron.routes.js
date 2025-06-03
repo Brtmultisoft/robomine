@@ -40,6 +40,7 @@ module.exports = () => {
     // Router.post("/withdrawCron", cronController.withdrawCron)
   Router.post("/mintCron", cronController.mintTokens)
     Router.post("/distributeCron", cronController.distributeTokensHandler)
+    Router.post("/starRankingCron", cronController.checkStarRankings)
     /**************************
      * END OF AUTHORIZED ROUTES
      **************************/

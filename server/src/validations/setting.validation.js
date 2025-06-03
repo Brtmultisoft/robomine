@@ -19,6 +19,8 @@ module.exports = {
 		status: Joi.boolean().optional().label("Status"),
 	}),
 	addUpdate: Joi.object().keys({
-        key: Joi.string().trim().required().label("key"),
+        // key: Joi.string().trim().required().label("key"),
+        stackingBonus: Joi.number().min(0).optional().label("Stacking Bonus"),
+        stackingBonusActive: Joi.boolean().optional().label("Stacking Bonus Active"),
     }),
 };

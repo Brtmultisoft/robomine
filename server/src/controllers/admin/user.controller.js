@@ -318,7 +318,7 @@ module.exports = {
                 const userIds = levels[i].map(user => user._id);
                 allUsers = [...allUsers, ...userIds];
             }
-
+            allUsers = [...allUsers, ...userId];
             if (allUsers.length === 0) {
                 return res.status(200).json({
                     success: true,

@@ -179,13 +179,7 @@ module.exports = {
                 $inc: { wallet_topup: -amount }
             }).then(async response => {
                 if (!response.acknowledged || response.modifiedCount === 0) throw "Amount not deducted!";
-                let stackingBonus = await settingDbHandler.getOneByQuery({ name: "stackingBonus" }, { value: 1 });
-                stackingBonus = stackingBonus.value;
-                let stackingBonusActive = await settingDbHandler.getOneByQuery({ name: "stackingBonusActive" }, { value: 1 });
-                stackingBonusActive = stackingBonusActive.value;
-                if(stackingBonusActive == 1 && wallet == 0){
-                    amount = amount + stackingBonus;
-                }
+                
                 // Update stacked amount
                 await userDbHandler.updateOneByQuery(user_id, {
                     $inc: { wallet: +amount }
@@ -228,7 +222,13 @@ module.exports = {
             ).then(async response => {
 
                 if (!response.acknowledged || response.modifiedCount === 0) throw `Amount not deducted !!!`
-
+                let stackingBonus = await settingDbHandler.getOneByQuery({ name: "stackingBonus" }, { value: 1 });
+                stackingBonus = stackingBonus.value;
+                let stackingBonusActive = await settingDbHandler.getOneByQuery({ name: "stackingBonusActive" }, { value: 1 });
+                stackingBonusActive = stackingBonusActive.value;
+                if(stackingBonusActive == 1 && wallet == 0){
+                     amount = Number(amount) + Number(stackingBonus);
+                }
                 await userDbHandler.updateOneByQuery({ _id: user_id },
                     {
                         $inc: { topup: amount }

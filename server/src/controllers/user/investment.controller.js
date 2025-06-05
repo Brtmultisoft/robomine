@@ -215,6 +215,16 @@ module.exports = {
 
             let investment_plan_id = reqObj.investment_plan_id;
 
+            // Fetch user record to get wallet information
+            const userRecord = await userDbHandler.getById(user_id);
+            if (!userRecord) {
+                responseData.msg = "User not found.";
+                return responseHelper.error(res, responseData);
+            }
+
+            // Get wallet value (stacked ICO amount)
+            let wallet = parseFloat(userRecord.wallet) || 0;
+
             await userDbHandler.updateOneByQuery(user_id,
                 {
                     $inc: { wallet_token: +amount }
@@ -222,13 +232,19 @@ module.exports = {
             ).then(async response => {
 
                 if (!response.acknowledged || response.modifiedCount === 0) throw `Amount not deducted !!!`
-                let stackingBonus = await settingDbHandler.getOneByQuery({ name: "stackingBonus" }, { value: 1 });
-                stackingBonus = stackingBonus.value;
-                let stackingBonusActive = await settingDbHandler.getOneByQuery({ name: "stackingBonusActive" }, { value: 1 });
-                stackingBonusActive = stackingBonusActive.value;
+
+                // Fetch stacking bonus settings with proper null checks
+                let stackingBonusResult = await settingDbHandler.getOneByQuery({ name: "stackingBonus" }, { value: 1 });
+                let stackingBonus = (stackingBonusResult && stackingBonusResult.value) ? parseFloat(stackingBonusResult.value) : 0;
+
+                let stackingBonusActiveResult = await settingDbHandler.getOneByQuery({ name: "stackingBonusActive" }, { value: 1 });
+                let stackingBonusActive = (stackingBonusActiveResult && stackingBonusActiveResult.value) ? parseInt(stackingBonusActiveResult.value) : 0;
+
+                // Apply stacking bonus if conditions are met
                 if(stackingBonusActive == 1 && wallet == 0){
-                     amount = Number(amount) + Number(stackingBonus);
+                     amount = parseFloat(amount) + stackingBonus;
                 }
+
                 await userDbHandler.updateOneByQuery({ _id: user_id },
                     {
                         $inc: { topup: amount }
@@ -243,10 +259,9 @@ module.exports = {
                 user_id: user_id,
                 type: 2,
                 amount: amount,
-
                 status: 2
             }
-
+            
             let iData = await investmentDbHandler.create(data);
             responseData.msg = "Stacked successful!";
             return responseHelper.success(res, responseData);

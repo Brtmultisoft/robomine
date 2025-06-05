@@ -92,20 +92,20 @@ export default function ROI() {
         </Grid>
         <Grid item xs={12} sm={6} lg={4}>
           <EcommerceDataCard
-            title="Total Stacked ICO"
-            count={teamStats.totalStackedIco}
+            title="Total Business"
+            count={teamStats.totalStackedIco + teamStats.totalStackedCoin}
             iconPrimary={<Chart />}
             color="success"
           />
         </Grid>
-        <Grid item xs={12} sm={6} lg={4}>
+        {/* <Grid item xs={12} sm={6} lg={4}>
           <EcommerceDataCard
             title="Total Stacked Coin"
             count={teamStats.totalStackedCoin}
             iconPrimary={<DocumentText />}
             color="warning"
           />
-        </Grid>
+        </Grid> */}
       </Grid>  
     
     <CommonDatatable 

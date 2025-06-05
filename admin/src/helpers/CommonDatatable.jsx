@@ -60,7 +60,7 @@ export const fuzzySort = (rowA, rowB, columnId) => {
 
 // ==============================|| REACT TABLE ||============================== //
 
-export default function ReactTable({ apiPoint, type, columns }) {
+export default function ReactTable({ apiPoint, type, columns, onDataFetched }) {
   const [columnFilters, setColumnFilters] = useState([]);
   const [globalFilter, setGlobalFilter] = useState('');
 
@@ -69,22 +69,25 @@ export default function ReactTable({ apiPoint, type, columns }) {
   const top = false;
 
   const fetchReports = async (page) => {
-
     try {
-
       const res = await axios.get(`/${apiPoint}?page=${page}&type=${type}`);
       if (!res.data?.status) return;
 
+      const newData = res.data?.result.list;
       setData((old) => {
-        return [...old, ...res.data?.result.list];
-      })
+        const updatedData = [...old, ...newData];
+        // Call onDataFetched with the complete data if it exists
+        if (onDataFetched && typeof onDataFetched === 'function') {
+          onDataFetched(updatedData);
+        }
+        return updatedData;
+      });
 
-      if (!res.data?.result.totalPages || page + 1 > parseInt(res.data?.result.totalPages)) return
+      if (!res.data?.result.totalPages || page + 1 > parseInt(res.data?.result.totalPages)) return;
 
-      fetchReports(page + 1)
-
+      fetchReports(page + 1);
     } catch (e) {
-      console.log(e)
+      console.log(e);
     }
   };
 

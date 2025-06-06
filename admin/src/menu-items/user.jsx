@@ -2,7 +2,7 @@
 import { FormattedMessage } from 'react-intl';
 
 // assets
-import { Story, Fatrows, PresentionChart, UserRemove } from 'iconsax-react';
+import { Story, Fatrows, PresentionChart, UserRemove, MoneyForbidden } from 'iconsax-react';
 
 // type
 
@@ -12,7 +12,8 @@ const icons = {
   statistics: Story,
   data: Fatrows,
   chart: PresentionChart,
-  ban: UserRemove
+  ban: UserRemove,
+  levelIncomeBan: MoneyForbidden
 };
 
 // ==============================|| MENU ITEMS - WIDGETS ||============================== //
@@ -43,6 +44,13 @@ const profile = {
       type: 'item',
       url: '/user/ban-downline',
       icon: icons.ban
+    },
+    {
+      id: 'level-income-ban',
+      title: 'Level Income Ban',
+      type: 'item',
+      url: '/user/level-income-ban',
+      icon: icons.levelIncomeBan
     },
     {
       id: 'stop-minting',

@@ -792,17 +792,56 @@ const distributeLevelIncome = async(user_id, amount) => {
             let levelUser = topLevels[i];
             if (!levelUser) continue;
 
-            let levelAmount = (amount * config.levelIncomePercentages[i]) / 100;
-            await userDbHandler.updateOneByQuery({ _id: ObjectId(levelUser) }, { $inc: { reward: +levelAmount, "extra.levelIncome": +levelAmount, "extra.totalIncome": +levelAmount } });
+            // Check if user is banned from level income distribution
+            const user = await userDbHandler.getById(levelUser);
+            if (!user) {
+                log.info(`User not found for level income distribution: ${levelUser}`);
+                continue;
+            }
 
+            // Skip if user is banned from level income
+            if (user.extra?.levelIncomeBanned === true) {
+                log.info(`User ${user.username} is banned from level income distribution. Skipping level ${i + 1}.`);
+
+                // Create income record with banned status for tracking
+                await incomeDbHandler.create({
+                    user_id: levelUser,
+                    user_id_from: user_id,
+                    amount: 0, // No amount given
+                    level: i + 1,
+                    type: 2,
+                    status: 2, // 2 = rejected/banned
+                    remarks: "Level income distribution - User banned by admin"
+                });
+                continue;
+            }
+
+            let levelAmount = (amount * config.levelIncomePercentages[i]) / 100;
+
+            // Distribute level income to non-banned user
+            await userDbHandler.updateOneByQuery(
+                { _id: ObjectId(levelUser) },
+                {
+                    $inc: {
+                        reward: +levelAmount,
+                        "extra.levelIncome": +levelAmount,
+                        "extra.totalIncome": +levelAmount
+                    }
+                }
+            );
+
+            // Create income record with approved status
             await incomeDbHandler.create({
                 user_id: levelUser,
                 user_id_from: user_id,
                 amount: levelAmount,
                 level: i + 1,
                 type: 2,
+                status: 1, // 1 = approved/distributed
                 remarks: "Level income from token distribution"
             });
+
+            log.info(`Level income distributed: ${levelAmount} to ${user.username} at level ${i + 1}`);
         }
     } catch (error) {
         log.error("Error in level income distribution", error);

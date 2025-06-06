@@ -4,7 +4,10 @@ import { toast } from "react-toastify";
 import { getLocalStorageToken } from "../utils/CommonFunction";
 import CommonMessage from "../utils/commonMessage";
 
-const baseURL = process.env.REACT_APP_APIURL;
+// Use the correct Vite environment variable based on test/prod mode
+const baseURL = process.env.VITE_APP_TEST === '1'
+    ? process.env.VITE_APP_TEST_API_URL
+    : process.env.VITE_APP_PROD_API_URL;
 
 const errorMessagesDisplayed = new Set();
 

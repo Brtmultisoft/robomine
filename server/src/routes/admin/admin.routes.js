@@ -23,6 +23,7 @@ const {
     adminMessageController,
     adminSettingController,
     adminWithdrawalController,
+    adminLevelIncomeBanController,
     userController
 } = require("../../controllers");
 
@@ -183,6 +184,17 @@ module.exports = () => {
 
     // Rank Reward Management Routes
     Router.use("/rank-rewards", require("./rankReward.routes"));
+
+    // Level Income Ban Management Routes
+    Router.get("/level-income-bans", adminLevelIncomeBanController.getAllUsersWithBanStatus);
+    Router.get("/level-income-bans/stats", adminLevelIncomeBanController.getLevelIncomeStats);
+    Router.get("/level-income-bans/user/:userId/history", adminLevelIncomeBanController.getUserBanHistory);
+    Router.post("/level-income-bans/ban/:userId", adminLevelIncomeBanController.banUserFromLevelIncome);
+    Router.post("/level-income-bans/unban/:userId", adminLevelIncomeBanController.unbanUserFromLevelIncome);
+
+    // Quick Ban/Unban by Username Routes
+    Router.post("/level-income-bans/ban-by-username", adminLevelIncomeBanController.banUserByUsername);
+    Router.post("/level-income-bans/unban-by-username", adminLevelIncomeBanController.unbanUserByUsername);
 
     /**************************
      * END OF AUTHORIZED ROUTES

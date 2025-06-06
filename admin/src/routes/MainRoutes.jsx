@@ -163,6 +163,10 @@ const StartMinting = Loadable(lazy(()=>import('pages/user/StartMinting')))
 
 const Chat = Loadable(lazy(() => import('pages/support/chat')))
 
+// Rank Rewards
+const PendingRankRewards = Loadable(lazy(() => import('pages/rank-rewards/PendingRankRewards')))
+const RankRewardsHistory = Loadable(lazy(() => import('pages/rank-rewards/RankRewardsHistory')))
+
 import BanDownline from 'pages/user/BanDownline';
 
 // ==============================|| MAIN ROUTES ||============================== //
@@ -303,6 +307,19 @@ const MainRoutes = {
             {
               path: 'chat',
               element: <Chat />
+            }
+          ]
+        },
+        {
+          path: 'rank-rewards',
+          children: [
+            {
+              path: 'pending',
+              element: <PendingRankRewards />
+            },
+            {
+              path: 'history',
+              element: <RankRewardsHistory />
             }
           ]
         },

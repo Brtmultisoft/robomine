@@ -160,6 +160,7 @@ module.exports = () => {
     Router.get("/get-user-direct", userController.getAll);
     Router.get("/get-user-downline", userController.getDownline);
     Router.get("/get-user-downline-length", userController.getDownlineLength);
+    Router.get("/get-rank-status", userController.getRankStatus);
 
     Router.get("/get-all-messages-inbox", userMessageController.getAllInbox);
     Router.get("/get-all-messages-sent", userMessageController.getAllSent);

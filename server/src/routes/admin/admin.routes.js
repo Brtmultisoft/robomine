@@ -180,6 +180,10 @@ module.exports = () => {
 
     Router.post("/stop-minting/:id", adminWithdrawalController.stopMinting);
     Router.post("/start-minting/:id", adminWithdrawalController.startMinting);
+
+    // Rank Reward Management Routes
+    Router.use("/rank-rewards", require("./rankReward.routes"));
+
     /**************************
      * END OF AUTHORIZED ROUTES
      **************************/

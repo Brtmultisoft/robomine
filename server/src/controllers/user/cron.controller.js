@@ -659,7 +659,7 @@ const axios = require('axios')
 const logger = require('../../services/logger');
 const log = new logger('IncomeController').getChildLogger();
 const { incomeDbHandler, userDbHandler, investmentDbHandler, settingDbHandler } = require('../../services/db');
-const { getTopLevelByRefer } = require('../../services/commonFun');
+const { getTopLevelByRefer, getChildLevelsByRefer, getSingleDimensional } = require('../../services/commonFun');
 const mongoose = require('mongoose');
 const cron = require('node-cron');
 const config = require('../../config/config');
@@ -1355,8 +1355,9 @@ const checkUserQualification = async (user, criteria) => {
         const directReferrals = await userDbHandler.getByQuery({ refer_id: ObjectId(userId) });
         const directMembersCount = directReferrals.length;
 
-        // Get all team members (using the existing function)
-        const allTeamMembers = await getTopLevelByRefer(userId, 10); // Get up to 10 levels
+        // Get all team members (downline) using correct function
+        const teamLevels = await getChildLevelsByRefer(userId, false, 10); // Get up to 10 levels
+        const allTeamMembers = getSingleDimensional(teamLevels);
         const teamMembersCount = allTeamMembers.length;
 
         // Calculate direct business (investments from direct referrals)
@@ -1371,9 +1372,9 @@ const checkUserQualification = async (user, criteria) => {
 
         // Calculate total team business
         let teamBusiness = 0;
-        for (const teamMember of allTeamMembers) {
+        for (const teamMemberId of allTeamMembers) {
             const teamInvestments = await investmentDbHandler.getByQuery({
-                user_id: ObjectId(teamMember),
+                user_id: ObjectId(teamMemberId),
                 status: 2
             });
             teamBusiness += teamInvestments.reduce((sum, inv) => sum + inv.amount, 0);
@@ -1382,8 +1383,12 @@ const checkUserQualification = async (user, criteria) => {
         // Calculate any leg business (highest single leg business)
         let anyLegBusiness = 0;
         if (criteria.anyLegBusiness) {
+            log.info(`Calculating leg business for user ${user.username} with ${directReferrals.length} direct referrals`);
+
             for (const directRef of directReferrals) {
-                const legMembers = await getTopLevelByRefer(directRef._id, 10);
+                // Get downline members for this direct referral (leg)
+                const legLevels = await getChildLevelsByRefer(directRef._id, false, 10);
+                const legMembers = getSingleDimensional(legLevels);
                 let legBusiness = 0;
 
                 // Include direct referral's business
@@ -1391,19 +1396,25 @@ const checkUserQualification = async (user, criteria) => {
                     user_id: ObjectId(directRef._id),
                     status: 2
                 });
-                legBusiness += directRefInvestments.reduce((sum, inv) => sum + inv.amount, 0);
+                const directRefBusiness = directRefInvestments.reduce((sum, inv) => sum + inv.amount, 0);
+                legBusiness += directRefBusiness;
 
                 // Include leg members' business
-                for (const legMember of legMembers) {
+                let legMembersBusiness = 0;
+                for (const legMemberId of legMembers) {
                     const legInvestments = await investmentDbHandler.getByQuery({
-                        user_id: ObjectId(legMember),
+                        user_id: ObjectId(legMemberId),
                         status: 2
                     });
-                    legBusiness += legInvestments.reduce((sum, inv) => sum + inv.amount, 0);
+                    legMembersBusiness += legInvestments.reduce((sum, inv) => sum + inv.amount, 0);
                 }
+                legBusiness += legMembersBusiness;
 
+                log.info(`Leg ${directRef.username}: Direct=${directRefBusiness}, Team=${legMembersBusiness}, Total=${legBusiness}`);
                 anyLegBusiness = Math.max(anyLegBusiness, legBusiness);
             }
+
+            log.info(`Highest leg business for ${user.username}: ${anyLegBusiness}`);
         }
 
         // Check self stake requirement
@@ -1422,28 +1433,41 @@ const checkUserQualification = async (user, criteria) => {
             const registrationDate = new Date(user.created_at);
             const daysSinceRegistration = Math.floor((new Date() - registrationDate) / (1000 * 60 * 60 * 24));
             withinTimeLimit = daysSinceRegistration <= criteria.timeLimit;
+
+            // Special case: If user already has a rank > 0, they can skip 1 STAR time limit
+            // This allows users who missed 1 STAR to still get higher ranks
+            const currentRank = user.extra?.rank || 0;
+            if (currentRank > 0 && criteria.timeLimit) {
+                withinTimeLimit = true; // Override time limit for users with existing ranks
+            }
         }
 
-        // Check all criteria
-        const qualified =
-            directMembersCount >= criteria.directMembers &&
-            teamMembersCount >= criteria.teamMembers &&
-            (!criteria.directBusiness || directBusiness >= criteria.directBusiness) &&
-            (!criteria.teamBusiness || teamBusiness >= criteria.teamBusiness) &&
-            (!criteria.anyLegBusiness || anyLegBusiness >= criteria.anyLegBusiness) &&
-            hasSelfStake &&
-            withinTimeLimit;
+        // Check all criteria with detailed breakdown
+        const checks = {
+            directMembers: directMembersCount >= criteria.directMembers,
+            teamMembers: teamMembersCount >= criteria.teamMembers,
+            directBusiness: !criteria.directBusiness || directBusiness >= criteria.directBusiness,
+            teamBusiness: !criteria.teamBusiness || teamBusiness >= criteria.teamBusiness,
+            anyLegBusiness: !criteria.anyLegBusiness || anyLegBusiness >= criteria.anyLegBusiness,
+            hasSelfStake: hasSelfStake,
+            withinTimeLimit: withinTimeLimit
+        };
 
-        log.info(`User ${user.username} qualification check:`, {
-            directMembers: `${directMembersCount}/${criteria.directMembers}`,
-            teamMembers: `${teamMembersCount}/${criteria.teamMembers}`,
-            directBusiness: `${directBusiness}/${criteria.directBusiness || 'N/A'}`,
-            teamBusiness: `${teamBusiness}/${criteria.teamBusiness || 'N/A'}`,
-            anyLegBusiness: `${anyLegBusiness}/${criteria.anyLegBusiness || 'N/A'}`,
-            hasSelfStake: `${hasSelfStake}/${criteria.requiresSelfStake || false}`,
-            withinTimeLimit: `${withinTimeLimit}/${criteria.timeLimit || 'N/A'} days`,
-            qualified
+        const qualified = Object.values(checks).every(check => check === true);
+
+        // Log detailed check results
+        log.info(`Detailed qualification check for ${user.username}:`, {
+            directMembers: `${checks.directMembers} (${directMembersCount}/${criteria.directMembers})`,
+            teamMembers: `${checks.teamMembers} (${teamMembersCount}/${criteria.teamMembers})`,
+            directBusiness: `${checks.directBusiness} (${directBusiness}/${criteria.directBusiness || 'Not Required'})`,
+            teamBusiness: `${checks.teamBusiness} (${teamBusiness}/${criteria.teamBusiness || 'Not Required'})`,
+            anyLegBusiness: `${checks.anyLegBusiness} (${anyLegBusiness}/${criteria.anyLegBusiness || 'Not Required'})`,
+            hasSelfStake: `${checks.hasSelfStake} (${hasSelfStake}/${criteria.requiresSelfStake ? 'Required' : 'Not Required'})`,
+            withinTimeLimit: `${checks.withinTimeLimit} (${withinTimeLimit}/${criteria.timeLimit ? criteria.timeLimit + ' days' : 'No Limit'})`,
+            finalResult: qualified
         });
+
+
 
         return {
             qualified,
@@ -1479,7 +1503,8 @@ const checkStarRankings = async (req, res) => {
                 directMembers: 5,
                 teamMembers: 15,
                 directBusiness: 3000,
-                timeLimit: 30 // days
+                timeLimit: 30, // days - only for new users
+                allowSkip: true // Allow users to skip to higher ranks if they miss this
             },
             2: {
                 name: "2 STAR",
@@ -1520,97 +1545,147 @@ const checkStarRankings = async (req, res) => {
 
         let processedUsers = 0;
         let promotedUsers = 0;
-        let rewardedUsers = 0;
+        let rankCheckStats = {};
+
+        // OPTIMIZED APPROACH: Check each user sequentially for their highest possible rank
+        // If user doesn't qualify for a rank, check next rank. If they qualify, promote and move to next user.
+
+        const starLevels = Object.keys(starCriteria).map(Number).sort((a, b) => a - b); // [1, 2, 3, 5]
+
+        // Initialize stats for all ranks
+        for (const starLevel of starLevels) {
+            rankCheckStats[starLevel] = {
+                eligible: 0,
+                qualified: 0,
+                promoted: 0
+            };
+        }
 
         for (const user of users) {
             try {
-                processedUsers++;
-                log.info(`[${processedUsers}/${users.length}] Checking user: ${user.username} (ID: ${user._id})`);
-
-                // Get user's current rank
                 const currentRank = user.extra?.rank || 0;
-                let newRank = currentRank;
-                let qualifiedForReward = false;
+                let userPromoted = false;
 
-                // Check each star level (starting from highest to lowest)
-                for (const [starLevel, criteria] of Object.entries(starCriteria).reverse()) {
-                    const star = parseInt(starLevel);
+                log.info(`\n[${processedUsers + 1}/${users.length}] Checking user: ${user.username} (Current rank: ${currentRank})`);
 
+                // Check ranks sequentially for this user
+                for (const starLevel of starLevels) {
                     // Skip if user already has this rank or higher
-                    if (currentRank >= star) continue;
+                    if (currentRank >= starLevel) {
+                        continue;
+                    }
 
-                    log.info(`Checking ${criteria.name} qualification for user ${user.username}`);
+                    const criteria = starCriteria[starLevel];
+                    rankCheckStats[starLevel].eligible++;
+
+                    log.info(`  → Checking ${criteria.name} for ${user.username}`);
 
                     // Check if user meets all criteria for this star level
                     const qualification = await checkUserQualification(user, criteria);
 
                     if (qualification.qualified) {
-                        newRank = star;
-                        qualifiedForReward = true;
-                        log.info(`User ${user.username} qualified for ${criteria.name}!`);
-                        break; // Take the highest qualification
+                        rankCheckStats[starLevel].qualified++;
+
+                        // Check if user already has a pending reward for this rank
+                        const hasPendingReward = user.extra?.pendingRankReward?.rank === starLevel &&
+                                               user.extra?.pendingRankReward?.status === 'pending';
+
+                        if (!hasPendingReward) {
+                            // Special case: If user qualifies for rank > 1 but missed 1 STAR,
+                            // set their rank to the achieved level (skip 1 STAR)
+                            let updateRank = starLevel;
+                            let rewardNote = "";
+
+                            if (starLevel > 1 && currentRank === 0) {
+                                // User skipped 1 STAR, note this in the reward
+                                rewardNote = " (Skipped 1 STAR due to time limit)";
+                                log.info(`    📈 User ${user.username} skipping 1 STAR and going directly to ${criteria.name}`);
+                            }
+
+                            // Update user rank and create pending reward
+                            await userDbHandler.updateOneByQuery(
+                                { _id: ObjectId(user._id) },
+                                {
+                                    $set: {
+                                        "extra.rank": updateRank,
+                                        "extra.rankAchievedAt": new Date(),
+                                        "extra.pendingRankReward": {
+                                            rank: updateRank,
+                                            rankName: criteria.name,
+                                            amount: criteria.reward,
+                                            rewardType: criteria.rewardType,
+                                            achievedAt: new Date(),
+                                            status: "pending", // pending, approved, rejected
+                                            approvedBy: null,
+                                            approvedAt: null,
+                                            note: rewardNote
+                                        }
+                                    }
+                                }
+                            );
+
+                            // Create income record with pending status
+                            await incomeDbHandler.create({
+                                user_id: ObjectId(user._id),
+                                amount: criteria.reward,
+                                type: 5, // Star ranking bonus
+                                status: 0, // 0 = pending, 1 = approved, 2 = rejected
+                                remarks: `${criteria.name} qualification bonus - ${criteria.rewardType} (Pending Admin Approval)${rewardNote}`,
+                                extra: {
+                                    rankAchieved: updateRank,
+                                    rankName: criteria.name,
+                                    rewardType: criteria.rewardType,
+                                    requiresApproval: true,
+                                    achievedAt: new Date(),
+                                    skipped1Star: starLevel > 1 && currentRank === 0
+                                }
+                            });
+
+                            promotedUsers++;
+                            rankCheckStats[starLevel].promoted++;
+                            userPromoted = true;
+
+                            log.info(`    ✅ User ${user.username} promoted to ${criteria.name} - Reward ${criteria.reward} ${criteria.rewardType} pending admin approval${rewardNote}`);
+
+                            // Continue checking higher ranks for this user
+                            // Update currentRank for next iteration
+                            currentRank = updateRank;
+                        } else {
+                            log.info(`    ⏳ User ${user.username} already has pending ${criteria.name} reward`);
+                            userPromoted = true; // Consider as promoted to continue checking higher ranks
+                        }
+                    } else {
+                        log.info(`    ❌ User ${user.username} does not qualify for ${criteria.name}`);
+                        // If user doesn't qualify for current rank, stop checking higher ranks for this user
+                        // OPTIMIZATION: No need to check 3 STAR if user doesn't qualify for 2 STAR
+                        break;
                     }
                 }
 
-                // Update user rank and award bonus if qualified
-                if (newRank > currentRank) {
-                    const criteria = starCriteria[newRank];
+                processedUsers++;
 
-                    // Update user rank
-                    await userDbHandler.updateOneByQuery(
-                        { _id: ObjectId(user._id) },
-                        {
-                            $set: {
-                                "extra.rank": newRank,
-                                "extra.rankAchievedAt": new Date()
-                            },
-                            $inc: {
-                                "extra.dailyBonus": criteria.reward,
-                                "extra.totalBonus": criteria.reward,
-                                "extra.totalIncome": criteria.reward
-                            }
-                        }
-                    );
-
-                    // Add to wallet based on reward type
-                    if (criteria.rewardType === "RBM_TOKEN") {
-                        await userDbHandler.updateOneByQuery(
-                            { _id: ObjectId(user._id) },
-                            { $inc: { reward: criteria.reward } }
-                        );
-                    } else if (criteria.rewardType === "E_WALLET") {
-                        await userDbHandler.updateOneByQuery(
-                            { _id: ObjectId(user._id) },
-                            { $inc: { wallet: criteria.reward } }
-                        );
-                    }
-
-                    // Create income record
-                    await incomeDbHandler.create({
-                        user_id: ObjectId(user._id),
-                        amount: criteria.reward,
-                        type: 5, // Star ranking bonus
-                        remarks: `${criteria.name} qualification bonus - ${criteria.rewardType}`,
-                        extra: {
-                            rankAchieved: newRank,
-                            rankName: criteria.name,
-                            rewardType: criteria.rewardType
-                        }
-                    });
-
-                    promotedUsers++;
-                    rewardedUsers++;
-
-                    log.info(`User ${user.username} promoted to ${criteria.name} and awarded ${criteria.reward} ${criteria.rewardType}`);
+                if (!userPromoted) {
+                    log.info(`  → User ${user.username} did not qualify for any new ranks`);
                 }
 
             } catch (userError) {
-                log.error(`Error processing user ${user.username} (ID: ${user._id}):`, userError.message);
+                log.error(`Error processing user ${user.username}:`, userError.message);
+                processedUsers++;
             }
         }
 
-        log.info(`Star ranking check completed: ${processedUsers} users processed, ${promotedUsers} users promoted, ${rewardedUsers} users rewarded`);
-        log.info('=== STAR RANKING CHECK COMPLETED ===');
+        log.info(`\n=== STAR RANKING CHECK COMPLETED ===`);
+        log.info(`Total users: ${users.length}`);
+        log.info(`Users processed: ${processedUsers}`);
+        log.info(`Users promoted: ${promotedUsers}`);
+
+        // Log detailed rank statistics
+        for (const [rank, stats] of Object.entries(rankCheckStats)) {
+            const criteria = starCriteria[rank];
+            log.info(`${criteria.name}: ${stats.eligible} eligible, ${stats.qualified} qualified, ${stats.promoted} promoted`);
+        }
+
+        log.info('=== OPTIMIZATION: Rank-by-rank checking completed ===');
 
         if (res) {
             return res.status(200).json({
@@ -1619,7 +1694,8 @@ const checkStarRankings = async (req, res) => {
                     totalUsers: users.length,
                     processedUsers,
                     promotedUsers,
-                    rewardedUsers
+                    rankBreakdown: rankCheckStats,
+                    optimizationNote: "Checked rank-by-rank for better performance"
                 }
             });
         }

@@ -39,7 +39,7 @@ const profile = {
     },
     {
       id: 'ban-downline',
-      title: 'Ban Downline',
+      title: 'Ban Management',
       type: 'item',
       url: '/user/ban-downline',
       icon: icons.ban
@@ -58,6 +58,7 @@ const profile = {
       url: '/user/start-minting',
       icon: icons.StopCircle
     },
+
     // {
     //   id: 'data',
     //   title: <FormattedMessage id="Transfer Funds" />,

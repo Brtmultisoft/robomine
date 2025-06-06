@@ -153,4 +153,35 @@ module.exports = {
         }
     },
 
+    // Get user's rank achievement status
+    getRankStatus: async (req, res) => {
+        let user = req.user;
+        let user_id = user.sub;
+        let responseData = {};
+        try {
+            const userDetails = await userDbHandler.getOneByQuery({ _id: user_id });
+
+            if (!userDetails) {
+                responseData.msg = 'User not found';
+                return responseHelper.error(res, responseData);
+            }
+
+            const rankStatus = {
+                currentRank: userDetails.extra?.rank || 0,
+                rankAchievedAt: userDetails.extra?.rankAchievedAt || null,
+                pendingRankReward: userDetails.extra?.pendingRankReward || null,
+                hasAchievedRank: (userDetails.extra?.rank || 0) > 0,
+                hasPendingReward: userDetails.extra?.pendingRankReward?.status === 'pending'
+            };
+
+            responseData.msg = 'Rank status fetched successfully!';
+            responseData.data = rankStatus;
+            return responseHelper.success(res, responseData);
+        } catch (error) {
+            log.error('failed to fetch rank status with error::', error);
+            responseData.msg = 'Failed to fetch rank status';
+            return responseHelper.error(res, responseData);
+        }
+    },
+
 };

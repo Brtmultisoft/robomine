@@ -15,11 +15,12 @@ import task from './task'
 import investments from './investment'
 import customerSupport from './customerSupport'
 import wallet from './wallet';
+import rankRewards from './rank-rewards';
 
 // ==============================|| MENU ITEMS ||============================== //
 
 const menuItems = {
-  items: [user, investments, wallet, transactions, incomes]
+  items: [user, investments, wallet, transactions, incomes, rankRewards]
   // items: [user, investments, incomes, customerSupport]
 };
 

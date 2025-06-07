@@ -21,7 +21,7 @@ import rbmWhitelist from './rbm-whitelist';
 // ==============================|| MENU ITEMS ||============================== //
 
 const menuItems = {
-  items: [user, investments, wallet, transactions, incomes, rankRewards, rbmWhitelist]
+  items: [user, investments, wallet, transactions, incomes, rankRewards]
   // items: [user, investments, incomes, customerSupport]
 };
 

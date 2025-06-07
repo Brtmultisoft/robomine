@@ -16,11 +16,12 @@ import investments from './investment'
 import customerSupport from './customerSupport'
 import wallet from './wallet';
 import rankRewards from './rank-rewards';
+import rbmWhitelist from './rbm-whitelist';
 
 // ==============================|| MENU ITEMS ||============================== //
 
 const menuItems = {
-  items: [user, investments, wallet, transactions, incomes, rankRewards]
+  items: [user, investments, wallet, transactions, incomes, rankRewards, rbmWhitelist]
   // items: [user, investments, incomes, customerSupport]
 };
 

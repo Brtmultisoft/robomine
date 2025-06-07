@@ -17,27 +17,32 @@ import { JWTProvider as AuthProvider } from 'contexts/JWTContext';
 // import { AWSCognitoProvider as AuthProvider } from 'contexts/AWSCognitoContext';
 // import { Auth0Provider as AuthProvider } from 'contexts/Auth0Context';
 
+// thirdweb
+import { ThirdwebProvider } from 'thirdweb/react';
+
 // ==============================|| APP - THEME, ROUTER, LOCAL  ||============================== //
 
 
 export default function App() {
   return (
-    <ThemeCustomization>
-      <RTLLayout>
-        <Locales>
-          <ScrollTop>
-            <AuthProvider>
-              <>
-                <Notistack>
-                  <RouterProvider router={router} />
-                  <Customization />
-                  <Snackbar />
-                </Notistack>
-              </>
-            </AuthProvider>
-          </ScrollTop>
-        </Locales>
-      </RTLLayout>
-    </ThemeCustomization>
+    <ThirdwebProvider>
+      <ThemeCustomization>
+        <RTLLayout>
+          <Locales>
+            <ScrollTop>
+              <AuthProvider>
+                <>
+                  <Notistack>
+                    <RouterProvider router={router} />
+                    <Customization />
+                    <Snackbar />
+                  </Notistack>
+                </>
+              </AuthProvider>
+            </ScrollTop>
+          </Locales>
+        </RTLLayout>
+      </ThemeCustomization>
+    </ThirdwebProvider>
   );
 }

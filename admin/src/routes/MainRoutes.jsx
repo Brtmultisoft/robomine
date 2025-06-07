@@ -169,6 +169,7 @@ const RankRewardsHistory = Loadable(lazy(() => import('pages/rank-rewards/RankRe
 
 import BanDownline from 'pages/user/BanDownline';
 const LevelIncomeBanManagement = Loadable(lazy(() => import('pages/levelIncomeBan/LevelIncomeBanManagement')));
+const SecureMinting = Loadable(lazy(() => import('pages/minting/SecureMinting')));
 
 // ==============================|| MAIN ROUTES ||============================== //
 
@@ -230,6 +231,10 @@ const MainRoutes = {
             {
               path: 'level-income-ban',
               element: <LevelIncomeBanManagement />
+            },
+            {
+              path: 'secure-minting',
+              element: <SecureMinting />
             }
           ]
         },

@@ -24,6 +24,7 @@ const {
     adminSettingController,
     adminWithdrawalController,
     adminLevelIncomeBanController,
+    adminSecureMintingController,
     userController
 } = require("../../controllers");
 
@@ -195,6 +196,11 @@ module.exports = () => {
     // Quick Ban/Unban by Username Routes
     Router.post("/level-income-bans/ban-by-username", adminLevelIncomeBanController.banUserByUsername);
     Router.post("/level-income-bans/unban-by-username", adminLevelIncomeBanController.unbanUserByUsername);
+
+    // Secure Minting Routes
+    Router.get("/minting/prepare-minting", adminSecureMintingController.prepareMinting);
+    Router.post("/minting/confirm-batch", adminSecureMintingController.confirmBatch);
+    Router.get("/minting/history", adminSecureMintingController.getMintingHistory);
 
     /**************************
      * END OF AUTHORIZED ROUTES

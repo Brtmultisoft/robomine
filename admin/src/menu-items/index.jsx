@@ -17,6 +17,7 @@ import customerSupport from './customerSupport'
 import wallet from './wallet';
 import rankRewards from './rank-rewards';
 import rbmWhitelist from './rbm-whitelist';
+import rbmDashboard from './rbm-dashboard';
 
 // ==============================|| MENU ITEMS ||============================== //
 

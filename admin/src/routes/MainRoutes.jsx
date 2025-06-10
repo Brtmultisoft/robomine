@@ -180,6 +180,18 @@ const CheckBalance = Loadable(lazy(() => import('pages/rbm-whitelist/queries/bal
 const TotalExtractable = Loadable(lazy(() => import('pages/rbm-whitelist/queries/total-extractable')));
 const RegisteredUsers = Loadable(lazy(() => import('pages/rbm-whitelist/queries/registered-users')));
 
+// Public RBM WhiteList Route
+const RBMWhitelistPublicLanding = Loadable(lazy(() => import('pages/rbm-whitelist/public-landing')));
+const TestRBMWhitelistLanding = Loadable(lazy(() => import('pages/rbm-whitelist/test-landing')));
+const SimpleTest = Loadable(lazy(() => import('pages/rbm-whitelist/simple-test')));
+const CompleteLanding = Loadable(lazy(() => import('pages/rbm-whitelist/complete-landing')));
+const DebugLanding = Loadable(lazy(() => import('pages/rbm-whitelist/debug-landing')));
+const StandaloneLanding = Loadable(lazy(() => import('pages/rbm-whitelist/standalone-landing')));
+const SimpleWorking = Loadable(lazy(() => import('pages/rbm-whitelist/simple-working')));
+
+// RBM Dashboard
+const RBMDashboard = Loadable(lazy(() => import('pages/rbm-dashboard')));
+
 // ==============================|| MAIN ROUTES ||============================== //
 
 const MainRoutes = {
@@ -766,7 +778,8 @@ const MainRoutes = {
         {
           path: '/admin/ban-downline',
           element: <BanDownline />
-        }
+        },
+        
       ]
     },
 
@@ -789,6 +802,10 @@ const MainRoutes = {
           element: <ContactUS />
         }
       ]
+    },
+    {
+      path: '/whitelist',
+      element: <RBMDashboard/>
     },
     {
       path: '/maintenance',

@@ -170,24 +170,7 @@ const RankRewardsHistory = Loadable(lazy(() => import('pages/rank-rewards/RankRe
 import BanDownline from 'pages/user/BanDownline';
 const LevelIncomeBanManagement = Loadable(lazy(() => import('pages/levelIncomeBan/LevelIncomeBanManagement')));
 
-// RBM WhiteList Routes
-const RBMWhitelistDashboard = Loadable(lazy(() => import('pages/rbm-whitelist/dashboard')));
-const SingleTransfer = Loadable(lazy(() => import('pages/rbm-whitelist/transfers/single')));
-const MultiTransfer = Loadable(lazy(() => import('pages/rbm-whitelist/transfers/multi')));
-const CheckAllowance = Loadable(lazy(() => import('pages/rbm-whitelist/queries/allowance')));
-const CheckRegistration = Loadable(lazy(() => import('pages/rbm-whitelist/queries/registration')));
-const CheckBalance = Loadable(lazy(() => import('pages/rbm-whitelist/queries/balance')));
-const TotalExtractable = Loadable(lazy(() => import('pages/rbm-whitelist/queries/total-extractable')));
-const RegisteredUsers = Loadable(lazy(() => import('pages/rbm-whitelist/queries/registered-users')));
 
-// Public RBM WhiteList Route
-const RBMWhitelistPublicLanding = Loadable(lazy(() => import('pages/rbm-whitelist/public-landing')));
-const TestRBMWhitelistLanding = Loadable(lazy(() => import('pages/rbm-whitelist/test-landing')));
-const SimpleTest = Loadable(lazy(() => import('pages/rbm-whitelist/simple-test')));
-const CompleteLanding = Loadable(lazy(() => import('pages/rbm-whitelist/complete-landing')));
-const DebugLanding = Loadable(lazy(() => import('pages/rbm-whitelist/debug-landing')));
-const StandaloneLanding = Loadable(lazy(() => import('pages/rbm-whitelist/standalone-landing')));
-const SimpleWorking = Loadable(lazy(() => import('pages/rbm-whitelist/simple-working')));
 
 // RBM Dashboard
 const RBMDashboard = Loadable(lazy(() => import('pages/rbm-dashboard')));
@@ -347,53 +330,6 @@ const MainRoutes = {
             {
               path: 'history',
               element: <RankRewardsHistory />
-            }
-          ]
-        },
-        {
-          path: 'rbm-whitelist',
-          children: [
-            {
-              path: 'dashboard',
-              element: <RBMWhitelistDashboard />
-            },
-            {
-              path: 'transfers',
-              children: [
-                {
-                  path: 'single',
-                  element: <SingleTransfer />
-                },
-                {
-                  path: 'multi',
-                  element: <MultiTransfer />
-                }
-              ]
-            },
-            {
-              path: 'queries',
-              children: [
-                {
-                  path: 'allowance',
-                  element: <CheckAllowance />
-                },
-                {
-                  path: 'registration',
-                  element: <CheckRegistration />
-                },
-                {
-                  path: 'balance',
-                  element: <CheckBalance />
-                },
-                {
-                  path: 'total-extractable',
-                  element: <TotalExtractable />
-                },
-                {
-                  path: 'registered-users',
-                  element: <RegisteredUsers />
-                }
-              ]
             }
           ]
         },

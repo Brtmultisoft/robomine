@@ -18,11 +18,7 @@ import imgFacebook from 'assets/images/auth/facebook.svg';
 import imgTwitter from 'assets/images/auth/twitter.svg';
 import imgGoogle from 'assets/images/auth/google.svg';
 import { Image } from 'react-bootstrap';
-import SimpleWorking from 'pages/rbm-whitelist/simple-working';
-import RBMWhitelistLanding from 'pages/rbm-whitelist/public-landing';
-import CompleteLanding from 'pages/rbm-whitelist/complete-landing';
-import StandaloneLanding from 'pages/rbm-whitelist/standalone-landing';
-import RBMWhitelistDashboard from 'pages/rbm-whitelist/dashboard';
+;
 
 // ================================|| LOGIN ||================================ //
 

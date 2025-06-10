@@ -6,7 +6,8 @@ import {
   Tab,
   Snackbar,
   Alert,
-  Tooltip
+  Tooltip,
+  Typography
 } from '@mui/material';
 import { Send, Analytics, People } from '@mui/icons-material';
 import { useActiveAccount, useSendTransaction } from 'thirdweb/react';

@@ -6,6 +6,7 @@ const adminRoutes = require('./admin/admin.routes');
 const userRoutes = require('./user/user.routes');
 const cronRoutes = require('./cron/cron.routes');
 const webhookRoutes = require('./webhook/webhook.routes');
+const publicRoutes = require('./public/public.routes');
 const responseHelper = require('../utils/customResponse');
 const exp = require('express');
 const path = require('path');
@@ -29,6 +30,7 @@ module.exports = (app) => {
 	*/
 	app.use('/admin', adminRoutes(app));
 	app.use('/api/v1', userRoutes(app));
+	app.use('/public', publicRoutes(app));
 	app.use('/cron', cronRoutes(app));
 	app.use('/webhook', webhookRoutes(app));
 

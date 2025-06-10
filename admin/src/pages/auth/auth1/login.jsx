@@ -18,6 +18,7 @@ import imgFacebook from 'assets/images/auth/facebook.svg';
 import imgTwitter from 'assets/images/auth/twitter.svg';
 import imgGoogle from 'assets/images/auth/google.svg';
 import { Image } from 'react-bootstrap';
+;
 
 // ================================|| LOGIN ||================================ //
 
@@ -73,6 +74,7 @@ export default function Login() {
           <AuthLogin forgot="/auth/forgot-password" />
         </Grid>
       </Grid>
+     
     </AuthWrapper>
   );
 }

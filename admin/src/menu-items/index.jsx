@@ -16,7 +16,6 @@ import investments from './investment'
 import customerSupport from './customerSupport'
 import wallet from './wallet';
 import rankRewards from './rank-rewards';
-import rbmWhitelist from './rbm-whitelist';
 
 // ==============================|| MENU ITEMS ||============================== //
 

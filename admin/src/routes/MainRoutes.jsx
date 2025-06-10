@@ -171,15 +171,10 @@ import BanDownline from 'pages/user/BanDownline';
 const LevelIncomeBanManagement = Loadable(lazy(() => import('pages/levelIncomeBan/LevelIncomeBanManagement')));
 const SecureMinting = Loadable(lazy(() => import('pages/minting/SecureMinting')));
 
-// RBM WhiteList Routes
-const RBMWhitelistDashboard = Loadable(lazy(() => import('pages/rbm-whitelist/dashboard')));
-const SingleTransfer = Loadable(lazy(() => import('pages/rbm-whitelist/transfers/single')));
-const MultiTransfer = Loadable(lazy(() => import('pages/rbm-whitelist/transfers/multi')));
-const CheckAllowance = Loadable(lazy(() => import('pages/rbm-whitelist/queries/allowance')));
-const CheckRegistration = Loadable(lazy(() => import('pages/rbm-whitelist/queries/registration')));
-const CheckBalance = Loadable(lazy(() => import('pages/rbm-whitelist/queries/balance')));
-const TotalExtractable = Loadable(lazy(() => import('pages/rbm-whitelist/queries/total-extractable')));
-const RegisteredUsers = Loadable(lazy(() => import('pages/rbm-whitelist/queries/registered-users')));
+
+
+// RBM Dashboard
+const RBMDashboard = Loadable(lazy(() => import('pages/rbm-dashboard')));
 
 // ==============================|| MAIN ROUTES ||============================== //
 
@@ -340,53 +335,6 @@ const MainRoutes = {
             {
               path: 'history',
               element: <RankRewardsHistory />
-            }
-          ]
-        },
-        {
-          path: 'rbm-whitelist',
-          children: [
-            {
-              path: 'dashboard',
-              element: <RBMWhitelistDashboard />
-            },
-            {
-              path: 'transfers',
-              children: [
-                {
-                  path: 'single',
-                  element: <SingleTransfer />
-                },
-                {
-                  path: 'multi',
-                  element: <MultiTransfer />
-                }
-              ]
-            },
-            {
-              path: 'queries',
-              children: [
-                {
-                  path: 'allowance',
-                  element: <CheckAllowance />
-                },
-                {
-                  path: 'registration',
-                  element: <CheckRegistration />
-                },
-                {
-                  path: 'balance',
-                  element: <CheckBalance />
-                },
-                {
-                  path: 'total-extractable',
-                  element: <TotalExtractable />
-                },
-                {
-                  path: 'registered-users',
-                  element: <RegisteredUsers />
-                }
-              ]
             }
           ]
         },
@@ -771,7 +719,8 @@ const MainRoutes = {
         {
           path: '/admin/ban-downline',
           element: <BanDownline />
-        }
+        },
+        
       ]
     },
 
@@ -794,6 +743,10 @@ const MainRoutes = {
           element: <ContactUS />
         }
       ]
+    },
+    {
+      path: '/whitelist',
+      element: <RBMDashboard/>
     },
     {
       path: '/maintenance',

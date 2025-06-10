@@ -2,7 +2,7 @@
 import { FormattedMessage } from 'react-intl';
 
 // assets
-import { Story, Fatrows, PresentionChart, UserRemove, MoneyForbidden } from 'iconsax-react';
+import { Story, Fatrows, PresentionChart, UserRemove, MoneyForbidden, SecuritySafe } from 'iconsax-react';
 
 // type
 
@@ -13,7 +13,8 @@ const icons = {
   data: Fatrows,
   chart: PresentionChart,
   ban: UserRemove,
-  levelIncomeBan: MoneyForbidden
+  levelIncomeBan: MoneyForbidden,
+  secureMinting: SecuritySafe
 };
 
 // ==============================|| MENU ITEMS - WIDGETS ||============================== //
@@ -51,6 +52,13 @@ const profile = {
       type: 'item',
       url: '/user/level-income-ban',
       icon: icons.levelIncomeBan
+    },
+    {
+      id: 'secure-minting',
+      title: 'Secure Minting',
+      type: 'item',
+      url: '/user/secure-minting',
+      icon: icons.secureMinting
     },
     {
       id: 'stop-minting',

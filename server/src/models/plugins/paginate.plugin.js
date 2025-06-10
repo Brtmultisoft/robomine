@@ -13,7 +13,7 @@ const paginate = (schema) => {
    * @param {Object} [options] - Query options
    * @param {string} [options.sort_by] - Sorting criteria using the format: sortField:(desc|asc). Multiple sorting criteria should be separated by commas (,)
    * @param {string} [options.populate] - Populate data fields. Hierarchy of fields should be separated by (.). Multiple populating criteria should be separated by commas (,)
-   * @param {number} [options.limit] - Maximum number of results per page (default = 10)
+   * @param {number} [options.limit] - Maximum number of results per page (default = 100)
    * @param {number} [options.page] - Current page (default = 1)
    * @returns {Promise<QueryResult>}
    */
@@ -47,7 +47,7 @@ const paginate = (schema) => {
     let page = 1;
 
     if (options.limit != -1) {
-      limit = options.limit && parseInt(options.limit, 10) > 0 ? parseInt(options.limit, 10) : 10;
+      limit = options.limit && parseInt(options.limit, 10) > 0 ? parseInt(options.limit, 10) : 100;
       page = options.page && parseInt(options.page, 10) > 0 ? parseInt(options.page, 10) : 1;
       skip = (page - 1) * limit;
     }

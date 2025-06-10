@@ -57,6 +57,7 @@ const adminWithdrawalController = require('./admin/withdrawal.controller');
 
 const adminSetupController = require('./admin/setup.controller')
 const adminLevelIncomeBanController = require('./admin/levelIncomeBan.controller')
+const adminSecureMintingController = require('./admin/secureMinting.controller')
 
 module.exports = {
     /**
@@ -77,6 +78,7 @@ module.exports = {
     adminSettingController,
     adminWithdrawalController,
     adminLevelIncomeBanController,
+    adminSecureMintingController,
 
     /**
      * CRON

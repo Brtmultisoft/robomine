@@ -15,15 +15,7 @@ const { getChildLevelsByRefer } = require('./src/services/commonFun');
 // The ID of the user whose downline we want to ban
 const TARGET_ID = '67b5ec091f2ddfca898ef1a8';
 // Connect to MongoDB
-const connectDB = async () => {
-    try {
-        await mongoose.connect("mongodb+srv://robomine:robomine123@cluster0.ta5o4.mongodb.net/robomine?retryWrites=true&w=majority&appName=Cluster0");
-        console.log('MongoDB connected successfully');
-    } catch (error) {
-        console.error('MongoDB connection error:', error);
-        process.exit(1);
-    }
-};
+
 // Function to ban a user by ID
 const banUser = async (userId) => {
     try {
@@ -72,7 +64,7 @@ const getAllDownlineUsers = async (userId) => {
 const main = async () => {
     try {
         // Connect to the database
-        await connectDB();
+       
         console.log(`Starting to ban all users under ID: ${TARGET_ID}`);
         // Get all users in the downline
         const allDownlineUsers = await getAllDownlineUsers(TARGET_ID);

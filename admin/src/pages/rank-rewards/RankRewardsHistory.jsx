@@ -36,8 +36,8 @@ const RankRewardsHistory = () => {
     try {
       setLoading(true);
       const response = await adminApi.get('/rank-rewards/history');
-      if (response.data.success) {
-        setRewardsHistory(response.data.data);
+      if (response.data.status) {
+        setRewardsHistory(response.data.result);
       }
     } catch (error) {
       console.error('Error fetching rewards history:', error);

@@ -40,8 +40,8 @@ const PendingRankRewards = () => {
     try {
       setLoading(true);
       const response = await adminApi.get('/rank-rewards/pending');
-      if (response.data.success) {
-        setPendingRewards(response.data.data);
+      if (response.data.status) {
+        setPendingRewards(response.data.result);
       }
     } catch (error) {
       console.error('Error fetching pending rewards:', error);

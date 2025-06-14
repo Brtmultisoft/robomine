@@ -816,9 +816,34 @@ const distributeLevelIncome = async(user_id, amount) => {
                 continue;
             }
 
+            // Calculate capping limit based on formula: (wallet_token + wallet) * 2.5
+            const cappingLimit = (user.wallet_token + user.wallet) * 2.5;
+
+            // Calculate total earnings (consider all income sources)
+            const totalEarnings = user.reward +
+                (user.extra?.dailyIncome || 0) +
+                (user.extra?.levelIncome || 0);
+
+            // Check if total earnings already exceed capping limit
+            if (totalEarnings >= cappingLimit) {
+                log.info(`User ${user.username} has reached capping limit (${cappingLimit}). Skipping level income distribution at level ${i + 1}.`);
+
+                // Create income record with capped status for tracking
+                await incomeDbHandler.create({
+                    user_id: levelUser,
+                    user_id_from: user_id,
+                    amount: 0, // No amount given
+                    level: i + 1,
+                    type: 2,
+                    status: 3, // 3 = capped/skipped
+                    remarks: "Level income distribution - User reached capping limit"
+                });
+                continue;
+            }
+
             let levelAmount = (amount * config.levelIncomePercentages[i]) / 100;
 
-            // Distribute level income to non-banned user
+            // Distribute level income to non-banned and non-capped user
             await userDbHandler.updateOneByQuery(
                 { _id: ObjectId(levelUser) },
                 {
@@ -1695,9 +1720,17 @@ const checkStarRankings = async (req, res) => {
                         }
                     } else {
                         log.info(`    ❌ User ${user.username} does not qualify for ${criteria.name}`);
-                        // If user doesn't qualify for current rank, stop checking higher ranks for this user
-                        // OPTIMIZATION: No need to check 3 STAR if user doesn't qualify for 2 STAR
-                        break;
+
+                        // Special handling for 1 STAR: Continue checking higher ranks even if 1 STAR fails
+                        // This allows users to skip 1 STAR and achieve higher ranks directly
+                        if (starLevel === 1) {
+                            log.info(`    🔄 Continuing to check higher ranks for ${user.username} (1 STAR can be skipped)`);
+                            continue; // Continue to check 2 STAR, 3 STAR, 5 STAR
+                        } else {
+                            // For ranks 2+ STAR: If user doesn't qualify, stop checking higher ranks
+                            // OPTIMIZATION: No need to check 5 STAR if user doesn't qualify for 2 STAR or 3 STAR
+                            break;
+                        }
                     }
                 }
 

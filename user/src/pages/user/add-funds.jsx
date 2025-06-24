@@ -150,6 +150,7 @@ export default function AddFunds() {
                                 color="primary"
                                 onClick={buyPackage}
                                 fullWidth
+                                disabled={true}
                                 sx={{ padding: theme.spacing(1.5) }}
                             >
                                 Stake

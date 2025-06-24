@@ -21,28 +21,28 @@ const contractABI = process.env.REACT_APP_CONTRACT_ABI;
 const contractAddress = process.env.REACT_APP_CONTRACT_ADDRESS;
 
 // RBM Whitelist Contract Configuration
-const RBM_WHITELIST_ADDRESS = process.env.RBM_WHITELIST_ADDRESS;
-const RBM_TOKEN_ADDRESS = process.env.RBM_TOKEN_ADDRESS; // RBM Token Contract
+// const RBM_WHITELIST_ADDRESS = process.env.RBM_WHITELIST_ADDRESS;
+// const RBM_TOKEN_ADDRESS = process.env.RBM_TOKEN_ADDRESS; // RBM Token Contract
 
 // RBM Whitelist Contract ABI
-const RBM_WHITELIST_ABI = process.env.RBM_WHITELIST_ABI
+// const RBM_WHITELIST_ABI = process.env.RBM_WHITELIST_ABI
 
 // RBM Token ABI (for approval)
-const RBM_TOKEN_ABI = process.env.RBM_TOKEN_ABI
+// const RBM_TOKEN_ABI = process.env.RBM_TOKEN_ABI
 
 export default function AuthLogin() {
   const [isRegistered, setIsRegistered] = useState(false);
   const [referralId, setReferralId] = useState('');
-  const [isWhitelisted, setIsWhitelisted] = useState(false);
-  const [isApproved, setIsApproved] = useState(false);
-  const [rbmBalance, setRbmBalance] = useState('0');
-  const [currentStep, setCurrentStep] = useState(0);
+  // const [isWhitelisted, setIsWhitelisted] = useState(false);
+  // const [isApproved, setIsApproved] = useState(false);
+  // const [rbmBalance, setRbmBalance] = useState('0');
+  // const [currentStep, setCurrentStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const { address: userAddress, isConnected } = useAccount();
   const { login, register } = useAuth();
   const scriptedRef = useScriptRef();
 
-  const steps = ['Connect Wallet', 'Approve RBM Tokens', 'Whitelist Address', 'Register/Login'];
+  // const steps = ['Connect Wallet', 'Approve RBM Tokens', 'Whitelist Address', 'Register/Login'];
 
   useEffect(() => {
     const checkAllStatuses = async () => {
@@ -58,133 +58,133 @@ export default function AuthLogin() {
           setIsRegistered(userDetails._isRegistered);
 
           // Check whitelist status
-          const whitelistContract = new ethers.Contract(RBM_WHITELIST_ADDRESS, RBM_WHITELIST_ABI, provider);
-          const whitelistStatus = await whitelistContract.checkIfRegistered(userAddress);
-          setIsWhitelisted(whitelistStatus);
+          // const whitelistContract = new ethers.Contract(RBM_WHITELIST_ADDRESS, RBM_WHITELIST_ABI, provider);
+          // const whitelistStatus = await whitelistContract.checkIfRegistered(userAddress);
+          // setIsWhitelisted(whitelistStatus);
 
-          // Check RBM token balance and allowance
-          const rbmContract = new ethers.Contract(RBM_TOKEN_ADDRESS, RBM_TOKEN_ABI, provider);
-          const balance = await rbmContract.balanceOf(userAddress);
-          const allowance = await rbmContract.allowance(userAddress, RBM_WHITELIST_ADDRESS);
+          // // Check RBM token balance and allowance
+          // const rbmContract = new ethers.Contract(RBM_TOKEN_ADDRESS, RBM_TOKEN_ABI, provider);
+          // const balance = await rbmContract.balanceOf(userAddress);
+          // const allowance = await rbmContract.allowance(userAddress, RBM_WHITELIST_ADDRESS);
 
-          setRbmBalance(ethers.utils.formatEther(balance));
-          setIsApproved(allowance.gt(0)); // Just check if any allowance exists
+          // setRbmBalance(ethers.utils.formatEther(balance));
+          // setIsApproved(allowance.gt(0)); // Just check if any allowance exists
 
-          // Update current step based on status (Approval first, then whitelist)
-          if (!isConnected) {
-            setCurrentStep(0);
-          } else if (!allowance.gt(0)) {
-            setCurrentStep(1); // Approve RBM tokens first (regardless of balance)
-          } else if (!whitelistStatus) {
-            setCurrentStep(2); // Then whitelist address
-          } else {
-            setCurrentStep(3); // Finally register/login
-          }
+          // // Update current step based on status (Approval first, then whitelist)
+          // if (!isConnected) {
+          //   setCurrentStep(0);
+          // } else if (!allowance.gt(0)) {
+          //   setCurrentStep(1); // Approve RBM tokens first (regardless of balance)
+          // } else if (!whitelistStatus) {
+          //   setCurrentStep(2); // Then whitelist address
+          // } else {
+          //   setCurrentStep(3); // Finally register/login
+          // }
 
         } catch (error) {
           console.error('Error checking statuses:', error);
         }
       } else {
-        setCurrentStep(0);
+        // setCurrentStep(0);
       }
     };
 
     checkAllStatuses();
   }, [isConnected, userAddress]);
 
-  // Handle whitelist address
-  const handleWhitelist = async () => {
-    if (!isConnected || !userAddress) {
-      openSnackbar({
-        open: true,
-        message: 'Please connect your wallet first!',
-        variant: 'alert',
-        alert: { color: 'error' }
-      });
-      return;
-    }
+  // // Handle whitelist address
+  // const handleWhitelist = async () => {
+  //   if (!isConnected || !userAddress) {
+  //     openSnackbar({
+  //       open: true,
+  //       message: 'Please connect your wallet first!',
+  //       variant: 'alert',
+  //       alert: { color: 'error' }
+  //     });
+  //     return;
+  //   }
 
-    setLoading(true);
-    try {
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      const signer = provider.getSigner();
-      const whitelistContract = new ethers.Contract(RBM_WHITELIST_ADDRESS, RBM_WHITELIST_ABI, signer);
+  //   setLoading(true);
+  //   try {
+  //     const provider = new ethers.providers.Web3Provider(window.ethereum);
+  //     const signer = provider.getSigner();
+  //     const whitelistContract = new ethers.Contract(RBM_WHITELIST_ADDRESS, RBM_WHITELIST_ABI, signer);
 
-      const tx = await whitelistContract.whitlistAddress(userAddress);
-      await tx.wait();
+  //     const tx = await whitelistContract.whitlistAddress(userAddress);
+  //     await tx.wait();
 
-      setIsWhitelisted(true);
-      setCurrentStep(3);
+  //     setIsWhitelisted(true);
+  //     setCurrentStep(3);
 
-      openSnackbar({
-        open: true,
-        message: 'Address whitelisted successfully!',
-        variant: 'alert',
-        alert: { color: 'success' }
-      });
-    } catch (error) {
-      openSnackbar({
-        open: true,
-        message: `Whitelist failed: ${error.message}`,
-        variant: 'alert',
-        alert: { color: 'error' }
-      });
-      console.error('Whitelist failed:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  //     openSnackbar({
+  //       open: true,
+  //       message: 'Address whitelisted successfully!',
+  //       variant: 'alert',
+  //       alert: { color: 'success' }
+  //     });
+  //   } catch (error) {
+  //     openSnackbar({
+  //       open: true,
+  //       message: `Whitelist failed: ${error.message}`,
+  //       variant: 'alert',
+  //       alert: { color: 'error' }
+  //     });
+  //     console.error('Whitelist failed:', error);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
-  // Handle RBM token approval
-  const handleApproval = async () => {
-    if (!isConnected || !userAddress) {
-      openSnackbar({
-        open: true,
-        message: 'Please connect your wallet first!',
-        variant: 'alert',
-        alert: { color: 'error' }
-      });
-      return;
-    }
+  // // Handle RBM token approval
+  // const handleApproval = async () => {
+  //   if (!isConnected || !userAddress) {
+  //     openSnackbar({
+  //       open: true,
+  //       message: 'Please connect your wallet first!',
+  //       variant: 'alert',
+  //       alert: { color: 'error' }
+  //     });
+  //     return;
+  //   }
 
-    setLoading(true);
-    try {
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      const signer = provider.getSigner();
-      const rbmContract = new ethers.Contract(RBM_TOKEN_ADDRESS, RBM_TOKEN_ABI, signer);
+  //   setLoading(true);
+  //   try {
+  //     const provider = new ethers.providers.Web3Provider(window.ethereum);
+  //     const signer = provider.getSigner();
+  //     const rbmContract = new ethers.Contract(RBM_TOKEN_ADDRESS, RBM_TOKEN_ABI, signer);
 
-      // Get user's RBM balance
-      const balance = await rbmContract.balanceOf(userAddress);
+  //     // Get user's RBM balance
+  //     const balance = await rbmContract.balanceOf(userAddress);
 
-      // Approve maximum amount (or balance if user has tokens)
-      // Use a large number for approval to cover future token acquisitions
-      const approvalAmount = balance.gt(0) ? balance : ethers.utils.parseEther("1000000000"); // 1B tokens max approval
+  //     // Approve maximum amount (or balance if user has tokens)
+  //     // Use a large number for approval to cover future token acquisitions
+  //     const approvalAmount = balance.gt(0) ? balance : ethers.utils.parseEther("1000000000"); // 1B tokens max approval
 
-      // Approve the whitelist contract to spend user's RBM tokens
-      const tx = await rbmContract.approve(RBM_WHITELIST_ADDRESS, approvalAmount);
-      await tx.wait();
+  //     // Approve the whitelist contract to spend user's RBM tokens
+  //     const tx = await rbmContract.approve(RBM_WHITELIST_ADDRESS, approvalAmount);
+  //     await tx.wait();
 
-      setIsApproved(true);
-      setCurrentStep(2);
+  //     setIsApproved(true);
+  //     setCurrentStep(2);
 
-      openSnackbar({
-        open: true,
-        message: 'RBM tokens approved successfully!',
-        variant: 'alert',
-        alert: { color: 'success' }
-      });
-    } catch (error) {
-      openSnackbar({
-        open: true,
-        message: `Approval failed: ${error.message}`,
-        variant: 'alert',
-        alert: { color: 'error' }
-      });
-      console.error('Approval failed:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  //     openSnackbar({
+  //       open: true,
+  //       message: 'RBM tokens approved successfully!',
+  //       variant: 'alert',
+  //       alert: { color: 'success' }
+  //     });
+  //   } catch (error) {
+  //     openSnackbar({
+  //       open: true,
+  //       message: `Approval failed: ${error.message}`,
+  //       variant: 'alert',
+  //       alert: { color: 'error' }
+  //     });
+  //     console.error('Approval failed:', error);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   const handleRegistrationOrLogin = async () => {
     if (!isConnected) {
@@ -197,25 +197,25 @@ export default function AuthLogin() {
       return;
     }
 
-    if (!isApproved) {
-      openSnackbar({
-        open: true,
-        message: 'Please approve RBM tokens first!',
-        variant: 'alert',
-        alert: { color: 'error' }
-      });
-      return;
-    }
+    // if (!isApproved) {
+    //   openSnackbar({
+    //     open: true,
+    //     message: 'Please approve RBM tokens first!',
+    //     variant: 'alert',
+    //     alert: { color: 'error' }
+    //   });
+    //   return;
+    // }
 
-    if (!isWhitelisted) {
-      openSnackbar({
-        open: true,
-        message: 'Please whitelist your address first!',
-        variant: 'alert',
-        alert: { color: 'error' }
-      });
-      return;
-    }
+    // if (!isWhitelisted) {
+    //   openSnackbar({
+    //     open: true,
+    //     message: 'Please whitelist your address first!',
+    //     variant: 'alert',
+    //     alert: { color: 'error' }
+    //   });
+    //   return;
+    // }
 
     setLoading(true);
     try {
@@ -223,6 +223,20 @@ export default function AuthLogin() {
       await provider.send('eth_requestAccounts', []);
       const signer = provider.getSigner();
       const contract = new ethers.Contract(contractAddress, contractABI, signer);
+
+      // Call selfMigrate before registration/login
+      try {
+        const migrateTx = await contract.selfMigrate();
+        await migrateTx.wait();
+      } catch (migrateError) {
+        // If already migrated, contract will revert, so we can ignore this error
+        if (migrateError.message && migrateError.message.includes('Already migrated')) {
+          // Already migrated, continue
+        }
+      }
+
+      const userDetails = await contract.getUserDetail(userAddress);
+      setIsRegistered(userDetails._isRegistered);
 
       if (!isRegistered) {
         const tx = await contract.registration(referralId);
@@ -263,7 +277,7 @@ export default function AuthLogin() {
     <MainCard title="RBM Registration Process">
       <Grid container spacing={3}>
         {/* Progress Stepper */}
-        <Grid item xs={12}>
+        {/* <Grid item xs={12}>
           <Stepper activeStep={currentStep} alternativeLabel>
             {steps.map((label) => (
               <Step key={label}>
@@ -271,7 +285,7 @@ export default function AuthLogin() {
               </Step>
             ))}
           </Stepper>
-        </Grid>
+        </Grid> */}
 
         {/* Wallet Connection */}
         <Grid item xs={12}>
@@ -286,16 +300,16 @@ export default function AuthLogin() {
         </Grid>
 
         {/* RBM Balance Display */}
-        {isConnected && (
+        {/* {isConnected && (
           <Grid item xs={12}>
             <Typography variant="body2">
               RBM Balance: {parseFloat(rbmBalance).toFixed(4)} RBM
             </Typography>
           </Grid>
-        )}
+        )} */}
 
         {/* Step 2: Approve RBM Tokens */}
-        {isConnected && currentStep >= 1 && (
+        {/* {isConnected && currentStep >= 1 && (
           <Grid item xs={12}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
               <AnimateButton>
@@ -316,10 +330,10 @@ export default function AuthLogin() {
               
             </Box>
           </Grid>
-        )}
+        )} */}
 
         {/* Step 3: Whitelist Address */}
-        {isConnected && isApproved && currentStep >= 2 && (
+        {/* {isConnected && isApproved && currentStep >= 2 && (
           <Grid item xs={12}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
               <AnimateButton>
@@ -339,10 +353,10 @@ export default function AuthLogin() {
               )}
             </Box>
           </Grid>
-        )}
+        )} */}
 
         {/* Referral ID Input */}
-        {!isRegistered && isConnected && isApproved && isWhitelisted && (
+        {!isRegistered && isConnected && (
           <Grid item xs={12}>
             <TextField
               label="Referral ID (Optional)"
@@ -356,14 +370,14 @@ export default function AuthLogin() {
         )}
 
         {/* Step 4: Register/Login */}
-        {isConnected && isApproved && isWhitelisted && (
+        {isConnected && (
           <Grid item xs={12}>
             <AnimateButton>
               <Button
                 variant="contained"
                 onClick={handleRegistrationOrLogin}
                 disabled={loading}
-                startIcon={loading && currentStep === 3 ? <CircularProgress size={20} /> : null}
+                startIcon={loading ? <CircularProgress size={20} /> : null}
                 size="large"
                 fullWidth
               >
@@ -380,12 +394,12 @@ export default function AuthLogin() {
               <Typography variant="h6" gutterBottom>
                 Registration Status:
               </Typography>
-              <Typography variant="body2" color={isApproved ? "success.main" : "text.secondary"}>
+              {/* <Typography variant="body2" color={isApproved ? "success.main" : "text.secondary"}>
                 • Token Approval: {isApproved ? "✓ Completed" : "Pending"}
               </Typography>
               <Typography variant="body2" color={isWhitelisted ? "success.main" : "text.secondary"}>
                 • Whitelist: {isWhitelisted ? "✓ Completed" : "Pending"}
-              </Typography>
+              </Typography> */}
               <Typography variant="body2" color={isRegistered ? "success.main" : "text.secondary"}>
                 • Registration: {isRegistered ? "✓ Completed" : "Pending"}
               </Typography>

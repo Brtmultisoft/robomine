@@ -147,6 +147,7 @@ export default function StakeToken() {
                                 color="primary"
                                 onClick={stakeTokens}
                                 fullWidth
+                                disabled={true}
                                 sx={{ padding: theme.spacing(1.5) }}
                             >
                                 Stake

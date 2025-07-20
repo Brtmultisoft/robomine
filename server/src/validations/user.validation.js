@@ -33,5 +33,16 @@ module.exports = {
 		password: Joi.string().optional().allow("").min(8).max(20).custom(password).label('Password'),
 		confirm_password: Joi.string().optional().allow("").min(8).max(20).valid(Joi.ref('password')).error(new Error('Confirm password and password must be same')),
 	}),
+	adminAdd: Joi.object().keys({
+		name: Joi.string().trim().required().min(3).max(100).custom(name).label("Name"),
+		username: Joi.string().trim().required().min(6).max(200).label("User Name"),
+		email: Joi.string().trim().optional().allow("").max(100).email().label('Email'),
+		phone_number: Joi.string().optional().allow("").min(10).max(15).label("Phone Number"),
+		password: Joi.string().required().min(8).max(20).label('Password'),
+		confirm_password: Joi.string().min(8).valid(Joi.ref('password')).required().error(new Error('Confirm password and password must be same')),
+		refer_username: Joi.string().trim().optional().allow("").label("Referrer Username"),
+		wallet: Joi.number().optional().min(0).label("Initial Wallet Balance"),
+		status: Joi.boolean().optional().default(true).label("Status"),
+	}),
 
 };

@@ -441,4 +441,129 @@ module.exports = {
         }
     },
 
+    add: async (req, res) => {
+        let reqObj = req.body;
+        log.info('Received request for Admin User Creation:', reqObj);
+        let responseData = {};
+
+        try {
+            // Check if username already exists
+            let checkUsername = await userDbHandler.getByQuery({ username: reqObj.username });
+            if (checkUsername.length) {
+                responseData.msg = 'Username already exists!';
+                return responseHelper.error(res, responseData);
+            }
+
+            // Check if email already exists (if provided)
+            if (reqObj.email) {
+                let checkEmail = await userDbHandler.getByQuery({ email: reqObj.email.toLowerCase() });
+                if (checkEmail.length) {
+                    responseData.msg = 'Email already exists!';
+                    return responseHelper.error(res, responseData);
+                }
+            }
+
+            // Check if phone number already exists (if provided)
+            if (reqObj.phone_number) {
+                let checkPhoneNumber = await userDbHandler.getByQuery({ phone_number: reqObj.phone_number });
+                if (checkPhoneNumber.length) {
+                    responseData.msg = 'Phone number already exists!';
+                    return responseHelper.error(res, responseData);
+                }
+            }
+
+            let refer_id = null;
+            let trace_id = '';
+
+            // If referrer username is provided, validate it
+            if (reqObj.refer_username) {
+                let referUser = await userDbHandler.getOneByQuery({ username: reqObj.refer_username }, { _id: 1, username: 1 });
+                if (referUser) {
+                    refer_id = referUser._id;
+                    trace_id = reqObj.refer_username;
+                } else {
+                    responseData.msg = `No referrer exists with username: ${reqObj.refer_username}`;
+                    return responseHelper.error(res, responseData);
+                }
+            }
+
+            // Hash the password
+            let hashedPassword = await _encryptPassword(reqObj.password);
+
+            // Prepare user data
+            let submitData = {
+                refer_id: refer_id,
+                trace_id: trace_id,
+                username: reqObj.username,
+                email: reqObj.email ? reqObj.email.toLowerCase() : '',
+                password: hashedPassword,
+                name: reqObj.name,
+                phone_number: reqObj.phone_number || '',
+                wallet: reqObj.wallet || 0,
+                status: reqObj.status !== undefined ? reqObj.status : true
+            };
+
+            // Create the user
+            let newUser = await userDbHandler.create(submitData);
+            log.info('User created by admin:', newUser);
+
+            responseData.msg = 'User created successfully!';
+            responseData.data = {
+                _id: newUser._id,
+                username: newUser.username,
+                name: newUser.name,
+                email: newUser.email,
+                phone_number: newUser.phone_number,
+                wallet: newUser.wallet,
+                status: newUser.status
+            };
+            return responseHelper.success(res, responseData);
+
+        } catch (error) {
+            log.error('Failed to create user with error::', error);
+            responseData.msg = 'Failed to create user';
+            return responseHelper.error(res, responseData);
+        }
+    },
+
+    checkUsername: async (req, res) => {
+        let username = req.params.username;
+        log.info('Received request to check username:', username);
+        let responseData = {};
+
+        try {
+            if (!username) {
+                responseData.msg = 'Username is required';
+                return responseHelper.error(res, responseData);
+            }
+
+            // Check if username exists
+            let user = await userDbHandler.getOneByQuery({ username: username }, { _id: 1, username: 1, name: 1 });
+
+            if (user) {
+                responseData.msg = 'Username exists';
+                responseData.data = {
+                    exists: true,
+                    user: {
+                        _id: user._id,
+                        username: user.username,
+                        name: user.name
+                    }
+                };
+                return responseHelper.success(res, responseData);
+            } else {
+                responseData.msg = 'Username does not exist';
+                responseData.data = {
+                    exists: false
+                };
+                return responseHelper.success(res, responseData);
+            }
+
+        } catch (error) {
+            log.error('Failed to check username with error::', error);
+            responseData.msg = 'Failed to check username';
+            return responseHelper.error(res, responseData);
+        }
+    },
+
 };

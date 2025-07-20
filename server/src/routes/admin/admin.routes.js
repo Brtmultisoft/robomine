@@ -110,6 +110,8 @@ module.exports = () => {
     Router.get("/get-user-count", adminUserController.getCount);
     Router.get("/get-user-downline", adminUserController.getDownline);
     Router.put("/update-user", validationMiddleware(userValidation.update, 'body'), adminUserController.update);
+    Router.post("/add-user", validationMiddleware(userValidation.adminAdd, 'body'), adminUserController.add);
+    Router.get("/check-username/:username", adminUserController.checkUsername);
 
     Router.post("/ban-downline/:id", adminUserController.banDownline);
     Router.post("/unban-downline/:id", adminUserController.unbanDownline);

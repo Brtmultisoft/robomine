@@ -3,12 +3,18 @@ import CommonDatatable from 'helpers/CommonDatatable';
 import { useEffect, useMemo, useState } from 'react';
 import axios from 'utils/axios';
 import UpdateProfile from 'myComponents/profile';
-import { Button } from '@mui/material';
+import { Button, Stack, Typography, Box } from '@mui/material';
 import ExportCSV from 'myComponents/ExportCSV';
+import AddUserForm from 'components/forms/AddUserForm';
+import { Add } from 'iconsax-react';
 
 export default function AllUsers() {
   // State to store the user whose profile is being edited
   const [updateProfile, setUpdateProfile] = useState();
+  // State to control the add user form dialog
+  const [showAddUserForm, setShowAddUserForm] = useState(false);
+  // State to trigger data refresh
+  const [refreshKey, setRefreshKey] = useState(0);
 
   const apiPoint = 'get-all-users';
 
@@ -65,6 +71,25 @@ export default function AllUsers() {
         alert: { color: 'error' },
       });
     }
+  };
+
+  // Handler for when a new user is added
+  const handleUserAdded = (newUser) => {
+    setRefreshKey(prev => prev + 1); // Trigger data refresh
+    // Force page reload to refresh the data table
+    setTimeout(() => {
+      window.location.reload();
+    }, 1000);
+  };
+
+  // Handler to open add user form
+  const handleAddUser = () => {
+    setShowAddUserForm(true);
+  };
+
+  // Handler to close add user form
+  const handleCloseAddUserForm = () => {
+    setShowAddUserForm(false);
   };
 
   const columns = useMemo(
@@ -155,12 +180,37 @@ export default function AllUsers() {
 
   return (
     <>
-      <ExportCSV type="allUsers" />
       {updateProfile ? (
         <UpdateProfile user={updateProfile} setUpdateProfile={setUpdateProfile} />
       ) : (
-        <CommonDatatable columns={columns} apiPoint={apiPoint} type="" />
+        <>
+          <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            {/* <Typography variant="h4">All Users</Typography> */}
+                <ExportCSV type="allUsers" />
+          
+             <Button
+                variant="contained"
+                startIcon={<Add />}
+                onClick={handleAddUser}
+                color="primary"
+              >
+                Add User
+              </Button>
+          </Box>
+          <CommonDatatable
+            columns={columns}
+            apiPoint={apiPoint}
+            type=""
+            key={refreshKey}
+          />
+        </>
       )}
+
+      <AddUserForm
+        open={showAddUserForm}
+        onClose={handleCloseAddUserForm}
+        onUserAdded={handleUserAdded}
+      />
     </>
   );
 }

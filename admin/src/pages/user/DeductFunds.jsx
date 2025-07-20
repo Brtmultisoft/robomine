@@ -37,7 +37,7 @@ export default function DeductFunds() {
             user_id: '',
             amount: '',
             remark: '',
-            type: 'tasksIncome'
+            type: 'wallet'
         },
         validationSchema,
         onSubmit: async (data) => {
@@ -138,8 +138,8 @@ export default function DeductFunds() {
                                 >
                                     {/* <MenuItem value={0}>Wallet</MenuItem>
                                     <MenuItem value={1}>Topup Wallet</MenuItem> */}
-                                    <MenuItem value={'tasksIncome'}>Tasks Wallet</MenuItem>
-                                    <MenuItem value={'levelIncome'}>Level Wallet</MenuItem>
+                                    <MenuItem value={'wallet'}> Stake Wallet</MenuItem>
+                                    <MenuItem value={'wallet_topup'}>ICO Wallet</MenuItem>
                                 </Select>
                             </FormControl>
                         </Stack>

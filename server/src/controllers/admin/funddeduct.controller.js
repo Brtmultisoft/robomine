@@ -61,20 +61,20 @@ module.exports = {
                 type: reqObj.type,
             }
 
-            if (reqObj.type == 'tasksIncome') {
-                if (user.extra.tasksIncome < reqObj.amount) {
+            if (reqObj.type == 'wallet') {
+                if (user.wallet < reqObj.amount) {
                     responseData.msg = "Insufficient Fund!";
                     return responseHelper.error(res, responseData);
                 }
-                user.extra.tasksIncome = parseFloat(user.extra.tasksIncome) - parseFloat(reqObj.amount)
+                user.wallet = parseFloat(user.wallet) - parseFloat(reqObj.amount)
                 // await userDbHandler.updateOneByQuery({ _id: ObjectId(reqObj.user_id) }, { $inc: { wallet: -reqObj.amount } });
             }
-            else if (reqObj.type == 'levelIncome') {
-                if (user.extra.levelIncome < reqObj.amount) {
+            else if (reqObj.type == 'wallet_topup') {
+                if (user.wallet_topup < reqObj.amount) {
                     responseData.msg = "Insufficient Fund!"
                     return responseHelper.error(res, responseData);
                 }
-                user.extra.levelIncome = parseFloat(user.extra.levelIncome) - parseFloat(reqObj.amount)
+                user.wallet_topup = parseFloat(user.wallet_topup) - parseFloat(reqObj.amount)
                 // await userDbHandler.updateOneByQuery({ _id: ObjectId(reqObj.user_id) }, { $inc: { wallet_topup: -reqObj.amount } });
             } else {
                 throw "Wrong type!"

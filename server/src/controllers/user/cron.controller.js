@@ -688,31 +688,31 @@ const distributeTokens = async() => {
 
 
         // 50% Public Staking & 50% Admin Wallets
-        const publicShare = dailyTokens * 0.50;
-        const adminShare = dailyTokens * 0.50;
+        const publicShare = dailyTokens ;
+        // const adminShare = dailyTokens * 0.50;
 
         // Distribute Admin Share (Each admin gets 25% of adminShare)
         const adminAmount = adminShare / config.adminWallets.length;
         const mongoose = require('mongoose');
 
-        for (const admin of config.adminWallets) {
-            // Fetch the user document based on username
-            const adminUser = await userDbHandler.getOneByQuery({ username: admin });
+        // for (const admin of config.adminWallets) {
+        //     // Fetch the user document based on username
+        //     const adminUser = await userDbHandler.getOneByQuery({ username: admin });
 
-            if (!adminUser || !adminUser._id) {
-                console.error(`Admin user not found or invalid _id for username: ${admin}`);
-                continue; // Skip this iteration if the user is not found
-            }
+        //     if (!adminUser || !adminUser._id) {
+        //         console.error(`Admin user not found or invalid _id for username: ${admin}`);
+        //         continue; // Skip this iteration if the user is not found
+        //     }
 
-            await userDbHandler.updateOneByQuery({ username: admin }, { $inc: { reward: adminAmount, wallet: adminAmount } });
+        //     await userDbHandler.updateOneByQuery({ username: admin }, { $inc: { reward: adminAmount, wallet: adminAmount } });
 
-            await incomeDbHandler.create({
-                user_id: ObjectId(adminUser._id), // Ensure it's a valid ObjectId
-                amount: adminAmount,
-                type: 3,
-                remarks: "Admin wallet distribution"
-            });
-        }
+        //     await incomeDbHandler.create({
+        //         user_id: ObjectId(adminUser._id), // Ensure it's a valid ObjectId
+        //         amount: adminAmount,
+        //         type: 3,
+        //         remarks: "Admin wallet distribution"
+        //     });
+        // }
 
 
         // Distribute Public Staking

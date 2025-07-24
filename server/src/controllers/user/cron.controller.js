@@ -689,7 +689,7 @@ const distributeTokens = async() => {
 
         // 50% Public Staking & 50% Admin Wallets
         const publicShare = dailyTokens ;
-        // const adminShare = dailyTokens * 0.50;
+        const adminShare = dailyTokens * 0.50;
 
         // Distribute Admin Share (Each admin gets 25% of adminShare)
         const adminAmount = adminShare / config.adminWallets.length;

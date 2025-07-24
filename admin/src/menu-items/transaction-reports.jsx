@@ -43,13 +43,13 @@ const transactions = {
     //   url: '/transaction-reports/invest-reports/',
     //   icon: icons.data
     // },
-    // {
-    //   id: 'Transfer Fund',
-    //   title: <FormattedMessage id="Transfer Fund" />,
-    //   type: 'item',
-    //   url: '/transaction-reports/transfer-fund-reports',
-    //   icon: icons.data
-    // },
+    {
+      id: 'Transfer Fund',
+      title: <FormattedMessage id="Transfer Fund" />,
+      type: 'item',
+      url: '/transaction-reports/transfer-fund-reports',
+      icon: icons.data
+    },
     {
       id: 'Deduct Fund',
       title: <FormattedMessage id="Deduct Fund" />,

@@ -61,7 +61,7 @@ module.exports = {
                 type: reqObj.type,
             }
             let inData = {
-                user_id=reqObj.user_id,
+                user_id:reqObj.user_id,
                 amount: reqObj.amount,
                 investment_plan_id: null,
                 amount_r: 0,

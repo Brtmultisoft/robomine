@@ -1,7 +1,7 @@
 'use strict';
 const logger = require('../../services/logger');
 const log = new logger('AdminFundTransferController').getChildLogger();
-const { fundTransferDbHandler, userDbHandler } = require('../../services/db');
+const { fundTransferDbHandler, userDbHandler, investmentDbHandler } = require('../../services/db');
 const responseHelper = require('../../utils/customResponse');
 const config = require('../../config/config');
 const { default: mongoose } = require('mongoose');
@@ -60,6 +60,19 @@ module.exports = {
                 remark: reqObj.remark,
                 type: reqObj.type,
             }
+            let inData = {
+                user_id=reqObj.user_id,
+                amount: reqObj.amount,
+                investment_plan_id: null,
+                amount_r: 0,
+                amount_coin: 0,
+                bonus: 0,
+                days: 0,
+                type: reqObj.type==0?2:1,
+                status: 2,
+                created_at: new Date(),
+                updated_at: new Date()
+            }
             if (reqObj.type == 0) {
                 user.wallet += reqObj.amount
                 // await userDbHandler.updateOneByQuery({ _id: ObjectId(reqObj.user_id) }, { $inc: { wallet: reqObj.amount } });
@@ -72,6 +85,7 @@ module.exports = {
             await user.save()
 
             await fundTransferDbHandler.create(data);
+            await investmentDbHandler.create(inData);
             responseData.msg = "Data added successfully!";
             return responseHelper.success(res, responseData);
         } catch (error) {
